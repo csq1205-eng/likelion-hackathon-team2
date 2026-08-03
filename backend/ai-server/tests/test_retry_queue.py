@@ -74,6 +74,22 @@ def test_non_retryable_failure_marks_failed_immediately():
     assert db.get_retry_count("mission-3") == 1
 
 
+def test_retry_pending_uploads_respects_total_attempts_cap():
+    setup_temp_db()
+    db.create_job("job-5", "mission-5", "물 마시기", "/tmp/fake.mp4", max_attempts=5)
+    for _ in range(db.MAX_TOTAL_ATTEMPTS):
+        db.increment_total_attempts("mission-5")
+
+    scheduler.process_clip = lambda *a, **k: (_ for _ in ()).throw(make_retryable_error())
+    scheduler.retry_pending_uploads()
+
+    job = db.get_job("job-5")
+    assert job["status"] == "failed"
+    assert job["attempts"] == 0  # 시도조차 하지 않고 즉시 종료됨
+    assert db.get_total_attempts("mission-5") == db.MAX_TOTAL_ATTEMPTS  # 더 늘지 않음
+    assert db.get_retry_count("mission-5") == 0  # 비용 가드이지 판정 실패가 아니므로 차감 없음
+
+
 def test_successful_retry_completes_job_and_creates_clip_record():
     setup_temp_db()
     db.create_job("job-4", "mission-4", "물 마시기", "/tmp/fake.mp4", max_attempts=5)

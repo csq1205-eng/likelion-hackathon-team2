@@ -13,18 +13,27 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from retention_policy import should_purge
 
 
-def make_row(hours_ago: float, shared: bool, highlight_generated: bool, deleted: bool = False):
+def make_row(hours_ago: float, shared: bool, highlight_generated: bool, deleted: bool = False,
+             share_decided: bool = True):
     return {
         "judgment_completed_at": (datetime.now(timezone.utc) - timedelta(hours=hours_ago)).isoformat(),
         "shared": int(shared),
         "highlight_generated": int(highlight_generated),
         "deleted": int(deleted),
+        "share_decided": int(share_decided),
     }
 
 
 def test_not_shared_highlight_done_purges_immediately():
+    # share_decided=True (기본값)이므로 유예 없이 바로 파기된다.
     row = make_row(hours_ago=0.1, shared=False, highlight_generated=True)
     assert should_purge(row) is True
+
+
+def test_not_shared_highlight_done_awaits_share_decision():
+    # 사용자가 아직 공유 여부를 선택하지 않았으면 유예 시간(기본 10분) 동안 기다린다.
+    row = make_row(hours_ago=0.1, shared=False, highlight_generated=True, share_decided=False)
+    assert should_purge(row) is False
 
 
 def test_not_shared_highlight_pending_waits():

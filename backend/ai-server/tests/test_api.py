@@ -25,7 +25,7 @@ def _fake_clip_bytes():
     return io.BytesIO(b"fake video bytes")  # frame_extraction은 mock되므로 진짜 영상일 필요 없음
 
 
-def _pass_verdict(mission_id, mission_label, clip_id, clip_path):
+def _pass_verdict(mission_id, mission_label, clip_id, clip_path, criteria=None):
     return VerdictResponse(
         mission_id=mission_id, clip_id=clip_id, verdict="pass", confidence=0.95,
         criteria=[Criterion(id="target_action_detected", met=True)],
@@ -33,7 +33,7 @@ def _pass_verdict(mission_id, mission_label, clip_id, clip_path):
     )
 
 
-def _fail_verdict(mission_id, mission_label, clip_id, clip_path):
+def _fail_verdict(mission_id, mission_label, clip_id, clip_path, criteria=None):
     return VerdictResponse(
         mission_id=mission_id, clip_id=clip_id, verdict="fail", confidence=0.4,
         criteria=[Criterion(id="target_action_detected", met=False)],
@@ -93,10 +93,24 @@ def test_highlight_complete_purges_non_shared_clip(client):
     main.process_clip = _pass_verdict
     clip_id = _upload(client, "m-api-5").json()["clip_id"]  # 기본값: 비공유
 
+    # share_decided가 아직 0이면 유예되므로, 먼저 '공유 안 함'을 명시적으로 선택한다.
+    client.patch(f"/api/clips/{clip_id}/share", json={"shared": False})
+
     res = client.post(f"/api/clips/{clip_id}/highlight-complete")
     assert res.status_code == 200
     assert res.json()["purged"] is True
     assert db.get_clip(clip_id)["deleted"] == 1
+
+
+def test_highlight_complete_awaits_share_decision(client):
+    main.process_clip = _pass_verdict
+    clip_id = _upload(client, "m-api-5b").json()["clip_id"]  # share 미결정
+
+    res = client.post(f"/api/clips/{clip_id}/highlight-complete")
+    assert res.status_code == 200
+    assert res.json()["purged"] is False
+    assert res.json()["reason"] == "awaiting_share_decision"
+    assert db.get_clip(clip_id)["deleted"] == 0
 
 
 def test_status_endpoint_for_completed_clip(client):
