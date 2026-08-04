@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from typing import List, Optional
 
 import judgment_policy
+from exceptions import InvalidCriteriaError
 from frame_extraction import extract_frames, cleanup_frames
 from vision_judge import judge_mission
 from models import VerdictResponse, ClipCriterion
@@ -23,14 +24,16 @@ FRAME_COUNT = 4
 def parse_criteria(raw: Optional[str]) -> Optional[List[ClipCriterion]]:
     """업로드 폼으로 들어온 criteria JSON 문자열을 파싱한다.
     형식: [{"id": "cup_visible", "description": "컵이 화면에 보인다"}, ...]
-    비어 있거나 형식이 틀리면 None (모델이 알아서 criteria를 만드는 기존 동작)."""
+    필드 자체가 비어 있으면 None (모델이 알아서 criteria를 만드는 기존 동작).
+    값이 있는데 JSON이 아니거나 형식이 틀리면 COMMON-002로 실패시킨다
+    (예전엔 조용히 None으로 넘어가 사용자가 기준을 지정했다고 착각하게 만들었다)."""
     if not raw:
         return None
     try:
         items = json.loads(raw)
         return [ClipCriterion(**item) for item in items]
-    except Exception:
-        return None
+    except Exception as e:
+        raise InvalidCriteriaError(f"criteria 형식이 올바르지 않습니다: {e}")
 
 
 def process_clip(

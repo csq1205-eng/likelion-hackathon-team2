@@ -16,7 +16,7 @@ class VerdictResponse(BaseModel):
     """
     mission_id: str
     clip_id: str
-    verdict: Literal["pass", "hold", "fail"]          # 임계값 정책 적용 후 최종 판정
+    verdict: Literal["pass", "hold", "fail", "error"]  # 임계값 정책 적용 후 최종 판정. error는 재시도 불가능한 시스템 오류로 판정 자체가 불가했던 경우
     confidence: float
     criteria: List[Criterion]
     model_notes: str  # 내부 디버깅/BE A 판정근거생성용. 사용자에게 직접 노출하지 않음

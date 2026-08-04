@@ -49,7 +49,7 @@ def test_retryable_failure_keeps_job_pending_without_charging_user():
     assert db.get_retry_count("mission-1") == 0  # 네트워크 오류는 사용자 횟수를 차감하지 않음
 
 
-def test_retryable_failure_exceeding_max_attempts_marks_failed_and_charges_user():
+def test_retryable_failure_exceeding_max_attempts_marks_failed_without_charging_user():
     setup_temp_db()
     db.create_job("job-2", "mission-2", "물 마시기", "/tmp/fake.mp4", max_attempts=2)
 
@@ -59,7 +59,12 @@ def test_retryable_failure_exceeding_max_attempts_marks_failed_and_charges_user(
 
     job = db.get_job("job-2")
     assert job["status"] == "failed"
-    assert db.get_retry_count("mission-2") == 1
+    # AI-001(재시도 소진)은 사용자 책임이 아니므로 재촬영 횟수를 차감하지 않는다.
+    assert db.get_retry_count("mission-2") == 0
+    # 대신 mission_results 조회가 이 시도를 알 수 있도록 verdict="error" 클립 레코드를 남긴다.
+    clip = db.get_clip("job-2")
+    assert clip is not None
+    assert clip["verdict"] == "error"
 
 
 def test_non_retryable_failure_marks_failed_immediately():
