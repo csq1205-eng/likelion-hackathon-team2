@@ -2,14 +2,24 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { QRCodeCanvas } from 'qrcode.react';
 
 export default function GroupFeedPage() {
   const params = useParams();
   const router = useRouter();
   
-  // 모달(하이라이트 영상 재생) 상태 관리
+  // 모달 상태 관리
   const [showHighlight, setShowHighlight] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteLink, setInviteLink] = useState(''); //초대 링크
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const currentOrigin = window.location.origin;
+      setInviteLink(`${currentOrigin}/group/invite/${params.id}`);
+    }
+  }, [params.id]);
 
   // 임시 데이터 (실제로는 백엔드에서 fetch)
   const groupData = {
@@ -26,16 +36,29 @@ export default function GroupFeedPage() {
   ];
 
   return (
+    // 💡 최상위 부모 태그 시작
     <div className="flex flex-col min-h-screen bg-gray-50 pb-24 relative">
+      
       {/* 상단 헤더 */}
-      <div className="bg-white px-5 py-4 sticky top-0 z-10 shadow-sm flex items-center">
-        <button onClick={() => router.push('/group')} className="text-xl font-bold mr-4">←</button>
-        <div>
-          <h1 className="text-lg font-bold text-gray-900">{groupData.name}</h1>
-          <p className="text-xs text-gray-500">Day {groupData.dayCount} / 21</p>
+      <div className="bg-white px-5 py-4 sticky top-0 z-10 shadow-sm flex items-center justify-between">
+        <div className="flex items-center">
+          <button onClick={() => router.push('/group')} className="text-xl font-bold mr-4">←</button>
+          <div>
+            <h1 className="text-lg font-bold text-gray-900">{groupData.name}</h1>
+            <p className="text-xs text-gray-500">Day {groupData.dayCount} / 21</p>
+          </div>
         </div>
-      </div>
 
+        {/* 💡 초대하기 버튼을 헤더 안쪽 우측으로 배치 */}
+        <button
+          onClick={() => setShowInviteModal(true)}
+          className="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-sm font-bold"
+        >
+          초대하기
+        </button>
+      </div>
+      
+      {/* 메인 피드 콘텐츠 영역 */}
       <div className="px-5 py-6 space-y-8">
         
         {/* 10. 그룹 목표 진행률 */}
@@ -55,12 +78,11 @@ export default function GroupFeedPage() {
           </p>
         </section>
 
-        {/* 11. 하이라이트 재생 썸네일 (어제 기준) */}
+        {/* 11. 하이라이트 재생 썸네일 */}
         <section 
           onClick={() => setShowHighlight(true)}
           className="relative w-full h-40 bg-gray-800 rounded-2xl overflow-hidden cursor-pointer shadow-md group"
         >
-          {/* 실제로는 여기에 썸네일 이미지가 들어갑니다 */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4">
             <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
               <span className="text-white text-sm ml-1">▶</span>
@@ -70,7 +92,7 @@ export default function GroupFeedPage() {
           </div>
         </section>
 
-        {/* 9. 멤버별 완료 여부 (오늘 기준) */}
+        {/* 9. 멤버별 완료 여부 */}
         <section>
           <h2 className="font-bold text-gray-800 mb-4 px-1">오늘의 미션 현황</h2>
           <div className="space-y-3">
@@ -86,7 +108,6 @@ export default function GroupFeedPage() {
                   </div>
                 </div>
                 
-                {/* 비공개/공유 상태 처리 */}
                 <div className="text-right">
                   {member.status === 'completed' ? (
                     member.isShared ? (
@@ -106,7 +127,7 @@ export default function GroupFeedPage() {
         </section>
       </div>
 
-      {/* 내 미션 수행하러 가기 FAB (Floating Action Button) */}
+      {/* 내 미션 수행하러 가기 FAB */}
       <div className="fixed bottom-6 left-0 right-0 px-5 z-10">
         <button 
           onClick={() => router.push('/mission')}
@@ -116,6 +137,47 @@ export default function GroupFeedPage() {
           <span>내 오늘의 미션 인증하기</span>
         </button>
       </div>
+
+      {/* 5. QR코드 초대 팝업(모달) */}
+      {showInviteModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-5">
+          <div className="bg-white rounded-3xl p-8 w-full max-w-sm flex flex-col items-center shadow-2xl animate-fade-in-up">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">친구 초대하기</h2>
+            <p className="text-sm text-gray-500 mb-6 text-center">
+              친구가 카메라로 아래 QR코드를 스캔하면<br />이 그룹으로 바로 들어올 수 있어요!
+            </p>
+            
+            <div className="bg-gray-50 p-4 rounded-2xl mb-6">
+              <QRCodeCanvas 
+                value={inviteLink} 
+                size={200}
+                bgColor={"#ffffff"}
+                fgColor={"#000000"}
+                level={"H"}
+                includeMargin={false}
+              />
+            </div>
+            
+            <div className="w-full flex space-x-2">
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(inviteLink);
+                  alert('초대 링크가 복사되었습니다!');
+                }}
+                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-200"
+              >
+                링크 복사
+              </button>
+              <button 
+                onClick={() => setShowInviteModal(false)}
+                className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700"
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 11. 하이라이트 재생 풀스크린 모달 */}
       {showHighlight && (
@@ -129,7 +191,6 @@ export default function GroupFeedPage() {
             </button>
           </div>
           <div className="flex-1 flex flex-col items-center justify-center">
-            {/* 실제 비디오 태그가 들어갈 자리 */}
             <div className="w-full aspect-[9/16] bg-gray-900 flex items-center justify-center border border-gray-800">
               <p className="text-gray-500 text-sm animate-pulse">자동 완성된 30초 영상 재생 중...</p>
             </div>
@@ -140,6 +201,8 @@ export default function GroupFeedPage() {
           </div>
         </div>
       )}
+      
+    {/* 💡 최상위 부모 태그 종료 */}
     </div>
   );
 }
