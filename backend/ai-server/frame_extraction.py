@@ -11,6 +11,7 @@ import subprocess
 from typing import List
 
 from errors import FrameExtractionError
+from exceptions import InvalidFileFormatError
 
 # ffmpeg/ffprobe가 응답 없이 매달리는 걸 막는다. 손상된 파일 하나로 요청이 무한정 잡히면 안 됨.
 FFMPEG_TIMEOUT_SEC = 30
@@ -18,6 +19,11 @@ FFMPEG_TIMEOUT_SEC = 30
 # 판정에 필요한 최소 해상도까지만 줄인다.
 # 휴대폰 원본(1080p/4K) 프레임을 그대로 base64로 보내면 지연/비용이 몇 배로 뛴다.
 FRAME_MAX_WIDTH = 768
+
+# 기능명세서 12.1: "원본 클립 영상 길이는 5초"가 기준. 실제 촬영본은 인코딩/컨테이너
+# 오차로 정확히 5.000초가 나오는 경우가 거의 없어서 ±0.5초 허용 오차를 둔다.
+MIN_CLIP_DURATION_SEC = 4.5
+MAX_CLIP_DURATION_SEC = 5.5
 
 
 def extract_frames(clip_path: str, clip_id: str, out_dir: str, count: int = 4) -> List[str]:
@@ -86,6 +92,13 @@ def _get_duration(clip_path: str) -> float:
 
     if duration <= 0 or duration != duration:  # 0 이하 또는 NaN
         raise FrameExtractionError(f"유효하지 않은 영상 길이입니다: {duration}")
+
+    if not (MIN_CLIP_DURATION_SEC <= duration <= MAX_CLIP_DURATION_SEC):
+        raise InvalidFileFormatError(
+            f"미션 인증 클립은 5초 촬영만 허용합니다 "
+            f"(허용 범위 {MIN_CLIP_DURATION_SEC}~{MAX_CLIP_DURATION_SEC}초, 업로드된 영상: {duration:.2f}초)"
+        )
+
     return duration
 
 

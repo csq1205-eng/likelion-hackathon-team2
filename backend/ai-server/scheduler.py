@@ -67,10 +67,15 @@ def retry_pending_uploads():
                 updated = db.get_job(job_id)
                 if updated["attempts"] >= updated["max_attempts"]:
                     db.mark_job_status_failed(job_id, "최대 재시도 횟수 초과")
-                    db.increment_retry_count(mission_id)
+                    # AI-001(재시도 가능했지만 결국 소진된 시스템/네트워크 오류)은
+                    # "사용자 재촬영 횟수에 포함하지 않는다"는 스펙 규칙이 있다.
+                    # ERROR 레코드를 남기는 것과 재촬영 횟수를 깎는 것은 별개 개념이다 —
+                    # 예전엔 increment_retry_count를 여기서 같이 불러서 시스템 오류인데도
+                    # 사용자 재촬영 횟수가 깎이는 버그가 있었다. (increment_retry_count 호출 제거함)
                     # clips 테이블에 들어간 적 없는 파일이라 파기 스케줄러가 못 찾는다.
                     # 여기서 직접 지우지 않으면 영구히 남는다.
                     purge_clip_assets(job_id, clip_path)
+                    db.create_clip_record(job_id, mission_id, clip_path, verdict="error", user_id=_get(job, "user_id"))
             else:
                 db.mark_job_status_failed(job_id, str(e))
                 db.increment_retry_count(mission_id)
@@ -86,7 +91,7 @@ def retry_pending_uploads():
             elif verdict.verdict == "pass":
                 db.reset_retry_count(mission_id)
 
-            db.create_clip_record(job_id, mission_id, clip_path, verdict.verdict)
+            db.create_clip_record(job_id, mission_id, clip_path, verdict.verdict, user_id=_get(job, "user_id"))
         except Exception as e:
             print(f"[retry-queue] 판정 후 기록 실패 {job_id}: {e}")
         finally:

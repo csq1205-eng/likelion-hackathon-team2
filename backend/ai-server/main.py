@@ -24,18 +24,34 @@ import uuid
 from dotenv import load_dotenv
 load_dotenv(encoding="utf-8-sig")  # .env 파일을 읽어서 환경변수로 자동 등록 (Windows BOM 대응)
 
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Header, Depends
+from fastapi import FastAPI, Request, UploadFile, File, Form, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 
 import db
+import mission_lookup
 from db import MAX_TOTAL_ATTEMPTS
 from pipeline import process_clip, parse_criteria
 from errors import is_retryable, retry_budget_for
-from retention_policy import purge_clip_assets
+from exceptions import (
+    WellLogError,
+    InvalidInputError,
+    InvalidFileFormatError,
+    RetryLimitExceededError,
+    TotalAttemptsExceededError,
+    AIJudgementFailedError,
+    FileTooLargeError,
+    ClipNotFoundError,
+    ClipAlreadyPurgedError,
+    ClipPurgeFailedError,
+    InvalidInternalKeyError,
+)
+from frame_extraction import cleanup_frames
+from retention_policy import purge_clip_assets, purge_clip_file
 from scheduler import start_scheduler, stop_scheduler
 
 UPLOAD_DIR = "storage/clips"
@@ -45,8 +61,11 @@ os.makedirs(FRAME_DIR, exist_ok=True)
 
 MAX_MISSION_RETRIES = 3        # 판정 'fail'로 소진되는 재촬영 횟수
 # MAX_TOTAL_ATTEMPTS는 db.py에 정의 (scheduler.py의 재처리 큐도 같은 값을 참조해야 함)
-MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "50"))
+MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "20"))
 MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024
+
+# 기능명세서 12.1: MVP 기준 MP4, MOV만 허용.
+ALLOWED_CLIP_EXTENSIONS = {".mp4", ".mov"}
 
 # 콤마 구분. 예: ALLOWED_ORIGINS=http://localhost:5173,https://welllog.app
 ALLOWED_ORIGINS = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "*").split(",") if o.strip()]
@@ -62,7 +81,7 @@ def require_internal_key(x_internal_key: Optional[str] = Header(default=None)):
     if not INTERNAL_API_KEY:
         return
     if x_internal_key != INTERNAL_API_KEY:
-        raise HTTPException(status_code=401, detail="유효하지 않은 내부 인증 키입니다.")
+        raise InvalidInternalKeyError("유효하지 않은 내부 인증 키입니다.")
 
 
 @asynccontextmanager
@@ -88,6 +107,34 @@ app.add_middleware(
 )
 
 
+@app.exception_handler(WellLogError)
+async def welllog_error_handler(request: Request, exc: WellLogError):
+    """기능명세서 5번 섹션(공통 오류 응답) 형식으로 통일해서 반환한다.
+    이 서비스가 던지는 모든 비즈니스 오류는 WellLogError를 거쳐 여기로 모인다."""
+    return JSONResponse(
+        status_code=exc.http_status,
+        content={
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "status": exc.http_status,
+            "code": exc.code,
+            "message": exc.message,
+            "errors": exc.errors,
+            "path": request.url.path,
+        },
+    )
+
+
+def _validate_file_format(clip_file: UploadFile):
+    """확장자만으로 판단한다(컨테이너 내부 포맷까지는 검증하지 않음).
+    진짜로 다른 포맷인 파일은 이후 ffprobe 단계(frame_extraction.py)에서 걸러진다 —
+    여기서는 명백히 잘못된 확장자를 빠르게, 파일을 저장하기 전에 쳐낸다."""
+    _, ext = os.path.splitext(clip_file.filename or "")
+    if ext.lower() not in ALLOWED_CLIP_EXTENSIONS:
+        raise InvalidFileFormatError(
+            f"허용되지 않은 파일 형식입니다: {ext or '(확장자 없음)'} (MP4, MOV만 허용)"
+        )
+
+
 def _save_upload(clip_file: UploadFile, clip_path: str):
     """업로드 파일을 스트리밍으로 저장하면서 용량 상한을 강제한다.
     상한 없이 받으면 4K 장시간 영상 하나로 디스크/추출 시간이 폭주할 수 있다."""
@@ -101,14 +148,11 @@ def _save_upload(clip_file: UploadFile, clip_path: str):
             if size > MAX_UPLOAD_BYTES:
                 f.close()
                 purge_clip_assets("", clip_path)
-                raise HTTPException(
-                    status_code=413,
-                    detail=f"클립 용량이 너무 큽니다. (최대 {MAX_UPLOAD_MB}MB)",
-                )
+                raise FileTooLargeError(f"클립 용량이 너무 큽니다. (최대 {MAX_UPLOAD_MB}MB)")
             f.write(chunk)
     if size == 0:
         purge_clip_assets("", clip_path)
-        raise HTTPException(status_code=400, detail="빈 파일입니다.")
+        raise InvalidInputError("빈 파일입니다.")
 
 
 @app.post("/api/clips/upload", dependencies=[Depends(require_internal_key)])
@@ -129,24 +173,45 @@ def upload_clip(
            {"id":"drinking_motion","description":"마시는 동작이 확인된다"}]
       넘기지 않으면 모델이 criteria를 스스로 만든다(집계는 어려워짐).
 
+    user_id는 의도적으로 이 API의 파라미터가 아니다. 호출자(BE A)가 같이 보낸 값을
+    그대로 믿으면 오귀속/스푸핑 위험이 있어서(내부 키 유출, 버그로 잘못된 값 전달 등),
+    "이 mission_id가 누구 것인지"는 BE B가 mission_lookup.get_mission(mission_id)로
+    직접 조회해서 확인해야 한다. 다만 그 함수는 아직 구현되지 않아서(NotImplementedError),
+    지금은 clips.user_id가 전부 NULL로 남는다 — 즉 POST /api/ai/clips/withdrawal-cleanup은
+    get_mission()이 연결되기 전까지는 실질적으로 아무 클립도 찾지 못한다. 연결되면
+    여기서 mission_info = get_mission(mission_id) 호출 한 줄만 추가하면 된다.
+
     네트워크성 오류(OpenAI 연결 끊김/타임아웃/레이트리밋)나 모델 스키마 위반은
     사용자 재촬영 횟수를 차감하지 않고 재처리 큐에 넣은 뒤 202를 반환한다.
     그 외 오류(예: 손상된 파일)는 재시도해도 의미 없으므로 즉시 실패 처리한다.
     """
+    # 형식이 잘못된 파일/criteria는 다른 자원을 건드리기 전에 가장 먼저 걸러낸다.
+    _validate_file_format(clip)
+
     if db.get_retry_count(mission_id) >= MAX_MISSION_RETRIES:
-        raise HTTPException(status_code=429, detail="재촬영 횟수를 초과했습니다.")
+        raise RetryLimitExceededError("재촬영 횟수를 초과했습니다.")
     if db.get_total_attempts(mission_id) >= MAX_TOTAL_ATTEMPTS:
-        raise HTTPException(status_code=429, detail="이 미션의 인증 시도 한도를 초과했습니다.")
+        raise TotalAttemptsExceededError("이 미션의 인증 시도 한도를 초과했습니다.")
+
+    # 형식이 잘못된 criteria는 파일 저장/시도횟수 차감 전에 먼저 걸러낸다.
+    # (여기서 실패하면 아무 자원도 소비하지 않은 상태로 끝나야 한다)
+    parsed_criteria = parse_criteria(criteria)
 
     clip_id = str(uuid.uuid4())
     clip_path = os.path.join(UPLOAD_DIR, f"{clip_id}.mp4")
     _save_upload(clip, clip_path)
 
     db.increment_total_attempts(mission_id)
-    parsed_criteria = parse_criteria(criteria)
 
     try:
         verdict = process_clip(mission_id, mission_label, clip_id, clip_path, criteria=parsed_criteria)
+    except WellLogError:
+        # 파이프라인 내부(frame_extraction.py 등)에서 이미 명확한 입력 검증 오류로
+        # 분류된 경우(예: FILE-001 영상 길이). _save_upload의 FILE-002와 동일하게
+        # 순수 입력 거부로 취급한다 - 판정을 시도한 게 아니므로 재촬영 횟수를 차감하지도,
+        # ERROR 판정 레코드를 남기지도 않는다. code/http_status는 원래 예외 그대로 나간다.
+        purge_clip_assets(clip_id, clip_path)
+        raise
     except Exception as e:
         if is_retryable(e):
             db.create_job(
@@ -163,10 +228,13 @@ def upload_clip(
                 },
             )
         db.increment_retry_count(mission_id)
-        # 이 클립은 clips 테이블에 기록되지 않으므로 파기 스케줄러가 찾지 못한다.
+        # 이 클립은 아직 clips 테이블에 기록되지 않았으므로 파기 스케줄러가 찾지 못한다.
         # 여기서 직접 지우지 않으면 판정 실패한 사용자 영상이 디스크에 영구히 남는다.
         purge_clip_assets(clip_id, clip_path)
-        raise HTTPException(status_code=422, detail=f"판정 처리 실패: {e}")
+        # 파일은 이미 지웠지만, mission_results 조회(12.3절)가 이 판정 시도 자체를
+        # 알 수 있도록 verdict="error"로 레코드는 남긴다. 클라이언트에는 그대로 AI-001을 반환한다.
+        db.create_clip_record(clip_id, mission_id, clip_path, verdict="error")
+        raise AIJudgementFailedError(f"판정 처리 실패: {e}")
 
     if verdict.verdict == "fail":
         db.increment_retry_count(mission_id)
@@ -189,7 +257,7 @@ def get_upload_status(clip_id: str):
         clip = db.get_clip(clip_id)
         if clip:
             return {"clip_id": clip_id, "status": "completed"}
-        raise HTTPException(status_code=404, detail="해당 클립의 처리 이력을 찾을 수 없습니다.")
+        raise ClipNotFoundError("해당 클립의 처리 이력을 찾을 수 없습니다.")
 
     result = {
         "clip_id": clip_id,
@@ -215,9 +283,9 @@ def set_share(clip_id: str, body: ShareRequest):
     (그래야 하이라이트 콜백 유예 없이 즉시 파기된다)."""
     clip = db.get_clip(clip_id)
     if not clip:
-        raise HTTPException(status_code=404, detail="클립을 찾을 수 없습니다.")
+        raise ClipNotFoundError("클립을 찾을 수 없습니다.")
     if clip["deleted"]:
-        raise HTTPException(status_code=410, detail="이미 파기된 클립입니다.")
+        raise ClipAlreadyPurgedError("이미 파기된 클립입니다.")
     db.set_shared(clip_id, body.shared)
     return {"clip_id": clip_id, "shared": body.shared}
 
@@ -233,7 +301,7 @@ def notify_highlight_complete(clip_id: str):
     """
     clip = db.get_clip(clip_id)
     if not clip:
-        raise HTTPException(status_code=404, detail="클립을 찾을 수 없습니다.")
+        raise ClipNotFoundError("클립을 찾을 수 없습니다.")
     if clip["deleted"]:
         return {"clip_id": clip_id, "purged": True, "already_deleted": True}
 
@@ -258,14 +326,121 @@ def delete_clip(clip_id: str):
     """사용자가 공유 클립을 직접 삭제한다."""
     clip = db.get_clip(clip_id)
     if not clip:
-        raise HTTPException(status_code=404, detail="클립을 찾을 수 없습니다.")
+        raise ClipNotFoundError("클립을 찾을 수 없습니다.")
     if clip["deleted"]:
         return {"clip_id": clip_id, "purged": True, "already_deleted": True}
 
     if not purge_clip_assets(clip_id, clip["file_path"]):
-        raise HTTPException(status_code=500, detail="클립 파기에 실패했습니다.")
+        raise ClipPurgeFailedError("클립 파기에 실패했습니다.")
     db.mark_deleted(clip_id)
     return {"clip_id": clip_id, "purged": True}
+
+
+class WithdrawalCleanupRequest(BaseModel):
+    userId: int
+    withdrawalId: int
+    requestedAt: Optional[str] = None
+
+
+@app.post("/api/ai/clips/withdrawal-cleanup", dependencies=[Depends(require_internal_key)])
+def withdrawal_cleanup(body: WithdrawalCleanupRequest):
+    """사용자 탈퇴 시 BE C가 호출하는 내부 연동 API (기능명세서 16.4).
+    이 사용자의 원본 클립 + 추출 프레임을 지우고 clips.db 레코드를 삭제 처리한다.
+
+    멱등성: 이미 삭제된 클립은 (user_id, deleted=0) 조회에서 자연히 빠지므로
+    같은 요청을 여러 번 호출해도 안전하다 — 재호출 시 남은 것만 다시 시도한다.
+
+    스펙은 스토리지 삭제가 지연될 때 202 Accepted + cleanupStatus=PROCESSING로
+    비동기 처리하는 경로도 정의하지만, 이 서비스는 로컬 디스크(os.remove)만 다뤄서
+    지연될 이유가 없다 - 항상 동기로 즉시 끝나므로 그 경로는 구현하지 않았다.
+    나중에 S3 같은 외부 스토리지로 옮기면 그때 필요해질 수 있다.
+
+    응답 형식은 6번 섹션 공통 오류 코드 체계(WellLogError)를 따르지 않는다 —
+    이 API는 스펙에서부터 실패 시에도 4번 섹션(공통 성공 응답)과 같은
+    {success, data, message} 모양에 success=false만 얹은 자체 포맷을 쓴다.
+    """
+    if not mission_lookup.USER_ID_LINKING_WIRED:
+        # get_mission()이 아직 연결되지 않아 clips.user_id가 전부 NULL이다 (mission_lookup.py 참고).
+        # 이 상태에서 NO_CLIPS/COMPLETED를 반환하면 "확인했더니 없음"이 아니라
+        # "확인할 방법이 없음"인데도 성공으로 보인다. 스펙의 500 FAILED 계약을 그대로 빌려서
+        # BE C가 이 탈퇴를 완료로 확정하지 않고 재시도/운영 확인 대상으로 남기게 만든다.
+        print(
+            f"[withdrawal-cleanup] user_id 연결 미구현 상태로 호출됨 "
+            f"(userId={body.userId}, withdrawalId={body.withdrawalId}) - 실제 클립 삭제 여부를 확인할 수 없음"
+        )
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "data": {
+                    "userId": body.userId,
+                    "withdrawalId": body.withdrawalId,
+                    "cleanupStatus": "FAILED",
+                },
+                "message": "클립 정리 작업에 실패했습니다. (user_id 연결 미구현 - mission_lookup.get_mission 대기 중)",
+            },
+        )
+
+    user_id = str(body.userId)
+    clips = db.get_active_clips_for_user(user_id)
+
+    if not clips:
+        return {
+            "success": True,
+            "data": {
+                "userId": body.userId,
+                "withdrawalId": body.withdrawalId,
+                "deletedClipCount": 0,
+                "deletedFrameCount": 0,
+                "cleanupStatus": "NO_CLIPS",
+                "idempotent": True,
+            },
+            "message": "삭제할 클립이 없습니다.",
+        }
+
+    deleted_clip_count = 0
+    deleted_frame_count = 0
+    any_failed = False
+
+    for clip in clips:
+        clip_id = clip["clip_id"]
+        # 프레임 수를 세야 하므로 purge_clip_assets 대신 두 단계를 직접 호출한다.
+        frame_count = cleanup_frames(clip_id, FRAME_DIR)
+        if not purge_clip_file(clip["file_path"]):
+            any_failed = True
+            continue
+        db.mark_deleted(clip_id)
+        deleted_clip_count += 1
+        deleted_frame_count += frame_count
+
+    if any_failed:
+        # BE C는 이 응답을 보고 탈퇴 상태를 확정하지 않고 재시도/운영 확인 대상으로 남긴다.
+        # 이미 지운 것들은 mark_deleted로 반영했으니, 재호출하면 실패한 것만 다시 시도한다.
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "data": {
+                    "userId": body.userId,
+                    "withdrawalId": body.withdrawalId,
+                    "cleanupStatus": "FAILED",
+                },
+                "message": "클립 정리 작업에 실패했습니다.",
+            },
+        )
+
+    return {
+        "success": True,
+        "data": {
+            "userId": body.userId,
+            "withdrawalId": body.withdrawalId,
+            "deletedClipCount": deleted_clip_count,
+            "deletedFrameCount": deleted_frame_count,
+            "cleanupStatus": "COMPLETED",
+            "idempotent": False,
+        },
+        "message": None,
+    }
 
 
 @app.get("/health")

@@ -13,6 +13,7 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from frame_extraction import extract_frames
+from exceptions import InvalidFileFormatError
 
 
 def make_synthetic_clip(path: str, duration: float = 5.0):
@@ -40,12 +41,38 @@ def test_extract_frames_produces_expected_count_and_valid_jpegs():
 
 
 def test_extract_frames_respects_custom_count():
+    # duration은 기능명세서 기준 5초 허용 범위(4.5~5.5초) 안이어야 한다 -
+    # 이 테스트가 검증하려는 건 frame count 파라미터지 duration 검증이 아니다.
     tmp_dir = tempfile.mkdtemp()
     clip_path = os.path.join(tmp_dir, "sample.mp4")
-    make_synthetic_clip(clip_path, duration=3.0)
+    make_synthetic_clip(clip_path, duration=5.0)
 
     frame_paths = extract_frames(clip_path, "synthetic-clip-2", tmp_dir, count=3)
     assert len(frame_paths) == 3
+
+
+def test_extract_frames_rejects_duration_outside_tolerance():
+    """5초 기준 ±0.5초 허용 오차를 벗어나면 FILE-001(InvalidFileFormatError)로 거부해야 한다."""
+    tmp_dir = tempfile.mkdtemp()
+    clip_path = os.path.join(tmp_dir, "too_short.mp4")
+    make_synthetic_clip(clip_path, duration=2.0)
+
+    try:
+        extract_frames(clip_path, "synthetic-clip-4", tmp_dir, count=4)
+    except InvalidFileFormatError:
+        pass
+    else:
+        raise AssertionError("5초 허용 범위를 벗어난 클립은 InvalidFileFormatError를 던져야 한다")
+
+
+def test_extract_frames_accepts_duration_within_tolerance():
+    """정확히 5.000초가 아니어도 허용 오차(±0.5초) 안이면 통과해야 한다."""
+    tmp_dir = tempfile.mkdtemp()
+    clip_path = os.path.join(tmp_dir, "slightly_short.mp4")
+    make_synthetic_clip(clip_path, duration=4.6)
+
+    frame_paths = extract_frames(clip_path, "synthetic-clip-5", tmp_dir, count=4)
+    assert len(frame_paths) == 4
 
 
 def test_extract_frames_handles_short_clip():

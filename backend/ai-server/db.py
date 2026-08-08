@@ -68,10 +68,13 @@ def init_db():
         _ensure_column(conn, "clips", "verdict", "verdict TEXT")
         _ensure_column(conn, "clips", "share_decided", "share_decided INTEGER NOT NULL DEFAULT 0")
         _ensure_column(conn, "clips", "highlight_generated_at", "highlight_generated_at TEXT")
+        _ensure_column(conn, "clips", "user_id", "user_id TEXT")
         _ensure_column(conn, "retry_counts", "total_attempts", "total_attempts INTEGER NOT NULL DEFAULT 0")
         _ensure_column(conn, "upload_jobs", "criteria_json", "criteria_json TEXT")
+        _ensure_column(conn, "upload_jobs", "user_id", "user_id TEXT")
 
         conn.execute("CREATE INDEX IF NOT EXISTS idx_clips_active ON clips(deleted)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_clips_user ON clips(user_id)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_jobs_status ON upload_jobs(status)")
 
 
@@ -96,15 +99,19 @@ def _connect():
 
 # ---- 클립 처리 정책 ----
 
-def create_clip_record(clip_id: str, mission_id: str, file_path: str, verdict: Optional[str] = None):
+def create_clip_record(clip_id: str, mission_id: str, file_path: str, verdict: Optional[str] = None,
+                        user_id: Optional[str] = None):
     """판정 완료 시점 기록. 24시간 파기 카운트가 여기서 시작된다.
-    재처리 큐가 같은 job을 두 번 처리하는 경우를 대비해 중복 삽입은 무시한다."""
+    재처리 큐가 같은 job을 두 번 처리하는 경우를 대비해 중복 삽입은 무시한다.
+    user_id는 탈퇴 시 클립 정리(withdrawal-cleanup)가 사용자 단위로 조회하기 위한 값이다.
+    업로드 API가 아직 user_id 없이 호출되던 시절의 기존 클립은 NULL로 남는다 —
+    그런 클립은 탈퇴 정리 대상에서 자동으로 잡히지 않는다."""
     with _connect() as conn:
         conn.execute(
-            """INSERT INTO clips (clip_id, mission_id, file_path, judgment_completed_at, verdict)
-               VALUES (?, ?, ?, ?, ?)
+            """INSERT INTO clips (clip_id, mission_id, file_path, judgment_completed_at, verdict, user_id)
+               VALUES (?, ?, ?, ?, ?, ?)
                ON CONFLICT(clip_id) DO NOTHING""",
-            (clip_id, mission_id, file_path, _now(), verdict),
+            (clip_id, mission_id, file_path, _now(), verdict, user_id),
         )
 
 
@@ -144,6 +151,14 @@ def get_active_clips():
     """아직 삭제되지 않은 클립 전체 (스케줄러가 매 틱마다 검사)"""
     with _connect() as conn:
         cur = conn.execute("SELECT * FROM clips WHERE deleted = 0")
+        return cur.fetchall()
+
+
+def get_active_clips_for_user(user_id: str):
+    """탈퇴 클립 정리(withdrawal-cleanup) 대상. 이 사용자의 미삭제 클립 전체.
+    user_id가 NULL인 클립(구버전 업로드)은 여기 잡히지 않는다."""
+    with _connect() as conn:
+        cur = conn.execute("SELECT * FROM clips WHERE user_id = ? AND deleted = 0", (user_id,))
         return cur.fetchall()
 
 
@@ -206,15 +221,15 @@ def reset_retry_count(mission_id: str):
 # ---- 네트워크 오류 재처리 큐 ----
 
 def create_job(job_id: str, mission_id: str, mission_label: str, clip_path: str,
-               max_attempts: int = 5, criteria_json: Optional[str] = None):
+               max_attempts: int = 5, criteria_json: Optional[str] = None, user_id: Optional[str] = None):
     now = _now()
     with _connect() as conn:
         conn.execute("""
             INSERT INTO upload_jobs
                 (job_id, mission_id, mission_label, clip_path, status, attempts, max_attempts,
-                 criteria_json, created_at, updated_at)
-            VALUES (?, ?, ?, ?, 'pending', 0, ?, ?, ?, ?)
-        """, (job_id, mission_id, mission_label, clip_path, max_attempts, criteria_json, now, now))
+                 criteria_json, user_id, created_at, updated_at)
+            VALUES (?, ?, ?, ?, 'pending', 0, ?, ?, ?, ?, ?)
+        """, (job_id, mission_id, mission_label, clip_path, max_attempts, criteria_json, user_id, now, now))
 
 
 def get_job(job_id: str) -> Optional[sqlite3.Row]:

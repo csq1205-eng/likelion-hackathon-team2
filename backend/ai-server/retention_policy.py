@@ -9,7 +9,10 @@
 1) 공유 결정 유예 — 사용자가 '공유' 버튼을 누르기 전에 BE A의 highlight-complete 콜백이
    먼저 도착하면 클립이 즉시 사라져 공유가 영영 불가능해진다.
    share_decided(사용자가 공유 여부를 실제로 선택함)가 아직 0이면 유예 시간만큼 기다린다.
-2) fail/hold 클립 조기 파기 — 하이라이트 대상이 아니므로 24시간을 들고 있을 이유가 없다.
+2) fail/hold/error 클립 조기 파기 — 하이라이트 대상이 아니므로 24시간을 들고 있을 이유가 없다.
+   error(AI-001, 재시도 불가/소진 시스템 오류)는 main.py/scheduler.py가 clips 레코드를
+   만드는 시점에 이미 파일을 지워버리므로, DB 판단 기준을 fail/hold와 맞춰야
+   "파일은 없는데 deleted=0"인 상태로 24시간씩 남아있지 않는다.
 
 파기 대상은 원본 클립 + 추출된 프레임 이미지 둘 다다. 프레임을 빼먹으면
 원본만 지워지고 모델에 보낸 사용자 사진이 디스크에 남는다.
@@ -69,8 +72,8 @@ def should_purge(clip_row) -> bool:
     share_decided = bool(_get(clip_row, "share_decided", 0))
     grace = timedelta(minutes=SHARE_DECISION_GRACE_MINUTES)
 
-    # 2) 하이라이트 대상이 아닌 판정(fail/hold)은 보관할 이유가 없다.
-    if _get(clip_row, "verdict") in ("fail", "hold"):
+    # 2) 하이라이트 대상이 아닌 판정(fail/hold/error)은 보관할 이유가 없다.
+    if _get(clip_row, "verdict") in ("fail", "hold", "error"):
         if share_decided:
             return True
         return _elapsed_since(judgment_at, grace)

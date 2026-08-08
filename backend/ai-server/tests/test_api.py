@@ -9,6 +9,7 @@ import sys
 import os
 import io
 import tempfile
+from contextlib import contextmanager
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -125,6 +126,147 @@ def test_status_endpoint_for_completed_clip(client):
 def test_missing_clip_returns_404(client):
     res = client.patch("/api/clips/does-not-exist/share", json={"shared": True})
     assert res.status_code == 404
+
+
+def test_upload_rejects_disallowed_file_extension(client):
+    res = client.post(
+        "/api/clips/upload",
+        data={"mission_id": "m-api-7", "mission_label": "물 마시기"},
+        files={"clip": ("clip.avi", _fake_clip_bytes(), "video/x-msvideo")},
+    )
+    assert res.status_code == 400
+    assert res.json()["code"] == "FILE-001"
+
+
+def test_upload_rejects_out_of_range_duration_without_charging_retry_count(client):
+    """frame_extraction 내부에서 영상 길이가 5초 허용 범위를 벗어나 FILE-001을
+    던지면(InvalidFileFormatError), main.py가 이걸 AI-001로 감싸버리지 않고
+    그대로 전달해야 한다. 판정을 시도한 게 아니므로 재촬영 횟수도 차감되면 안 된다."""
+    def raise_duration_error(mission_id, mission_label, clip_id, clip_path, criteria=None):
+        raise main.InvalidFileFormatError(
+            "미션 인증 클립은 5초 촬영만 허용합니다 (업로드된 영상: 2.00초)"
+        )
+
+    main.process_clip = raise_duration_error
+    res = client.post(
+        "/api/clips/upload",
+        data={"mission_id": "m-api-11", "mission_label": "물 마시기"},
+        files={"clip": ("clip.mp4", _fake_clip_bytes(), "video/mp4")},
+    )
+    assert res.status_code == 400
+    assert res.json()["code"] == "FILE-001"
+    assert db.get_retry_count("m-api-11") == 0
+
+
+def _seed_clip_for_user(clip_id, mission_id, user_id, verdict="pass"):
+    """withdrawal-cleanup 테스트용 클립을 DB+디스크에 직접 만든다.
+    user_id는 이제 upload API의 파라미터가 아니므로(get_mission() 연결 전까지는
+    upload로는 만들 수 없다 - main.py 참고) DB 레이어를 직접 호출해서 시드한다."""
+    clip_path = os.path.join(main.UPLOAD_DIR, f"{clip_id}.mp4")
+    with open(clip_path, "wb") as f:
+        f.write(b"fake video bytes")
+    db.create_clip_record(clip_id, mission_id, clip_path, verdict=verdict, user_id=user_id)
+    return clip_path
+
+
+@contextmanager
+def _user_id_linking_wired():
+    """get_mission()이 연결된 이후 상황을 이 블록 안에서만 흉내낸다.
+    실제 기본값(mission_lookup.USER_ID_LINKING_WIRED = False)은 블록 밖에서 그대로 유지된다."""
+    original = main.mission_lookup.USER_ID_LINKING_WIRED
+    main.mission_lookup.USER_ID_LINKING_WIRED = True
+    try:
+        yield
+    finally:
+        main.mission_lookup.USER_ID_LINKING_WIRED = original
+
+
+def test_withdrawal_cleanup_refuses_success_while_user_id_linking_unwired(client):
+    """지금 실제 배포 상태(USER_ID_LINKING_WIRED = False, 기본값)를 검증한다.
+    get_mission()이 연결되기 전까지는 사용자에게 삭제 대상 클립이 실제로 있어도
+    무조건 500 FAILED를 반환해야 한다 - 그래야 BE C가 탈퇴를 '완료'로 잘못
+    확정해서 실제로는 안 지워진 개인 클립이 남는 사고를 막는다."""
+    assert main.mission_lookup.USER_ID_LINKING_WIRED is False  # 이 테스트가 검증하려는 전제
+
+    clip_id = "clip-wc-0"
+    _seed_clip_for_user(clip_id, "m-wc-0", user_id="999")
+
+    res = client.post("/api/ai/clips/withdrawal-cleanup", json={"userId": 999, "withdrawalId": 0})
+
+    assert res.status_code == 500
+    body = res.json()
+    assert body["success"] is False
+    assert body["data"]["cleanupStatus"] == "FAILED"
+    # 실제로 안 지워졌어야 한다 (성공을 사칭하지 않았다는 증거)
+    assert db.get_clip(clip_id)["deleted"] == 0
+
+
+def test_withdrawal_cleanup_removes_users_clips(client):
+    """get_mission() 연결 이후를 가정한 삭제 로직 자체의 검증."""
+    clip_id = "clip-wc-1"
+    clip_path = _seed_clip_for_user(clip_id, "m-wc-1", user_id="100")
+
+    with _user_id_linking_wired():
+        cleanup_res = client.post(
+            "/api/ai/clips/withdrawal-cleanup",
+            json={"userId": 100, "withdrawalId": 1},
+        )
+    assert cleanup_res.status_code == 200
+    body = cleanup_res.json()
+    assert body["data"]["cleanupStatus"] == "COMPLETED"
+    assert body["data"]["deletedClipCount"] == 1
+    assert body["data"]["idempotent"] is False
+    assert db.get_clip(clip_id)["deleted"] == 1
+    assert not os.path.exists(clip_path)
+
+
+def test_withdrawal_cleanup_no_clips_is_idempotent(client):
+    with _user_id_linking_wired():
+        res = client.post(
+            "/api/ai/clips/withdrawal-cleanup",
+            json={"userId": 999999, "withdrawalId": 2},
+        )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["data"]["cleanupStatus"] == "NO_CLIPS"
+    assert body["data"]["idempotent"] is True
+
+
+def test_withdrawal_cleanup_second_call_is_idempotent(client):
+    clip_id = "clip-wc-2"
+    _seed_clip_for_user(clip_id, "m-wc-2", user_id="200")
+
+    with _user_id_linking_wired():
+        first = client.post("/api/ai/clips/withdrawal-cleanup", json={"userId": 200, "withdrawalId": 3})
+        assert first.json()["data"]["cleanupStatus"] == "COMPLETED"
+
+        second = client.post("/api/ai/clips/withdrawal-cleanup", json={"userId": 200, "withdrawalId": 3})
+    assert second.json()["data"]["cleanupStatus"] == "NO_CLIPS"
+    assert second.json()["data"]["idempotent"] is True
+
+
+def test_withdrawal_cleanup_reports_failure_when_purge_fails(client):
+    """스토리지 삭제가 실패하면 500 FAILED를 반환하고, 실패한 클립은 deleted 처리하지 않아
+    재호출 시 다시 시도 대상에 남아야 한다(멱등 재시도)."""
+    clip_id = "clip-wc-3"
+    _seed_clip_for_user(clip_id, "m-wc-3", user_id="300")
+
+    original_purge_clip_file = main.purge_clip_file
+    main.purge_clip_file = lambda path: False
+    try:
+        with _user_id_linking_wired():
+            cleanup_res = client.post(
+                "/api/ai/clips/withdrawal-cleanup",
+                json={"userId": 300, "withdrawalId": 4},
+            )
+    finally:
+        main.purge_clip_file = original_purge_clip_file
+
+    assert cleanup_res.status_code == 500
+    body = cleanup_res.json()
+    assert body["success"] is False
+    assert body["data"]["cleanupStatus"] == "FAILED"
+    assert db.get_clip(clip_id)["deleted"] == 0
 
 
 if __name__ == "__main__":
