@@ -72,7 +72,7 @@ class VisionService:
             response = self.client.responses.parse(
                 model=self.model,
                 instructions=(
-                    "당신은 WELLOG의 미션 인증 영상 판정 AI입니다. 사용자가 촬영한 5초 영상에서 "
+                    "당신은 WIDIT의 미션 인증 영상 판정 AI입니다. 사용자가 촬영한 5초 영상에서 "
                     "추출된 연속 프레임들을 보고 미션 수행 여부를 판정하세요. "
                     "criteria_hint가 주어지면 반드시 그 id들로만 criteria를 채우고, 없으면 스스로 "
                     "핵심 판단 기준 1~4개를 영문 소문자와 숫자, 밑줄로만 이루어진 id로 만드세요. "

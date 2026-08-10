@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="WELLOG BE B",
+    title="WIDIT BE B",
     description="미션 인증 클립 업로드, 프레임 추출, AI 비전 판정, 보관/파기 정책을 담당하는 서비스",
     version="0.1.0",
     lifespan=lifespan,

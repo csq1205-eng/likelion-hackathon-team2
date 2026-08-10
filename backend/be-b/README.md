@@ -1,4 +1,4 @@
-# WELLOG BE B — 미션 클립 업로드 · AI 비전 판정 · 보관/파기
+# WIDIT BE B — 미션 클립 업로드 · AI 비전 판정 · 보관/파기
 
 `백엔드 API 명세서 최종본`의 12장(미션/AI API 중 클립 업로드·판정·재촬영), 16장(클립 공유 API) 구현체입니다.
 클립을 받아 ffmpeg로 프레임을 추출하고, OpenAI 비전 모델로 미션 수행 여부를 판정한 뒤,
@@ -21,10 +21,10 @@ cp .env.example .env
 uvicorn app.main:app --reload --port 8002
 ```
 
-> **OneDrive 동기화 폴더에서 작업 중이라면** `.venv`를 프로젝트 폴더 밖(예: `C:\dev\welllog-venvs\be-b\.venv`)에
+> **OneDrive 동기화 폴더에서 작업 중이라면** `.venv`를 프로젝트 폴더 밖(예: `C:\dev\widit-venvs\be-b\.venv`)에
 > 만드는 걸 권장합니다. OneDrive 실시간 동기화가 venv의 수천 개 파일과 충돌해 삭제/재생성 시 이전 패키지가
 > 남아있는 것처럼 보이는 문제가 있었습니다. `pip install -r requirements.txt`와 `pytest`, `uvicorn` 모두
-> 그 외부 `.venv`의 `python.exe`로 실행하면 됩니다 (예: `C:\dev\welllog-venvs\be-b\.venv\Scripts\python.exe -m pytest`).
+> 그 외부 `.venv`의 `python.exe`로 실행하면 됩니다 (예: `C:\dev\widit-venvs\be-b\.venv\Scripts\python.exe -m pytest`).
 
 - Swagger UI: http://127.0.0.1:8002/docs
 - 상태 확인: http://127.0.0.1:8002/health
