@@ -1,24 +1,34 @@
-import httpx
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.schemas.highlight import HighlightCompleteRequest, HighlightCompleteResponse
-from app.services.callback_service import CallbackConfigurationError
+from app.dependencies import require_internal_key
+from app.schemas.highlight import (
+    HighlightCompleteRequest,
+    HighlightCompleteResponse,
+    HighlightGenerateRequest,
+    HighlightGenerateResponse,
+)
+from app.services.highlight_generator import HighlightGenerationError, HighlightSourceError
 from app.services.highlight_service import HighlightService
 
 
-router = APIRouter(prefix="/api/ai/highlights", tags=["highlights"])
+router = APIRouter(
+    prefix="/api/ai/highlights",
+    tags=["highlights"],
+    dependencies=[Depends(require_internal_key)],
+)
 service = HighlightService()
+
+
+@router.post("/generate", response_model=HighlightGenerateResponse)
+async def generate_highlight(request: HighlightGenerateRequest) -> HighlightGenerateResponse:
+    try:
+        return await service.generate(request)
+    except HighlightSourceError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+    except HighlightGenerationError as exc:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))
 
 
 @router.post("/complete", response_model=HighlightCompleteResponse)
 async def complete_highlight(request: HighlightCompleteRequest) -> HighlightCompleteResponse:
-    try:
-        return await service.complete(request)
-    except CallbackConfigurationError as exc:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc))
-    except httpx.HTTPError:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="BE B 하이라이트 완료 콜백 호출에 실패했습니다.",
-        )
-
+    return await service.complete(request)

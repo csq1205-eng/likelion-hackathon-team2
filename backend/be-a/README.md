@@ -49,6 +49,79 @@ API JSON은 최종 명세서에 맞춰 `camelCase`를 사용하며, Python 코�
 
 - `POST /api/ai/verdicts/reason`: 내부 판정 결과를 사용자용 문장으로 변환
 - `POST /api/ai/highlights/complete`: 저장이 끝난 하이라이트의 각 클립에 대해 BE B 콜백 호출
+- `POST /api/ai/reports/weekly`: BE C가 계산한 주간 그룹 통계를 자연어 리포트로 변환
+
+## 서버 간 인증
+
+`INTERNAL_API_KEY`가 설정되어 있으면 모든 `/api/ai/*` 요청에 같은 값을 담은
+`X-Internal-Key` 헤더가 필요합니다. 키가 비어 있는 로컬 환경에서는 인증을 강제하지 않으며,
+`/health`는 배포 헬스체크를 위해 항상 인증 없이 접근할 수 있습니다.
+
+```http
+X-Internal-Key: change-me
+```
+
+## 주간 그룹 리포트
+
+BE C가 미리 계산한 집계값을 전달하면 BE A는 통계를 다시 계산하지 않고 사용자용 문장만 생성합니다.
+AI를 사용할 수 없거나 호출이 실패하면 규칙 기반 문장을 반환합니다.
+
+```http
+POST /api/ai/reports/weekly
+```
+
+```json
+{
+  "groupId": 10,
+  "weekStartDate": "2026-08-03",
+  "memberCount": 4,
+  "assignedMissionCount": 20,
+  "completedMissionCount": 15,
+  "completionRate": 75.0,
+  "previousWeekCompletionRate": 60.0,
+  "currentStreakDays": 5,
+  "dailyStats": [
+    {
+      "date": "2026-08-03",
+      "assignedMissionCount": 3,
+      "completedMissionCount": 2
+    }
+  ],
+  "topMissionTypes": ["HYDRATION", "SUN_CARE"]
+}
+```
+
+응답의 `reportSource`는 `AI` 또는 `FALLBACK`입니다.
+
+## 하이라이트 완료 콜백 안정성
+
+하이라이트 영상 저장이 성공한 뒤 BE B의 다음 API를 클립별로 호출합니다.
+
+```http
+POST /api/clips/{clipId}/highlight-complete
+```
+
+- `408`, `425`, `429`, `5xx` 및 네트워크 오류는 기본 3회까지 재시도합니다.
+- 재시도 간격은 기본 `0.25초 → 0.5초`의 지수 백오프를 사용합니다.
+- `4xx` 비재시도 오류는 즉시 해당 클립의 실패로 기록합니다.
+- 모든 재시도는 동일한 `Idempotency-Key`를 사용합니다.
+- 여러 클립 중 일부가 실패해도 나머지 콜백을 계속 처리합니다.
+- 중복 `clipId` 요청은 422로 거부합니다.
+
+응답의 `callbackStatus` 또는 완료 API의 `status` 값은 다음과 같습니다.
+
+- `COMPLETED`: 모든 클립 콜백 성공
+- `PARTIAL`: 일부 성공, 일부 실패
+- `FAILED`: 모든 클립 콜백 실패
+- `SKIPPED`: 로컬 설정 등으로 콜백 비활성화
+
+성공한 ID는 `notifiedClipIds`, 실패한 ID는 `failedClipIds`에서 확인할 수 있습니다.
+콜백 실패가 발생해도 이미 저장된 하이라이트 영상의 `status`는 `COMPLETED`로 유지됩니다.
+
+```dotenv
+HIGHLIGHT_CALLBACK_RETRY_ATTEMPTS=3
+HIGHLIGHT_CALLBACK_BACKOFF_SECONDS=0.25
+```
 
 판정 이유 요청 예시:
 
@@ -66,6 +139,23 @@ API JSON은 최종 명세서에 맞춰 `camelCase`를 사용하며, Python 코�
   "processedAt": "2026-08-03T12:30:00Z"
 }
 ```
+
+BE B의 현재 `VerdictResponse`도 같은 엔드포인트에 그대로 전달할 수 있습니다. BE A가
+snake_case 필드, UUID 문자열 ID, 소문자 판정값과 `0~1` 신뢰도를 기존 계약으로 정규화합니다.
+
+```json
+{
+  "mission_id": "mission-2026-08-10-001",
+  "clip_id": "83fe9cc1-08f8-4192-9510-ff7866836286",
+  "verdict": "hold",
+  "confidence": 0.72,
+  "criteria": [{"id": "application_action", "met": false}],
+  "model_notes": "internal only",
+  "processed_at": "2026-08-10T12:30:00Z"
+}
+```
+
+응답에는 사용자용 `reason`과 `reasonSource`만 포함되며 `model_notes`는 포함되지 않습니다.
 
 최종 판정값은 API 명세서에 따라 `PASS`, `FAIL`, `HOLD`, `ERROR`를 사용합니다. `HOLD`는 판정 보류로
 재촬영 실패 횟수에 포함하지 않습니다. 판정 처리가 아직 끝나지 않은 경우에는
