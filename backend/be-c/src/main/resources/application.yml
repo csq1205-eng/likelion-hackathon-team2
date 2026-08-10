@@ -1,6 +1,6 @@
 spring:
   application:
-    name: welllog-server
+    name: wedit-server
   profiles:
     active: local
 

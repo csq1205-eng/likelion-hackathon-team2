@@ -1,4 +1,4 @@
-# WellLog 서버
+# Wedit 서버
 
 ## 참조 문서
 
