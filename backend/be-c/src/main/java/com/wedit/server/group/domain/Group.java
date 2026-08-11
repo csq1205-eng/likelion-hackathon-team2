@@ -65,6 +65,16 @@ public class Group {
         return new Group(owner, name, goalName, targetDays);
     }
 
+    public boolean complete() {
+        if (this.status == GroupStatus.COMPLETED) {
+            return false;
+        }
+
+        this.status = GroupStatus.COMPLETED;
+        this.completedAt = LocalDateTime.now();
+        return true;
+    }
+
     @PrePersist
     public void prePersist() {
         LocalDateTime now = LocalDateTime.now();
@@ -99,5 +109,9 @@ public class Group {
 
     public GroupStatus getStatus() {
         return status;
+    }
+
+    public LocalDateTime getCompletedAt() {
+        return completedAt;
     }
 }

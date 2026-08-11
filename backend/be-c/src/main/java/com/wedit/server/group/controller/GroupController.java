@@ -9,7 +9,11 @@ import com.wedit.server.group.dto.GroupInviteResponse;
 import com.wedit.server.group.dto.GroupJoinRequest;
 import com.wedit.server.group.dto.GroupJoinResponse;
 import com.wedit.server.group.dto.GroupListResponse;
+import com.wedit.server.group.dto.GroupProgressResponse;
 import com.wedit.server.group.dto.GroupStatusResponse;
+import com.wedit.server.group.dto.DailyStampIssueResponse;
+import com.wedit.server.group.dto.GardenCompletionResponse;
+import com.wedit.server.group.dto.RewardClaimResponse;
 import com.wedit.server.group.service.GroupService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -111,5 +115,55 @@ public class GroupController {
         Long userId = temporaryAccessTokenResolver.resolveUserId(authorizationHeader);
 
         return ApiResponse.success(groupService.getGroupStatus(userId, groupId, date));
+    }
+
+    @GetMapping("/{groupId}/progress")
+    @SecurityRequirement(name = "bearerAuth")
+    public ApiResponse<GroupProgressResponse> getGroupProgress(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @PathVariable Long groupId
+    ) {
+        Long userId = temporaryAccessTokenResolver.resolveUserId(authorizationHeader);
+
+        return ApiResponse.success(groupService.getGroupProgress(userId, groupId));
+    }
+
+    @PostMapping("/{groupId}/stamps/daily")
+    @SecurityRequirement(name = "bearerAuth")
+    public ApiResponse<DailyStampIssueResponse> issueDailyStamps(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @PathVariable Long groupId,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        Long userId = temporaryAccessTokenResolver.resolveUserId(authorizationHeader);
+
+        return ApiResponse.success(groupService.issueDailyStamps(userId, groupId, date));
+    }
+
+    @PostMapping("/{groupId}/rewards/claim")
+    @SecurityRequirement(name = "bearerAuth")
+    public ApiResponse<RewardClaimResponse> claimGroupReward(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @PathVariable Long groupId
+    ) {
+        Long userId = temporaryAccessTokenResolver.resolveUserId(authorizationHeader);
+
+        return ApiResponse.success(groupService.claimGroupReward(userId, groupId));
+    }
+
+    @PostMapping("/{groupId}/garden/complete")
+    @SecurityRequirement(name = "bearerAuth")
+    public ApiResponse<GardenCompletionResponse> completeGarden(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @PathVariable Long groupId
+    ) {
+        Long userId = temporaryAccessTokenResolver.resolveUserId(authorizationHeader);
+
+        return ApiResponse.success(groupService.completeGarden(userId, groupId));
     }
 }
