@@ -1,17 +1,19 @@
 import os
 from pathlib import Path
 
-from fastapi import FastAPI
 from dotenv import load_dotenv
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+
 load_dotenv()
 
-from app.routers.missions import router as missions_router
-from app.routers.verdicts import router as verdicts_router
 from app.routers.highlights import router as highlights_router
+from app.routers.missions import router as missions_router
 from app.routers.reports import router as reports_router
+from app.routers.verdicts import router as verdicts_router
+
 
 app = FastAPI(
     title="WELLOG BE A",
@@ -19,8 +21,6 @@ app = FastAPI(
     version="0.2.0",
 )
 
-# 쉼표로 구분해 여러 프론트엔드 주소를 등록할 수 있습니다.
-# Render 배포 시 ALLOWED_ORIGINS=https://프론트도메인 형태로 설정하세요.
 allowed_origins = [
     origin.strip().rstrip("/")
     for origin in os.getenv(
@@ -53,6 +53,7 @@ highlight_output_dir = Path(
     os.getenv("HIGHLIGHT_OUTPUT_DIR", "generated/highlights")
 ).resolve()
 highlight_output_dir.mkdir(parents=True, exist_ok=True)
+
 app.mount(
     "/generated/highlights",
     StaticFiles(directory=highlight_output_dir),
