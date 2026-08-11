@@ -34,6 +34,22 @@ uvicorn app.main:app --reload --port 8002
 
 포트 구성: BE A `8001`, BE C `8080`, 기존 `ai-server` `8000`, 이 서비스는 기본 `8002`.
 
+## 배포 (Render)
+
+데모 시연을 위해 각 파트를 별도 임시 도메인으로 배포하는 방향으로 팀이 합의했습니다
+(BE C는 이미 `https://wedit-be-c.onrender.com` 배포 완료). BE B도 같은 방식으로 배포합니다.
+
+- 루트에 `Dockerfile`이 있습니다 (`python:3.12-slim` + ffmpeg 설치 + uvicorn을 `$PORT`로 바인딩).
+  Render에서 이 리포의 `backend/be-b`를 루트 디렉터리로 지정한 Docker 서비스로 등록하면 됩니다.
+- 필수 환경변수: `OPENAI_API_KEY`, `BE_A_BASE_URL`(BE A 배포 URL로 교체), `INTERNAL_API_KEY`
+  (BE A/BE C와 값을 맞출 경우), 그리고 **`PUBLIC_BASE_URL`을 반드시 BE B의 실제 배포 도메인으로
+  설정**해야 합니다 (`.env.example` 참고). 비워두면 응답의 `sourceClipUrl`/`frameUrl`이
+  `localhost`로 나가 프론트/BE A에서 접근할 수 없습니다.
+- **주의:** MVP 구현은 클립 파일과 SQLite DB를 로컬 디스크에 저장합니다(`app/storage.py`,
+  `DATABASE_PATH`). Render 무료 티어처럼 디스크가 영속적이지 않은 환경에서는 재배포나 장시간
+  유휴 후 재시작 시 업로드된 클립/판정 기록이 초기화됩니다. 데모 중에는 인스턴스가 계속 떠 있도록
+  유지하고, 필요하면 Render의 영구 디스크(persistent disk) 옵션을 검토하세요.
+
 ## 테스트
 
 ```bash
