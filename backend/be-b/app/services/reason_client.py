@@ -72,10 +72,14 @@ class ReasonClient:
             "missionTitle": mission_title,
         }
 
+        headers = {}
+        if settings.internal_api_key:
+            headers["X-Internal-Key"] = settings.internal_api_key
+
         owns_client = self._client is None
         client = self._client or httpx.Client(timeout=_TIMEOUT_SEC)
         try:
-            response = client.post(f"{self.base_url}/api/ai/verdicts/reason", json=body)
+            response = client.post(f"{self.base_url}/api/ai/verdicts/reason", json=body, headers=headers)
             response.raise_for_status()
             data = response.json()
             reason = data.get("reason")
