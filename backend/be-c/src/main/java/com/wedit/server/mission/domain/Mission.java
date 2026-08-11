@@ -121,6 +121,22 @@ public class Mission {
         return missionDate;
     }
 
+    public String getSlot() {
+        return slot;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getMissionType() {
+        return missionType;
+    }
+
     public MissionStatus getStatus() {
         return status;
     }
