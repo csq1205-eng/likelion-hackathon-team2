@@ -15,6 +15,8 @@ OpenAI Structured Outputs로 미션을 생성하고, API 키가 없거나 AI 호
 - AI 호출 실패 또는 안전 검증 실패 시 규칙 기반 미션 자동 대체
 - BE B 판정 결과를 사용자용 문장으로 변환 (`PASS / FAIL / HOLD / ERROR`)
 - OpenAI로 판정 이유를 자연스럽게 생성하고 실패 시 규칙 문장으로 자동 대체
+- 주간 그룹 통계를 AI 리포트로 변환하고 실패 시 규칙 문장으로 자동 대체
+- FFmpeg로 세로형 하이라이트 영상 생성 및 자막·완료 카드 합성
 - 하이라이트 저장 성공 후 각 클립의 BE B 완료 콜백 호출
 
 ## 실행
@@ -48,6 +50,7 @@ API JSON은 최종 명세서에 맞춰 `camelCase`를 사용하며, Python 코�
 추가 API:
 
 - `POST /api/ai/verdicts/reason`: 내부 판정 결과를 사용자용 문장으로 변환
+- `POST /api/ai/highlights/generate`: 클립을 조합해 FFmpeg 하이라이트 영상을 생성
 - `POST /api/ai/highlights/complete`: 저장이 끝난 하이라이트의 각 클립에 대해 BE B 콜백 호출
 - `POST /api/ai/reports/weekly`: BE C가 계산한 주간 그룹 통계를 자연어 리포트로 변환
 
@@ -191,8 +194,3 @@ python -m pytest -q
 ```
 
 자동 테스트에서는 실제 OpenAI API 키를 사용하지 않습니다. 실제 AI 응답은 서버 실행 후 Swagger에서 확인합니다.
-
-## 다음 구현 순서
-
-1. 주간 그룹 리포트 API
-2. FFmpeg 기반 하이라이트 생성
