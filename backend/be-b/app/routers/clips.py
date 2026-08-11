@@ -12,13 +12,18 @@ service = ClipService()
 @router.post("/upload")
 def upload_clip(
     background_tasks: BackgroundTasks,
-    mission_id: int = Form(..., alias="missionId"),
+    missionId: int = Form(...),
     shared: bool = Form(...),
     clip: UploadFile = File(...),
     user_id: int = Depends(resolve_user_id),
 ):
-    """미션 인증 클립 업로드 + 재촬영 (명세서 12.1 / 12.4는 동일 API)."""
-    result = service.upload_clip(user_id=user_id, mission_id=mission_id, upload=clip, shared=shared)
+    """미션 인증 클립 업로드 + 재촬영 (명세서 12.1 / 12.4는 동일 API).
+
+    FastAPI가 Form() 파라미터의 alias를 OpenAPI 스키마(Swagger)에 반영하지 않는 문제가 있어
+    (`alias="missionId"`로는 문서/Swagger "Try it out"이 여전히 mission_id로 표시됨),
+    실제로 요청에서 받는 이름을 그대로 파라미터명으로 사용한다.
+    """
+    result = service.upload_clip(user_id=user_id, mission_id=missionId, upload=clip, shared=shared)
 
     if result.judgement_status == "PROCESSING":
         background_tasks.add_task(
