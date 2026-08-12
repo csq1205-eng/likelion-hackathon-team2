@@ -54,6 +54,7 @@ public class MissionService {
                 mission.getTitle(),
                 mission.getDescription(),
                 mission.getMissionType(),
+                mission.getVerificationCriteria(),
                 mission.getStatus().name(),
                 null
         );

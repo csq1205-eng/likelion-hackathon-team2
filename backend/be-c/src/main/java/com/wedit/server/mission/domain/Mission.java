@@ -49,6 +49,9 @@ public class Mission {
     @Column(name = "mission_type", nullable = false, length = 50)
     private String missionType;
 
+    @Column(name = "verification_criteria", length = 1000)
+    private String verificationCriteria;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private MissionStatus status;
@@ -69,7 +72,8 @@ public class Mission {
             String slot,
             String title,
             String description,
-            String missionType
+            String missionType,
+            String verificationCriteria
     ) {
         this.user = user;
         this.group = group;
@@ -78,6 +82,7 @@ public class Mission {
         this.title = title;
         this.description = description;
         this.missionType = missionType;
+        this.verificationCriteria = verificationCriteria;
         this.status = MissionStatus.PENDING;
     }
 
@@ -90,7 +95,20 @@ public class Mission {
             String description,
             String missionType
     ) {
-        return new Mission(user, group, missionDate, slot, title, description, missionType);
+        return new Mission(user, group, missionDate, slot, title, description, missionType, null);
+    }
+
+    public static Mission create(
+            User user,
+            Group group,
+            LocalDate missionDate,
+            String slot,
+            String title,
+            String description,
+            String missionType,
+            String verificationCriteria
+    ) {
+        return new Mission(user, group, missionDate, slot, title, description, missionType, verificationCriteria);
     }
 
     @PrePersist
@@ -135,6 +153,10 @@ public class Mission {
 
     public String getMissionType() {
         return missionType;
+    }
+
+    public String getVerificationCriteria() {
+        return verificationCriteria;
     }
 
     public MissionStatus getStatus() {

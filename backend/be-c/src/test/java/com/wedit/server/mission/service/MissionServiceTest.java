@@ -45,7 +45,8 @@ class MissionServiceTest {
                 "MORNING",
                 "아침 물 한 잔 마시기",
                 "기상 후 물을 마시고 인증 클립을 제출해 주세요.",
-                "HYDRATION"
+                "HYDRATION",
+                "사용자가 물을 마시는 장면이 확인되어야 합니다."
         ));
 
         TodayMissionResponse response = missionService.getTodayMissions(user.getId());
@@ -56,6 +57,7 @@ class MissionServiceTest {
         assertThat(response.missions().get(0).slot()).isEqualTo("MORNING");
         assertThat(response.missions().get(0).title()).isEqualTo("아침 물 한 잔 마시기");
         assertThat(response.missions().get(0).missionType()).isEqualTo("HYDRATION");
+        assertThat(response.missions().get(0).verificationCriteria()).isEqualTo("사용자가 물을 마시는 장면이 확인되어야 합니다.");
         assertThat(response.missions().get(0).status()).isEqualTo("PENDING");
     }
 }

@@ -55,7 +55,7 @@
 | --- | --- | --- |
 | GET | `/api/v1/missions/today` | 저장된 오늘의 개인별 미션 조회 |
 
-`GET /api/v1/missions/today`는 조회 시점에 미션을 새로 생성하지 않는다. `missions` 테이블에 저장된 오늘 미션이 없으면 빈 목록을 반환한다.
+`GET /api/v1/missions/today`는 조회 시점에 미션을 새로 생성하지 않는다. `missions` 테이블에 저장된 오늘 미션이 없으면 빈 목록을 반환한다. 저장된 미션의 AI 판정 기준은 `verificationCriteria`로 응답한다.
 
 ## 실행
 

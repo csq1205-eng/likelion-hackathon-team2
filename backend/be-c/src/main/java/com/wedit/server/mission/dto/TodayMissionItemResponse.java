@@ -6,6 +6,7 @@ public record TodayMissionItemResponse(
         String title,
         String description,
         String missionType,
+        String verificationCriteria,
         String status,
         String reason
 ) {
