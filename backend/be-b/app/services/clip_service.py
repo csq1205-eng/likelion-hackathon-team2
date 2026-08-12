@@ -61,7 +61,13 @@ class ClipService:
     # 업로드 / 재촬영 (POST /api/clips/upload)
     # ------------------------------------------------------------------
     def upload_clip(
-        self, user_id: int, mission_id: int, upload: UploadFile, shared: bool
+        self,
+        user_id: int,
+        mission_id: int,
+        upload: UploadFile,
+        shared: bool,
+        mission_title: Optional[str] = None,
+        criteria_hint: Optional[List[dict]] = None,
     ) -> ClipUploadResponse:
         extension = validate_clip_file(upload)
 
@@ -116,7 +122,9 @@ class ClipService:
             }
 
         try:
-            verdict = self.vision_service.judge(frame_paths, mission_title=None, criteria_hint=None)
+            verdict = self.vision_service.judge(
+                frame_paths, mission_title=mission_title, criteria_hint=criteria_hint
+            )
         except VisionServiceUnavailable:
             # OPENAI_API_KEY 미설정 등 재시도해도 성공할 수 없는 설정 오류 -> 즉시 AI-001.
             self._finalize_error(clip_id, mission_id, user_id, judgement_request_id)
@@ -144,6 +152,7 @@ class ClipService:
             confidence_score=verdict.confidence_score,
             criteria=verdict.criteria,
             model_notes=verdict.model_notes,
+            mission_title=mission_title,
         )
 
         self._finalize_judgement(

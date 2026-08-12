@@ -111,6 +111,39 @@ def test_network_error_returns_202_then_background_retry_completes(client, fake_
     assert body["result"] == "PASS"
 
 
+def test_mission_title_and_criteria_are_passed_to_vision_and_reason(client, fake_vision, fake_reason_client):
+    fake_vision.queue(VisionVerdict(verdict="PASS", confidence_score=92.5, criteria=[], model_notes="ok"))
+
+    response = client.post(
+        "/api/clips/upload",
+        data={
+            "missionId": "100",
+            "shared": "true",
+            "missionTitle": "아침 물 한 잔 마시기",
+            "criteria": '[{"id": "product_visible", "description": "물컵이 보여야 함"}]',
+        },
+        files={"clip": fake_clip_file()},
+        headers=auth_header(),
+    )
+
+    assert response.status_code == 200
+    assert fake_vision.last_mission_title == "아침 물 한 잔 마시기"
+    assert fake_vision.last_criteria_hint == [{"id": "product_visible", "description": "물컵이 보여야 함"}]
+    assert fake_reason_client.last_mission_title == "아침 물 한 잔 마시기"
+
+
+def test_invalid_criteria_json_returns_common_001(client, fake_vision):
+    response = client.post(
+        "/api/clips/upload",
+        data={"missionId": "100", "shared": "true", "criteria": "not-json"},
+        files={"clip": fake_clip_file()},
+        headers=auth_header(),
+    )
+
+    assert response.status_code == 400
+    assert response.json()["code"] == "COMMON-001"
+
+
 def test_invalid_file_extension_returns_file_001(client):
     response = client.post(
         "/api/clips/upload",

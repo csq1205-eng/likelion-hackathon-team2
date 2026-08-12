@@ -20,6 +20,8 @@ class FakeVisionService:
         self.model = "fake-vision-model"
         self._queue = list(verdicts or [])
         self.calls = 0
+        self.last_mission_title = None
+        self.last_criteria_hint = None
 
     def queue(self, verdict: VisionVerdict) -> None:
         self._queue.append(verdict)
@@ -29,6 +31,8 @@ class FakeVisionService:
 
     def judge(self, frame_paths, mission_title=None, criteria_hint=None) -> VisionVerdict:
         self.calls += 1
+        self.last_mission_title = mission_title
+        self.last_criteria_hint = criteria_hint
         if not self._queue:
             return VisionVerdict(verdict="PASS", confidence_score=95.0, criteria=[], model_notes="default pass")
         item = self._queue.pop(0)
@@ -38,7 +42,11 @@ class FakeVisionService:
 
 
 class FakeReasonClient:
+    def __init__(self):
+        self.last_mission_title = None
+
     def get_reason(self, mission_id, clip_id, verdict, confidence_score, criteria, model_notes, mission_title=None):
+        self.last_mission_title = mission_title
         return f"[fake reason] {verdict}", "FALLBACK"
 
 
@@ -74,7 +82,12 @@ def fake_vision():
 
 
 @pytest.fixture()
-def client(storage, fake_vision, monkeypatch):
+def fake_reason_client():
+    return FakeReasonClient()
+
+
+@pytest.fixture()
+def client(storage, fake_vision, fake_reason_client, monkeypatch):
     from app.main import app
     from app.services.clip_service import ClipService
     from app.services.withdrawal_service import WithdrawalService
@@ -83,7 +96,7 @@ def client(storage, fake_vision, monkeypatch):
 
     test_clip_service = ClipService(
         vision_service=fake_vision,
-        reason_client=FakeReasonClient(),
+        reason_client=fake_reason_client,
         frame_extractor=fake_frame_extractor,
     )
     monkeypatch.setattr(clips_router, "service", test_clip_service)
