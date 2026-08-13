@@ -23,42 +23,62 @@ export default function JoinCheck() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-white px-5 py-8 items-center justify-center text-center">
-      <div className="flex-1 flex flex-col items-center justify-center w-full">
-        {/* 그룹 대표 이미지나 아이콘 */}
-        <div className="w-24 h-24 bg-blue-100 rounded-3xl flex items-center justify-center mb-6 text-4xl shadow-inner">
-          ✨
-        </div>
-        
-        <h2 className="text-gray-500 text-sm font-semibold mb-2">WELLLOG 챌린지 초대장</h2>
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
-          여름 대비 꿀피부 만들기
+    <div className="bg-white flex-1 rounded-t-[32px] px-5 py-6 flex flex-col shadow-sm overflow-y-auto">
+      <div className=''>
+        <h1 className="text-[18px] text-[#000000] font-semibold mt-4 mb-4">
+          함께할 그룹을 정해주세요     
         </h1>
-        
+      </div>
+      <div className="w-24 h-24 bg-blue-100 rounded-3xl flex items-center justify-center mb-6 text-4xl shadow-inner">
+          <button
+            onClick={() => setShowInviteModal(true)}
+            className="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-[30px] font-bold"
+          >
+            +
+          </button>
+          <button
+            onClick={() => setShowInviteModal(true)}
+            className="bg-blue-100 text-blue-600 px-[10px] py-[20px] y-1 rounded-lg text-[15px] font-bold"
+          >
+            <source />
+            초대코드로 참여
+          </button>
+      </div>
+      <div className="flex-1 flex flex-col items-center justify-center w-full">
+        <h1 className="text-[18px] text-[#000000] font-semibold mt-4 mb-4">
+          그룹 초대하기   
+        </h1>
         <div className="flex -space-x-2 mb-4">
-          {/* 멤버 프로필 미리보기 임시 UI */}
-          <div className="w-10 h-10 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-xs">🙋‍♀️</div>
-          <div className="w-10 h-10 rounded-full bg-gray-300 border-2 border-white flex items-center justify-center text-xs">💁‍♀️</div>
-          <div className="w-10 h-10 rounded-full bg-blue-100 border-2 border-white flex items-center justify-center text-xs text-blue-600 font-bold">+2</div>
+          <button
+            onClick={() => setShowInviteModal(true)}
+            className="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-[14px] font-bold"
+          >
+            카카오톡
+          </button>
+          <button
+            onClick={() => setShowInviteModal(true)}
+            className="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-[14px] font-bold"
+          >
+            URL
+          </button>
+          <button
+            onClick={() => setShowInviteModal(true)}
+            className="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-[14px] font-bold"
+          >
+            QR
+          </button>
         </div>
-        <p className="text-gray-600 text-sm mb-10">현재 4명의 친구가 함께하고 있어요!</p>
       </div>
 
-      {/* 하단 버튼 영역 */}
-      <div className="w-full space-y-3">
+      {/* 뒤로가기 버튼 */}
+      <div className="space-y-2">
         <button
           onClick={handleJoin}
-          className="w-full py-4 rounded-xl font-bold text-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+          className="font-semibold text-lg text-[#666666] transition-colors"
         >
-          {isLogin ? '참여하기' : '로그인 후 참여하기'}
-        </button>
-        <button
-          onClick={() => router.push('/group')}
-          className="w-full py-4 rounded-xl font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors"
-        >
-          돌아가기
+         -
         </button>
       </div>
     </div>
-  );
+  );     
 }

@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.schemas.verdict import VerdictReasonRequest
 
 
 client = TestClient(app)
@@ -100,6 +101,65 @@ def test_confidence_score_must_be_percentage():
             "criteria": [],
             "modelNotes": "Internal only",
             "processedAt": "2026-08-03T12:30:00Z",
+        },
+    )
+
+    assert response.status_code == 422
+
+
+def test_accepts_be_b_native_verdict_payload_with_uuid():
+    response = client.post(
+        "/api/ai/verdicts/reason",
+        json={
+            "mission_id": "mission-2026-08-10-001",
+            "clip_id": "83fe9cc1-08f8-4192-9510-ff7866836286",
+            "verdict": "hold",
+            "confidence": 0.72,
+            "criteria": [{"id": "application_action", "met": False}],
+            "model_notes": "SECRET BE B INTERNAL NOTE",
+            "processed_at": "2026-08-10T12:30:00Z",
+            "raw_verdict": "pass",
+            "policy_version": "v1",
+        },
+    )
+
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["missionId"] == "mission-2026-08-10-001"
+    assert body["clipId"] == "83fe9cc1-08f8-4192-9510-ff7866836286"
+    assert body["verdict"] == "HOLD"
+    assert body["reasonSource"] == "FALLBACK"
+    assert "SECRET" not in response.text
+
+
+def test_converts_be_b_confidence_ratio_to_percentage():
+    request = VerdictReasonRequest.model_validate(
+        {
+            "mission_id": "mission-1",
+            "clip_id": "clip-1",
+            "verdict": "pass",
+            "confidence": 0.72,
+            "criteria": [],
+            "model_notes": "internal only",
+            "processed_at": "2026-08-10T12:30:00Z",
+        }
+    )
+
+    assert request.confidence_score == 72.0
+    assert request.verdict == "PASS"
+
+
+def test_rejects_empty_be_b_identifier():
+    response = client.post(
+        "/api/ai/verdicts/reason",
+        json={
+            "mission_id": " ",
+            "clip_id": "clip-1",
+            "verdict": "pass",
+            "confidence": 0.95,
+            "criteria": [],
+            "model_notes": "",
+            "processed_at": "2026-08-10T12:30:00Z",
         },
     )
 

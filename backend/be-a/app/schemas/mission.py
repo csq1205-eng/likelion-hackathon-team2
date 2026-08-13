@@ -2,7 +2,7 @@ from typing import List, Literal, Optional
 
 from pydantic import Field, model_validator
 
-from app.schemas.common import ApiModel
+from app.schemas.common import ApiModel, ExternalId
 
 
 MissionSlot = Literal["MORNING", "NOON", "EVENING"]
@@ -35,7 +35,7 @@ class Environment(ApiModel):
 
 
 class MissionGenerateRequest(ApiModel):
-    user_id: str = Field(min_length=1, max_length=100)
+    user_id: ExternalId
     goal: str = Field(min_length=1, max_length=300)
     profile: UserProfile
     environment: Environment = Field(default_factory=Environment)
@@ -65,7 +65,7 @@ class AppliedFilters(ApiModel):
 
 
 class MissionGenerateResponse(ApiModel):
-    user_id: str
+    user_id: ExternalId
     missions: List[Mission]
     applied_filters: AppliedFilters
     generation_mode: Literal["ai", "fallback"]
