@@ -141,15 +141,17 @@ python -m pytest -q
    `verificationCriteria`와 동일하게 `[{"id":..., "description":...}, ...]` 형태)를 추가했습니다.
    값이 오면 AI 비전 판정과 BE A `verdicts/reason` 호출 모두에 그대로 전달되어, AI가 매번 스스로
    기준 id를 새로 만드는 대신 고정된 기준으로 판정합니다. 값이 없으면 기존과 동일하게 동작합니다
-   (하위 호환). 단, `retry_processing_judgement`(202 이후 백그라운드 재시도)는 이 값을 DB에
-   저장해두지 않아 재시도 시에는 여전히 컨텍스트 없이 판정합니다 — 필요하면 추후 저장 컬럼을
-   추가해야 합니다.
+   (하위 호환). ~~단, `retry_processing_judgement`(202 이후 백그라운드 재시도)는 이 값을 DB에
+   저장해두지 않아 재시도 시에는 여전히 컨텍스트 없이 판정합니다.~~ → **해결됨(2026-08-13).**
+   `mission_clips`에 `mission_title`/`criteria_hint` 컬럼을 추가(기존 배포 DB용 마이그레이션 포함)해
+   재시도 시에도 동일한 컨텍스트로 판정하도록 고쳤습니다.
 7. **외부 스토리지 미적용**: 명세서는 "외부 스토리지에 저장하고 DB에는 URL만 저장"을 요구하지만,
    MVP에서는 로컬 디스크 + `/files` 정적 서빙으로 대체했습니다. 배포 환경에서는 `app/storage.py`를
    S3 등으로 교체해야 합니다.
-8. **비공유 클립이 `highlight-complete`를 영영 못 받는 경우**: 명세서에는 시간 기반 안전장치가
-   명시돼 있지 않아 구현하지 않았습니다. BE A가 그날 하이라이트를 생성하지 않으면 해당 클립은
-   파기되지 않고 남습니다. 필요하면 안전망(예: N일 후 강제 파기)을 추가해야 합니다.
+8. **비공유 클립이 `highlight-complete`를 영영 못 받는 경우**: ~~명세서에는 시간 기반 안전장치가
+   명시돼 있지 않아 구현하지 않았습니다.~~ → **해결됨(2026-08-13).** `NON_SHARED_CLIP_FORCE_PURGE_DAYS`
+   (기본 7일)가 지나도 `highlight-complete`가 안 오면 기존 5분 주기 스윕이 강제로 파기하도록
+   `retention_service.purge_stale_unshared_clips`를 추가했습니다.
 9. **`withdrawal-cleanup`의 202 Accepted 분기 미구현**: 명세서 16.4는 스토리지 삭제가 지연되면
    `202 Accepted` + `cleanupStatus=PROCESSING`을 반환하고 BE B가 비동기로 후처리하는 흐름을
    정의합니다. 현재 구현은 로컬 디스크 삭제라 항상 동기로 끝나 `COMPLETED`/`NO_CLIPS`/`FAILED`만
