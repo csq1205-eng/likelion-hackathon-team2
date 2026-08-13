@@ -132,6 +132,30 @@ def test_mission_title_and_criteria_are_passed_to_vision_and_reason(client, fake
     assert fake_reason_client.last_mission_title == "아침 물 한 잔 마시기"
 
 
+def test_retry_preserves_mission_title_and_criteria(client, fake_vision, fake_reason_client):
+    fake_vision.queue_error(VisionServiceCallError("timeout"))
+    fake_vision.queue(VisionVerdict(verdict="PASS", confidence_score=88.0, criteria=[], model_notes="ok"))
+
+    response = client.post(
+        "/api/clips/upload",
+        data={
+            "missionId": "100",
+            "shared": "true",
+            "missionTitle": "아침 물 한 잔 마시기",
+            "criteria": '[{"id": "drink_water", "description": "물컵이 보여야 함"}]',
+        },
+        files={"clip": fake_clip_file()},
+        headers=auth_header(),
+    )
+
+    assert response.status_code == 202
+
+    # TestClient는 BackgroundTasks를 응답 직후 동기적으로 실행하므로, 이 시점엔 재시도가 이미 끝나 있다.
+    assert fake_vision.last_mission_title == "아침 물 한 잔 마시기"
+    assert fake_vision.last_criteria_hint == [{"id": "drink_water", "description": "물컵이 보여야 함"}]
+    assert fake_reason_client.last_mission_title == "아침 물 한 잔 마시기"
+
+
 def test_invalid_criteria_json_returns_common_001(client, fake_vision):
     response = client.post(
         "/api/clips/upload",

@@ -52,3 +52,30 @@ def purge_expired_shared_clips(conn: sqlite3.Connection) -> int:
         purge_clip(conn, row)
 
     return len(rows)
+
+
+def purge_stale_unshared_clips(conn: sqlite3.Connection) -> int:
+    """비공유 클립이 highlight-complete 콜백을 영영 못 받는 경우의 안전장치.
+
+    BE A가 그날 하이라이트를 생성하지 않으면 KEEP_UNTIL_HIGHLIGHT_COMPLETE 클립은
+    이론상 무기한 남는다. NON_SHARED_CLIP_FORCE_PURGE_DAYS(기본 7일)가 지나도
+    콜백이 안 왔으면 강제로 파기한다. 백그라운드 스케줄러가 주기 호출.
+    """
+    cutoff = (
+        datetime.now(timezone.utc) - timedelta(days=settings.non_shared_clip_force_purge_days)
+    ).isoformat()
+    rows = conn.execute(
+        """
+        SELECT * FROM mission_clips
+        WHERE deleted = 0
+          AND retention_policy = ?
+          AND highlight_generated_at IS NULL
+          AND created_at <= ?
+        """,
+        (KEEP_UNTIL_HIGHLIGHT_COMPLETE, cutoff),
+    ).fetchall()
+
+    for row in rows:
+        purge_clip(conn, row)
+
+    return len(rows)

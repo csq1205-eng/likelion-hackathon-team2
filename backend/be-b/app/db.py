@@ -19,7 +19,9 @@ CREATE TABLE IF NOT EXISTS mission_clips (
     highlight_generated_at TEXT,
     deleted INTEGER NOT NULL DEFAULT 0,
     deleted_at TEXT,
-    created_at TEXT NOT NULL
+    created_at TEXT NOT NULL,
+    mission_title TEXT,
+    criteria_hint TEXT
 );
 
 CREATE TABLE IF NOT EXISTS mission_clip_frames (
@@ -75,10 +77,26 @@ def get_connection() -> sqlite3.Connection:
     return conn
 
 
+# CREATE TABLE IF NOT EXISTS는 이미 만들어진 테이블에 새 컬럼을 추가해주지 않으므로,
+# 배포된 DB에 컬럼을 뒤늦게 추가할 때는 여기에 추가하고 마이그레이션으로 처리한다.
+_COLUMN_MIGRATIONS = [
+    ("mission_clips", "mission_title", "TEXT"),
+    ("mission_clips", "criteria_hint", "TEXT"),
+]
+
+
+def _run_migrations(conn: sqlite3.Connection) -> None:
+    for table, column, column_type in _COLUMN_MIGRATIONS:
+        existing_columns = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
+        if column not in existing_columns:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {column_type}")
+
+
 def init_db() -> None:
     conn = get_connection()
     try:
         conn.executescript(_SCHEMA)
+        _run_migrations(conn)
         conn.commit()
     finally:
         conn.close()

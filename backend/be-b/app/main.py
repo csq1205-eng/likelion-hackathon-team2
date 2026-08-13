@@ -18,7 +18,7 @@ from app.db import db_session, init_db
 from app.errors import COMMON_001_INVALID_INPUT, ApiException
 from app.routers.clips import router as clips_router
 from app.routers.internal import router as internal_router
-from app.services.retention_service import purge_expired_shared_clips
+from app.services.retention_service import purge_expired_shared_clips, purge_stale_unshared_clips
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +31,14 @@ async def _retention_sweep_loop() -> None:
         try:
             with db_session() as conn:
                 purged = purge_expired_shared_clips(conn)
+                stale_purged = purge_stale_unshared_clips(conn)
             if purged:
                 logger.info("retention sweep purged %s expired shared clip(s)", purged)
+            if stale_purged:
+                logger.info(
+                    "retention sweep force-purged %s stale unshared clip(s) missing highlight-complete",
+                    stale_purged,
+                )
         except Exception:
             logger.exception("retention sweep failed")
 

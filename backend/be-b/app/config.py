@@ -47,6 +47,12 @@ class Settings:
         return int(os.getenv("SHARED_CLIP_RETENTION_HOURS", "24"))
 
     @property
+    def non_shared_clip_force_purge_days(self) -> int:
+        """비공유 클립이 highlight-complete 콜백을 영영 못 받을 때의 안전장치.
+        이 기간(일)이 지나도 콜백이 안 오면 강제로 파기한다."""
+        return int(os.getenv("NON_SHARED_CLIP_FORCE_PURGE_DAYS", "7"))
+
+    @property
     def storage_root(self) -> Path:
         return Path(os.getenv("STORAGE_ROOT", "storage"))
 

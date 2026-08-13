@@ -1,3 +1,4 @@
+import json
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
@@ -87,7 +88,15 @@ class ClipService:
                 shared, judged_at=None
             )
             clip_id = self._insert_pending_clip(
-                conn, mission_id, user_id, attempt_no, shared, retention_policy, retention_expires_at
+                conn,
+                mission_id,
+                user_id,
+                attempt_no,
+                shared,
+                retention_policy,
+                retention_expires_at,
+                mission_title,
+                criteria_hint,
             )
 
         clip_path: Optional[Path] = None
@@ -213,8 +222,13 @@ class ClipService:
         frames_dir = settings.storage_root / "frames" / str(clip_id)
         frame_paths = sorted(frames_dir.glob("*.jpg"), key=lambda p: int(p.stem))
 
+        mission_title = clip["mission_title"]
+        criteria_hint = json.loads(clip["criteria_hint"]) if clip["criteria_hint"] else None
+
         try:
-            verdict = self.vision_service.judge(frame_paths, mission_title=None, criteria_hint=None)
+            verdict = self.vision_service.judge(
+                frame_paths, mission_title=mission_title, criteria_hint=criteria_hint
+            )
         except (VisionServiceUnavailable, VisionServiceCallError):
             self._finalize_error(clip_id, clip["mission_id"], clip["user_id"], judgement_request_id)
             return
@@ -227,6 +241,7 @@ class ClipService:
             confidence_score=verdict.confidence_score,
             criteria=verdict.criteria,
             model_notes=verdict.model_notes,
+            mission_title=mission_title,
         )
         self._finalize_judgement(
             clip_id=clip_id,
@@ -433,13 +448,16 @@ class ClipService:
         shared: bool,
         retention_policy: str,
         retention_expires_at: Optional[str],
+        mission_title: Optional[str] = None,
+        criteria_hint: Optional[List[dict]] = None,
     ) -> int:
         cursor = conn.execute(
             """
             INSERT INTO mission_clips (
                 mission_id, user_id, attempt_no, source_clip_url, source_clip_path,
-                shared, share_decided, retention_policy, retention_expires_at, created_at
-            ) VALUES (?, ?, ?, '', '', ?, 1, ?, ?, ?)
+                shared, share_decided, retention_policy, retention_expires_at, created_at,
+                mission_title, criteria_hint
+            ) VALUES (?, ?, ?, '', '', ?, 1, ?, ?, ?, ?, ?)
             """,
             (
                 mission_id,
@@ -449,6 +467,8 @@ class ClipService:
                 retention_policy,
                 retention_expires_at,
                 retention_service.now_iso(),
+                mission_title,
+                json.dumps(criteria_hint) if criteria_hint is not None else None,
             ),
         )
         return cursor.lastrowid
