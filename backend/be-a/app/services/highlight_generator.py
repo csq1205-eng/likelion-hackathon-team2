@@ -1,4 +1,5 @@
 import os
+import platform
 import shutil
 import subprocess
 from pathlib import Path
@@ -143,12 +144,17 @@ class FFmpegHighlightGenerator:
     @staticmethod
     def _resolve_font_path() -> str:
         configured = os.getenv("HIGHLIGHT_FONT_PATH")
-        candidates = [
-            configured,
-            "/System/Library/Fonts/AppleSDGothicNeo.ttc",
-            "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-        ]
+        candidates = [configured]
+        if platform.system() == "Darwin":
+            candidates.append("/System/Library/Fonts/AppleSDGothicNeo.ttc")
+        else:
+            candidates.extend(
+                [
+                    "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+                    "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+                    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                ]
+            )
         for candidate in candidates:
             if candidate and Path(candidate).is_file():
                 return candidate

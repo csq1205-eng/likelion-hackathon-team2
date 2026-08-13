@@ -1,6 +1,6 @@
-# WELLOG BE A
+# WEDIT BE A
 
-WELLOG의 **AI 개인별 미션 생성 + 추천 이유 + 안전/제외 필터**를 구현한 FastAPI MVP입니다.
+WEDIT의 **AI 개인별 미션 생성 + 추천 이유 + 안전/제외 필터**를 구현한 FastAPI MVP입니다.
 OpenAI Structured Outputs로 미션을 생성하고, API 키가 없거나 AI 호출이 실패하면 안전한 기본 미션 카탈로그로 자동 전환합니다.
 
 ## 구현 기능
@@ -42,6 +42,24 @@ API JSON은 최종 명세서에 맞춰 `camelCase`를 사용하며, Python 코�
 응답의 `generationMode`가 `ai`이면 AI 생성, `fallback`이면 기본 미션으로 대체된 결과입니다.
 
 판정 이유 응답의 `reasonSource`는 `AI` 또는 `FALLBACK`입니다.
+
+## Docker 배포
+
+```bash
+docker build -t wedit-be-a .
+docker run --rm -p 10000:10000 --env-file .env wedit-be-a
+```
+
+루트 `Dockerfile`은 Linux 이미지에 FFmpeg/FFprobe와 Noto CJK 한글 폰트를 설치하고,
+UID 10001의 비루트 사용자로 서비스를 실행합니다. 배포 플랫폼이 주입하는 `PORT`가 없으면
+10000번 포트를 사용합니다.
+
+## 미션 정책
+
+안전 규칙은 Python 필터 코드와 분리된 `config/mission_policy_rules.json`에서 로드합니다.
+`MISSION_POLICY_RULES_PATH`로 배포 환경별 정책 파일을 주입할 수 있습니다. BE B의
+`mission_policy_rules` API 계약이 확정되면 `FileMissionPolicyRepository`를 BE B 어댑터로
+교체하도록 저장소 경계를 분리했습니다.
 
 ## API
 
