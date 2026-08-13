@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 
+
 client = TestClient(app)
 
 
@@ -29,7 +30,10 @@ def test_generate_personalized_missions() -> None:
     )
 
     assert response.status_code == 200
-    body = response.json()
+    envelope = response.json()
+    assert envelope["success"] is True
+    assert envelope["message"] is None
+    body = envelope["data"]
     assert len(body["missions"]) == 3
     assert body["missions"][0]["missionType"] == "SUN_CARE"
     assert "자외선 지수가 8" in body["missions"][0]["reason"]
@@ -48,13 +52,18 @@ def test_bad_dust_and_knee_pain_remove_outdoor_missions() -> None:
                 "concerns": [],
                 "pain_areas": ["무릎"],
             },
-            "environment": {"fine_dust": "bad"},
+            "environment": {
+                "fine_dust": "bad",
+            },
         },
     )
 
     assert response.status_code == 200
-    body = response.json()
-    assert all(m["missionType"] != "OUTDOOR_ACTIVITY" for m in body["missions"])
+    body = response.json()["data"]
+    assert all(
+        mission["missionType"] != "OUTDOOR_ACTIVITY"
+        for mission in body["missions"]
+    )
     assert len(body["appliedFilters"]["safety"]) == 2
 
 
@@ -64,8 +73,44 @@ def test_reject_more_than_three_missions() -> None:
         json={
             "user_id": "user-789",
             "goal": "피부 관리",
-            "profile": {"skin_type": "oily"},
+            "profile": {
+                "skin_type": "oily",
+            },
             "max_missions": 4,
         },
     )
+
     assert response.status_code == 422
+    assert response.json()["code"] == "COMMON-001"
+
+
+def test_response_can_be_saved_by_be_c() -> None:
+    response = client.post(
+        "/api/ai/missions/generate",
+        json={
+            "userId": 123,
+            "goal": "피부 컨디션 개선",
+            "profile": {
+                "skinType": "dry",
+                "concerns": ["건조함"],
+            },
+            "environment": {
+                "uvIndex": 7,
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()["data"]
+    assert body["userId"] == 123
+    assert body["missions"]
+
+    required_storage_fields = {
+        "title",
+        "description",
+        "missionType",
+        "slot",
+        "reason",
+        "verificationCriteria",
+    }
+    assert required_storage_fields <= body["missions"][0].keys()

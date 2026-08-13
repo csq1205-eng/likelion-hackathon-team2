@@ -6,6 +6,7 @@ from openai import OpenAI
 from pydantic import BaseModel, Field
 
 from app.schemas.mission import Mission, MissionGenerateRequest
+from app.schemas.report import WeeklyReportRequest
 from app.schemas.verdict import VerdictReasonRequest
 
 
@@ -15,6 +16,11 @@ class GeneratedMissionSet(BaseModel):
 
 class GeneratedVerdictReason(BaseModel):
     user_message: str = Field(min_length=1, max_length=500)
+
+
+class GeneratedWeeklyReport(BaseModel):
+    summary_text: str = Field(min_length=1, max_length=500)
+    encouragement_text: str = Field(min_length=1, max_length=300)
 
 
 class LLMConfigurationError(RuntimeError):
@@ -51,7 +57,7 @@ class LLMService:
         response = self.client.responses.parse(
             model=self.model,
             instructions=(
-                "당신은 WELLOG의 웰니스 미션 설계자입니다. 사용자 목표와 프로필을 분석해 "
+                "당신은 WEDIT의 웰니스 미션 설계자입니다. 사용자 목표와 프로필을 분석해 "
                 "오늘 직접 수행할 수 있는 개인화 미션을 만드세요. 의료 진단, 치료, 약물·건강기능식품 "
                 "추천은 금지합니다. 각 미션은 5초 내외 영상에서 물체나 행동으로 판정 가능해야 합니다. "
                 "전체 수행 과정을 5초 안에 촬영하도록 요구하지 말고, 핵심 물체와 한 가지 행동이 짧은 "
@@ -86,7 +92,7 @@ class LLMService:
         response = self.client.responses.parse(
             model=self.model,
             instructions=(
-                "당신은 WELLOG의 영상 인증 결과 안내 도우미입니다. 입력된 판정 결과를 바꾸지 말고 "
+                "당신은 WEDIT의 영상 인증 결과 안내 도우미입니다. 입력된 판정 결과를 바꾸지 말고 "
                 "사용자에게 보여줄 자연스러운 한국어 문장 한두 개를 작성하세요. PASS는 인증 완료를 "
                 "축하하고, FAIL은 확인되지 않은 조건과 다음 촬영 방법을 비난하지 않는 말투로 안내하세요. "
                 "HOLD는 현재 영상만으로 판정하기 어려웠던 조건과 재촬영 방법을 안내하세요. "
@@ -102,3 +108,26 @@ class LLMService:
         if parsed is None:
             raise RuntimeError("AI가 판정 이유를 반환하지 않았습니다.")
         return parsed.user_message
+
+    def generate_weekly_report(self, request: WeeklyReportRequest) -> GeneratedWeeklyReport:
+        if not self.client:
+            raise LLMConfigurationError("OPENAI_API_KEY가 설정되지 않았습니다.")
+
+        report_context = request.model_dump(mode="json", by_alias=True)
+        response = self.client.responses.parse(
+            model=self.model,
+            instructions=(
+                "당신은 WEDIT 친구 그룹의 주간 웰니스 리포트 작성자입니다. 제공된 집계값을 "
+                "다시 계산하거나 변경하지 말고, summary_text와 encouragement_text를 자연스러운 한국어로 "
+                "작성하세요. 개인 간 순위를 만들거나 특정 구성원을 비난하지 마세요. 완료하지 못한 날을 "
+                "실패로 단정하지 말고 다음 주에 실천 가능한 따뜻한 응원을 제공하세요. 의료 진단이나 "
+                "치료 조언을 하지 말고, 입력에 없는 사실을 만들지 마세요."
+            ),
+            input=json.dumps(report_context, ensure_ascii=False),
+            text_format=GeneratedWeeklyReport,
+        )
+
+        parsed = response.output_parsed
+        if parsed is None:
+            raise RuntimeError("AI가 주간 리포트를 반환하지 않았습니다.")
+        return parsed
