@@ -25,7 +25,7 @@ def test_fail_returns_retry_message_without_exposing_notes():
     )
 
     assert response.status_code == 200
-    body = response.json()
+    body = response.json()["data"]
     assert body["verdict"] == "FAIL"
     assert body["reasonSource"] == "FALLBACK"
     assert "다시 촬영" in body["reason"]
@@ -47,8 +47,8 @@ def test_pass_returns_completed_message():
     )
 
     assert response.status_code == 200
-    assert "인증이 완료" in response.json()["reason"]
-    assert response.json()["reasonSource"] == "FALLBACK"
+    assert "인증이 완료" in response.json()["data"]["reason"]
+    assert response.json()["data"]["reasonSource"] == "FALLBACK"
 
 
 def test_error_returns_system_message():
@@ -66,7 +66,7 @@ def test_error_returns_system_message():
     )
 
     assert response.status_code == 200
-    assert "일시적인 오류" in response.json()["reason"]
+    assert "일시적인 오류" in response.json()["data"]["reason"]
 
 
 def test_hold_returns_retry_message_without_counting_as_fail():
@@ -84,7 +84,7 @@ def test_hold_returns_retry_message_without_counting_as_fail():
     )
 
     assert response.status_code == 200
-    body = response.json()
+    body = response.json()["data"]
     assert body["verdict"] == "HOLD"
     assert "명확하게 확인하기 어려웠어요" in body["reason"]
     assert body["reasonSource"] == "FALLBACK"
@@ -105,6 +105,7 @@ def test_confidence_score_must_be_percentage():
     )
 
     assert response.status_code == 422
+    assert response.json()["code"] == "COMMON-001"
 
 
 def test_accepts_be_b_native_verdict_payload_with_uuid():
@@ -124,7 +125,7 @@ def test_accepts_be_b_native_verdict_payload_with_uuid():
     )
 
     assert response.status_code == 200, response.text
-    body = response.json()
+    body = response.json()["data"]
     assert body["missionId"] == "mission-2026-08-10-001"
     assert body["clipId"] == "83fe9cc1-08f8-4192-9510-ff7866836286"
     assert body["verdict"] == "HOLD"

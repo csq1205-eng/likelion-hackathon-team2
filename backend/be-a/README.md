@@ -43,6 +43,20 @@ API JSON은 최종 명세서에 맞춰 `camelCase`를 사용하며, Python 코�
 
 판정 이유 응답의 `reasonSource`는 `AI` 또는 `FALLBACK`입니다.
 
+모든 `/api/ai/*` 성공 응답은 최종 명세서의 공통 형식을 사용합니다.
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": null
+}
+```
+
+입력 검증 및 인증 오류도 `timestamp`, `status`, `code`, `message`, `errors`, `path`를
+포함하는 공통 오류 형식으로 반환합니다. 입력 검증 실패는 `COMMON-001`, 내부 키 누락은
+`AUTH-001`, 유효하지 않은 내부 키는 `AUTH-002`를 사용합니다.
+
 ## Docker 배포
 
 ```bash
@@ -65,12 +79,16 @@ UID 10001의 비루트 사용자로 서비스를 실행합니다. 배포 플랫�
 
 `POST /api/ai/missions/generate`
 
-추가 API:
+BE C와 연동하는 내부 AI API:
 
 - `POST /api/ai/verdicts/reason`: 내부 판정 결과를 사용자용 문장으로 변환
 - `POST /api/ai/highlights/generate`: 클립을 조합해 FFmpeg 하이라이트 영상을 생성
 - `POST /api/ai/highlights/complete`: 저장이 끝난 하이라이트의 각 클립에 대해 BE B 콜백 호출
 - `POST /api/ai/reports/weekly`: BE C가 계산한 주간 그룹 통계를 자연어 리포트로 변환
+
+위 내부 API들은 최종 외부 조회 API가 아닙니다. BE C가 생성 결과를 저장한 뒤
+`GET /api/v1/missions/today`, `GET /api/v1/groups/{groupId}/highlight`,
+`GET /api/v1/groups/{groupId}/report`에서 조회 응답으로 변환합니다.
 
 ## 서버 간 인증
 

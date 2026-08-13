@@ -27,6 +27,7 @@ def test_internal_api_rejects_missing_key_when_configured(monkeypatch):
     monkeypatch.setenv("INTERNAL_API_KEY", "test-internal-secret")
     response = client.post("/api/ai/reports/weekly", json=_report_payload())
     assert response.status_code == 401
+    assert response.json()["code"] == "AUTH-001"
 
 
 def test_internal_api_rejects_wrong_key(monkeypatch):
@@ -37,6 +38,7 @@ def test_internal_api_rejects_wrong_key(monkeypatch):
         headers={"X-Internal-Key": "wrong-key"},
     )
     assert response.status_code == 403
+    assert response.json()["code"] == "AUTH-002"
 
 
 def test_internal_api_accepts_matching_key(monkeypatch):
