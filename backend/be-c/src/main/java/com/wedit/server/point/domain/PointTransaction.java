@@ -13,10 +13,19 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "point_transactions")
+@Table(
+        name = "point_transactions",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_point_transactions_user_reference",
+                        columnNames = {"user_id", "reference_type", "reference_id"}
+                )
+        }
+)
 public class PointTransaction {
 
     @Id

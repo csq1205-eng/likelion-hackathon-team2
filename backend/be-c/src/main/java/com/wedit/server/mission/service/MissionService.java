@@ -140,6 +140,7 @@ public class MissionService {
                 modelVersion,
                 judgedAt
         ));
+        mission.applyResult(result);
         if (result == MissionResultType.PASS) {
             pointService.earnMissionPassPoint(mission.getUser(), mission.getId());
         }

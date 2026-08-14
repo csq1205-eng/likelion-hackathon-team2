@@ -2,6 +2,8 @@ package com.wedit.server.user.controller;
 
 import com.wedit.server.auth.service.TemporaryAccessTokenResolver;
 import com.wedit.server.common.ApiResponse;
+import com.wedit.server.common.CustomException;
+import com.wedit.server.common.ErrorCode;
 import com.wedit.server.highlight.dto.HighlightListResponse;
 import com.wedit.server.highlight.service.HighlightService;
 import com.wedit.server.notification.dto.NotificationListResponse;
@@ -111,39 +113,84 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/streak")
-    public ApiResponse<UserStreakResponse> getStreak(@PathVariable Long userId) {
+    @SecurityRequirement(name = "bearerAuth")
+    public ApiResponse<UserStreakResponse> getStreak(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @PathVariable Long userId
+    ) {
+        validateRequester(authorizationHeader, userId);
+
         return ApiResponse.success(userRecordService.getStreak(userId));
     }
 
     @GetMapping("/{userId}/missions/history")
+    @SecurityRequirement(name = "bearerAuth")
     public ApiResponse<MissionHistoryResponse> getMissionHistory(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @PathVariable Long userId,
             @RequestParam int year,
             @RequestParam int month
     ) {
+        validateRequester(authorizationHeader, userId);
+
         return ApiResponse.success(userRecordService.getMissionHistory(userId, year, month));
     }
 
     @GetMapping("/{userId}/points")
-    public ApiResponse<PointResponse> getPoints(@PathVariable Long userId) {
+    @SecurityRequirement(name = "bearerAuth")
+    public ApiResponse<PointResponse> getPoints(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @PathVariable Long userId
+    ) {
+        validateRequester(authorizationHeader, userId);
+
         return ApiResponse.success(pointService.getPoints(userId));
     }
 
     @GetMapping("/{userId}/highlights")
-    public ApiResponse<HighlightListResponse> getHighlights(@PathVariable Long userId) {
+    @SecurityRequirement(name = "bearerAuth")
+    public ApiResponse<HighlightListResponse> getHighlights(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @PathVariable Long userId
+    ) {
+        validateRequester(authorizationHeader, userId);
+
         return ApiResponse.success(highlightService.getHighlights(userId));
     }
 
     @PostMapping("/{userId}/push-token")
+    @SecurityRequirement(name = "bearerAuth")
     public ApiResponse<PushTokenResponse> registerPushToken(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @PathVariable Long userId,
             @Valid @RequestBody PushTokenRequest request
     ) {
+        validateRequester(authorizationHeader, userId);
+
         return ApiResponse.success(notificationService.registerPushToken(userId, request));
     }
 
     @GetMapping("/{userId}/notifications")
-    public ApiResponse<NotificationListResponse> getNotifications(@PathVariable Long userId) {
+    @SecurityRequirement(name = "bearerAuth")
+    public ApiResponse<NotificationListResponse> getNotifications(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @PathVariable Long userId
+    ) {
+        validateRequester(authorizationHeader, userId);
+
         return ApiResponse.success(notificationService.getNotifications(userId));
+    }
+
+    private void validateRequester(String authorizationHeader, Long userId) {
+        Long requesterId = temporaryAccessTokenResolver.resolveUserId(authorizationHeader);
+        if (!requesterId.equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
     }
 }
