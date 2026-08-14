@@ -12,6 +12,12 @@ public interface MissionRepository extends JpaRepository<Mission, Long> {
 
     List<Mission> findAllByUserAndMissionDateOrderByIdAsc(User user, LocalDate missionDate);
 
+    List<Mission> findAllByUserAndMissionDateBetweenOrderByMissionDateAscIdAsc(
+            User user,
+            LocalDate startDate,
+            LocalDate endDate
+    );
+
     @Query("""
             select mission
             from Mission mission

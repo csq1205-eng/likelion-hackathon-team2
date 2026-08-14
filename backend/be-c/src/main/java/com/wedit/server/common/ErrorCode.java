@@ -14,6 +14,7 @@ public enum ErrorCode {
     INVALID_GROUP_INVITE_CODE(HttpStatus.NOT_FOUND, "GROUP-003", "유효하지 않은 초대 코드입니다."),
     MISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "MISSION-001", "미션을 찾을 수 없습니다."),
     AI_INTEGRATION_FAILED(HttpStatus.BAD_GATEWAY, "AI-001", "AI 서비스 연동에 실패했습니다."),
+    POINT_BALANCE_NOT_ENOUGH(HttpStatus.BAD_REQUEST, "POINT-001", "포인트 잔액이 부족합니다."),
     NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON-002", "요청한 리소스를 찾을 수 없습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON-999", "서버 내부 오류가 발생했습니다.");
 

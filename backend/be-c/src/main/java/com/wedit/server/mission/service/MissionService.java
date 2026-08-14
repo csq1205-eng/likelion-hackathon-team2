@@ -24,6 +24,7 @@ import com.wedit.server.mission.dto.TodayMissionItemResponse;
 import com.wedit.server.mission.dto.TodayMissionResponse;
 import com.wedit.server.mission.repository.MissionRepository;
 import com.wedit.server.mission.repository.MissionResultRepository;
+import com.wedit.server.point.service.PointService;
 import com.wedit.server.user.domain.User;
 import com.wedit.server.user.domain.UserMissionPreference;
 import com.wedit.server.user.domain.UserOnboardingProfile;
@@ -56,6 +57,7 @@ public class MissionService {
     private final MissionRepository missionRepository;
     private final MissionResultRepository missionResultRepository;
     private final MissionGenerationClient missionGenerationClient;
+    private final PointService pointService;
     private final ObjectMapper objectMapper;
 
     public MissionService(
@@ -67,6 +69,7 @@ public class MissionService {
             MissionRepository missionRepository,
             MissionResultRepository missionResultRepository,
             MissionGenerationClient missionGenerationClient,
+            PointService pointService,
             ObjectMapper objectMapper
     ) {
         this.userRepository = userRepository;
@@ -77,6 +80,7 @@ public class MissionService {
         this.missionRepository = missionRepository;
         this.missionResultRepository = missionResultRepository;
         this.missionGenerationClient = missionGenerationClient;
+        this.pointService = pointService;
         this.objectMapper = objectMapper;
     }
 
@@ -136,6 +140,9 @@ public class MissionService {
                 modelVersion,
                 judgedAt
         ));
+        if (result == MissionResultType.PASS) {
+            pointService.earnMissionPassPoint(mission.getUser(), mission.getId());
+        }
 
         return new MissionResultCreateResponse(
                 missionResult.getId(),

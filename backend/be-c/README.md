@@ -66,6 +66,19 @@
 | Method | URL | 설명 |
 | --- | --- | --- |
 | DELETE | `/api/v1/users/{userId}` | 회원 탈퇴 및 BE B 클립 정리 요청 |
+| GET | `/api/v1/users/{userId}/streak` | 미션 연속 완료 일수 조회 |
+| GET | `/api/v1/users/{userId}/missions/history` | 월별 지난 미션 달력 조회 |
+| GET | `/api/v1/users/{userId}/points` | 포인트 잔액과 최근 거래 내역 조회 |
+| GET | `/api/v1/users/{userId}/highlights` | 과거 하이라이트 목록 조회 |
+| POST | `/api/v1/users/{userId}/push-token` | 푸시 디바이스 토큰 등록/갱신 |
+| GET | `/api/v1/users/{userId}/notifications` | 알림 목록 조회 |
+| PATCH | `/api/v1/notifications/{notificationId}/read` | 알림 읽음 처리 |
+
+### 포인트
+
+| Method | URL | 설명 |
+| --- | --- | --- |
+| POST | `/api/v1/points/redeem` | 포인트 전환 신청 |
 
 BE A/BE B 내부 API에 `INTERNAL_API_KEY`가 설정된 환경에서는 BE C도 같은 값을 환경변수로 설정해야 한다. BE C는 내부 연동 호출 시 `X-Internal-Key` 헤더로 전달한다.
 

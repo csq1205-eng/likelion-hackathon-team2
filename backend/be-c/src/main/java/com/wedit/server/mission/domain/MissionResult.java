@@ -124,4 +124,20 @@ public class MissionResult {
     public MissionResultType getResult() {
         return result;
     }
+
+    public Long getClipId() {
+        return clipId;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public BigDecimal getConfidenceScore() {
+        return confidenceScore;
+    }
+
+    public LocalDateTime getJudgedAt() {
+        return judgedAt;
+    }
 }
