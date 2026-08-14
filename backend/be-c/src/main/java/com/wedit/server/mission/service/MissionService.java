@@ -12,8 +12,11 @@ import com.wedit.server.group.repository.GroupRepository;
 import com.wedit.server.mission.domain.Mission;
 import com.wedit.server.mission.domain.MissionResult;
 import com.wedit.server.mission.domain.MissionResultType;
+import com.wedit.server.mission.dto.AiMissionEnvironmentRequest;
+import com.wedit.server.mission.dto.AiMissionGenerateRequest;
 import com.wedit.server.mission.dto.AiMissionGenerateResponse;
 import com.wedit.server.mission.dto.AiMissionItemResponse;
+import com.wedit.server.mission.dto.AiMissionProfileRequest;
 import com.wedit.server.mission.dto.MissionGenerationResponse;
 import com.wedit.server.mission.dto.MissionResultCreateRequest;
 import com.wedit.server.mission.dto.MissionResultCreateResponse;
@@ -22,20 +25,32 @@ import com.wedit.server.mission.dto.TodayMissionResponse;
 import com.wedit.server.mission.repository.MissionRepository;
 import com.wedit.server.mission.repository.MissionResultRepository;
 import com.wedit.server.user.domain.User;
+import com.wedit.server.user.domain.UserMissionPreference;
+import com.wedit.server.user.domain.UserOnboardingProfile;
 import com.wedit.server.user.domain.UserStatus;
+import com.wedit.server.user.repository.UserMissionPreferenceRepository;
+import com.wedit.server.user.repository.UserOnboardingProfileRepository;
 import com.wedit.server.user.repository.UserRepository;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MissionService {
 
+    private static final String DEFAULT_GOAL = "건강한 생활 습관 만들기";
+    private static final String DEFAULT_SKIN_TYPE = "normal";
+    private static final int MAX_DAILY_MISSION_COUNT = 3;
+
     private final UserRepository userRepository;
+    private final UserOnboardingProfileRepository userOnboardingProfileRepository;
+    private final UserMissionPreferenceRepository userMissionPreferenceRepository;
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final MissionRepository missionRepository;
@@ -45,6 +60,8 @@ public class MissionService {
 
     public MissionService(
             UserRepository userRepository,
+            UserOnboardingProfileRepository userOnboardingProfileRepository,
+            UserMissionPreferenceRepository userMissionPreferenceRepository,
             GroupRepository groupRepository,
             GroupMemberRepository groupMemberRepository,
             MissionRepository missionRepository,
@@ -53,6 +70,8 @@ public class MissionService {
             ObjectMapper objectMapper
     ) {
         this.userRepository = userRepository;
+        this.userOnboardingProfileRepository = userOnboardingProfileRepository;
+        this.userMissionPreferenceRepository = userMissionPreferenceRepository;
         this.groupRepository = groupRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.missionRepository = missionRepository;
@@ -80,11 +99,10 @@ public class MissionService {
     public List<MissionGenerationResponse> generateTodayMissions(Long userId, Long groupId) {
         User user = findUser(userId);
         LocalDate today = LocalDate.now();
-        AiMissionGenerateResponse aiResponse = missionGenerationClient.generate(user.getId());
         List<Group> targetGroups = findTargetGroups(user, groupId);
 
         return targetGroups.stream()
-                .map(group -> saveGeneratedMissions(user, group, today, aiResponse))
+                .map(group -> saveGeneratedMissions(user, group, today))
                 .toList();
     }
 
@@ -158,8 +176,7 @@ public class MissionService {
     private MissionGenerationResponse saveGeneratedMissions(
             User user,
             Group group,
-            LocalDate missionDate,
-            AiMissionGenerateResponse aiResponse
+            LocalDate missionDate
     ) {
         Long groupId = group == null ? null : group.getId();
         List<Mission> existingMissions = missionRepository.findAllByUserAndMissionDateAndGroupIdOrderByIdAsc(
@@ -177,6 +194,7 @@ public class MissionService {
             );
         }
 
+        AiMissionGenerateResponse aiResponse = missionGenerationClient.generate(toAiMissionGenerateRequest(user, group));
         if (aiResponse == null || aiResponse.missions() == null) {
             throw new CustomException(ErrorCode.AI_INTEGRATION_FAILED, "BE A 미션 생성 응답이 비어 있습니다.");
         }
@@ -194,6 +212,49 @@ public class MissionService {
                 missions.size(),
                 missions.stream().map(Mission::getId).toList()
         );
+    }
+
+    private AiMissionGenerateRequest toAiMissionGenerateRequest(User user, Group group) {
+        Optional<UserOnboardingProfile> profile = userOnboardingProfileRepository.findByUser(user);
+        Optional<UserMissionPreference> preference = userMissionPreferenceRepository.findByUser(user);
+        List<String> concerns = profile
+                .map(this::toConcerns)
+                .filter(concernList -> !concernList.isEmpty())
+                .orElseGet(() -> List.of(DEFAULT_GOAL));
+        List<String> excludedMissions = preference
+                .map(UserMissionPreference::getExcludedKeywords)
+                .orElseGet(List::of);
+
+        return new AiMissionGenerateRequest(
+                user.getId(),
+                group == null ? DEFAULT_GOAL : group.getGoalName(),
+                new AiMissionProfileRequest(
+                        DEFAULT_SKIN_TYPE,
+                        concerns,
+                        profile.map(UserOnboardingProfile::getSleepHours)
+                                .map(BigDecimal::doubleValue)
+                                .orElse(null),
+                        preference.map(UserMissionPreference::getPreferredMissionTypes)
+                                .orElseGet(List::of),
+                        preference.map(UserMissionPreference::getAvoidedMissionTypes)
+                                .orElseGet(List::of)
+                ),
+                new AiMissionEnvironmentRequest(null, null, null, null),
+                excludedMissions,
+                MAX_DAILY_MISSION_COUNT
+        );
+    }
+
+    private List<String> toConcerns(UserOnboardingProfile profile) {
+        List<String> concerns = new ArrayList<>();
+        if (profile.getMainConcern() != null && !profile.getMainConcern().isBlank()) {
+            concerns.add(profile.getMainConcern());
+        }
+        if (profile.getCauseCandidates() != null) {
+            concerns.addAll(profile.getCauseCandidates());
+        }
+
+        return concerns;
     }
 
     private Mission toMission(User user, Group group, LocalDate missionDate, AiMissionItemResponse item) {

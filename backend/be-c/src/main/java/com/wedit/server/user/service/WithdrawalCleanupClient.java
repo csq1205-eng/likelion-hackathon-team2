@@ -1,10 +1,10 @@
 package com.wedit.server.user.service;
 
-import com.wedit.server.common.CustomException;
-import com.wedit.server.common.ErrorCode;
+import com.wedit.server.common.ApiResponse;
 import com.wedit.server.user.dto.WithdrawalCleanupRequest;
 import com.wedit.server.user.dto.WithdrawalCleanupResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -12,24 +12,51 @@ import org.springframework.web.client.RestClientException;
 @Component
 public class WithdrawalCleanupClient {
 
+    private static final String INTERNAL_KEY_HEADER = "X-Internal-Key";
+
     private final RestClient restClient;
+    private final String internalKey;
 
     public WithdrawalCleanupClient(
             RestClient.Builder restClientBuilder,
-            @Value("${app.ai.be-b.base-url:http://localhost:8001}") String baseUrl
+            @Value("${app.ai.be-b.base-url:http://localhost:8001}") String baseUrl,
+            @Value("${app.ai.internal-key:}") String internalKey
     ) {
         this.restClient = restClientBuilder.baseUrl(baseUrl).build();
+        this.internalKey = internalKey;
     }
 
     public WithdrawalCleanupResponse cleanup(WithdrawalCleanupRequest request) {
         try {
-            return restClient.post()
+            ApiResponse<WithdrawalCleanupResponse> response = restClient.post()
                     .uri("/api/ai/clips/withdrawal-cleanup")
+                    .headers(headers -> {
+                        if (!internalKey.isBlank()) {
+                            headers.set(INTERNAL_KEY_HEADER, internalKey);
+                        }
+                    })
                     .body(request)
                     .retrieve()
-                    .body(WithdrawalCleanupResponse.class);
+                    .body(new ParameterizedTypeReference<>() {
+                    });
+            if (response == null || response.data() == null) {
+                return failedResponse(request);
+            }
+
+            return response.data();
         } catch (RestClientException exception) {
-            throw new CustomException(ErrorCode.AI_INTEGRATION_FAILED, "BE B 탈퇴 클립 정리 API 호출에 실패했습니다.");
+            return failedResponse(request);
         }
+    }
+
+    private WithdrawalCleanupResponse failedResponse(WithdrawalCleanupRequest request) {
+        return new WithdrawalCleanupResponse(
+                request.userId(),
+                request.withdrawalId(),
+                0,
+                0,
+                "FAILED",
+                false
+        );
     }
 }

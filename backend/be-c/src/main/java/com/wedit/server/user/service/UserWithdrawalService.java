@@ -24,6 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserWithdrawalService {
 
+    private static final String CLEANUP_COMPLETED = "COMPLETED";
+    private static final String CLEANUP_NO_CLIPS = "NO_CLIPS";
+    private static final String CLEANUP_PROCESSING = "PROCESSING";
+
     private final UserRepository userRepository;
     private final UserSessionRepository userSessionRepository;
     private final GroupMemberRepository groupMemberRepository;
@@ -61,13 +65,31 @@ public class UserWithdrawalService {
                 withdrawal.getId(),
                 LocalDateTime.now()
         ));
+        String deletedScope = toDeletedScope(cleanupResponse);
+        if (CLEANUP_PROCESSING.equals(cleanupResponse.cleanupStatus())) {
+            withdrawal.markProcessing(deletedScope);
+            return toResponse(user, withdrawal);
+        }
+        if (!isCleanupCompleted(cleanupResponse)) {
+            withdrawal.fail(deletedScope);
+            return toResponse(user, withdrawal);
+        }
 
         groupMemberRepository.findAllByUserAndStatus(user, GroupMemberStatus.ACTIVE)
                 .forEach(GroupMember::leave);
         userSessionRepository.deleteAllByUser(user);
         user.withdraw();
-        withdrawal.complete(toDeletedScope(cleanupResponse));
+        withdrawal.complete(deletedScope);
 
+        return toResponse(user, withdrawal);
+    }
+
+    private boolean isCleanupCompleted(WithdrawalCleanupResponse cleanupResponse) {
+        return CLEANUP_COMPLETED.equals(cleanupResponse.cleanupStatus())
+                || CLEANUP_NO_CLIPS.equals(cleanupResponse.cleanupStatus());
+    }
+
+    private UserWithdrawalResponse toResponse(User user, UserWithdrawal withdrawal) {
         return new UserWithdrawalResponse(
                 user.getId(),
                 withdrawal.getId(),

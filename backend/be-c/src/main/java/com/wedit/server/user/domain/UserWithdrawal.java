@@ -65,6 +65,16 @@ public class UserWithdrawal {
         this.completedAt = LocalDateTime.now();
     }
 
+    public void markProcessing(String deletedScope) {
+        this.status = UserWithdrawalStatus.PROCESSING;
+        this.deletedScope = deletedScope;
+    }
+
+    public void fail(String deletedScope) {
+        this.status = UserWithdrawalStatus.FAILED;
+        this.deletedScope = deletedScope;
+    }
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();

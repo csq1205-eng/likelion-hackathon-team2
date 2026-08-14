@@ -54,8 +54,20 @@
 | Method | URL | 설명 |
 | --- | --- | --- |
 | GET | `/api/v1/missions/today` | 저장된 오늘의 개인별 미션 조회 |
+| POST | `/api/v1/missions/today/generate` | BE A 미션 생성 API 호출 후 오늘 미션 저장 |
+| POST | `/api/v1/missions/results` | BE B 판정 결과를 BE C `mission_results`에 저장 |
 
 `GET /api/v1/missions/today`는 조회 시점에 미션을 새로 생성하지 않는다. `missions` 테이블에 저장된 오늘 미션이 없으면 빈 목록을 반환한다. 저장된 미션의 AI 판정 기준은 `verificationCriteria`로 응답한다.
+
+`POST /api/v1/missions/today/generate`는 BE A의 `{success, data, message}` 응답 중 `data.missions`를 오늘 날짜로 저장한다. `missionId`와 `date`는 BE C 저장 시점에 발급/관리한다.
+
+### 사용자
+
+| Method | URL | 설명 |
+| --- | --- | --- |
+| DELETE | `/api/v1/users/{userId}` | 회원 탈퇴 및 BE B 클립 정리 요청 |
+
+BE A/BE B 내부 API에 `INTERNAL_API_KEY`가 설정된 환경에서는 BE C도 같은 값을 환경변수로 설정해야 한다. BE C는 내부 연동 호출 시 `X-Internal-Key` 헤더로 전달한다.
 
 ## 실행
 
