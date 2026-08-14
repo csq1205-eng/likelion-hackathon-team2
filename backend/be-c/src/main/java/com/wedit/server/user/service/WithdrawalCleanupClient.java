@@ -19,7 +19,7 @@ public class WithdrawalCleanupClient {
 
     public WithdrawalCleanupClient(
             RestClient.Builder restClientBuilder,
-            @Value("${app.ai.be-b.base-url:http://localhost:8001}") String baseUrl,
+            @Value("${app.ai.be-b.base-url:http://localhost:8002}") String baseUrl,
             @Value("${app.ai.internal-key:}") String internalKey
     ) {
         this.restClient = restClientBuilder.baseUrl(baseUrl).build();

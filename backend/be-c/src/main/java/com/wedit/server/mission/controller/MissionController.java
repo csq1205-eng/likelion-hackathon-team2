@@ -2,6 +2,7 @@ package com.wedit.server.mission.controller;
 
 import com.wedit.server.auth.service.TemporaryAccessTokenResolver;
 import com.wedit.server.common.ApiResponse;
+import com.wedit.server.common.InternalApiKeyValidator;
 import com.wedit.server.mission.dto.GenerateTodayMissionRequest;
 import com.wedit.server.mission.dto.MissionGenerationResponse;
 import com.wedit.server.mission.dto.MissionResultCreateRequest;
@@ -25,13 +26,16 @@ public class MissionController {
 
     private final MissionService missionService;
     private final TemporaryAccessTokenResolver temporaryAccessTokenResolver;
+    private final InternalApiKeyValidator internalApiKeyValidator;
 
     public MissionController(
             MissionService missionService,
-            TemporaryAccessTokenResolver temporaryAccessTokenResolver
+            TemporaryAccessTokenResolver temporaryAccessTokenResolver,
+            InternalApiKeyValidator internalApiKeyValidator
     ) {
         this.missionService = missionService;
         this.temporaryAccessTokenResolver = temporaryAccessTokenResolver;
+        this.internalApiKeyValidator = internalApiKeyValidator;
     }
 
     @GetMapping("/today")
@@ -60,8 +64,11 @@ public class MissionController {
 
     @PostMapping("/results")
     public ApiResponse<MissionResultCreateResponse> saveMissionResult(
+            @RequestHeader(value = "X-Internal-Key", required = false) String internalKey,
             @Valid @RequestBody MissionResultCreateRequest request
     ) {
+        internalApiKeyValidator.validate(internalKey);
+
         return ApiResponse.success(missionService.saveMissionResult(request));
     }
 }
