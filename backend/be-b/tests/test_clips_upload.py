@@ -168,6 +168,19 @@ def test_invalid_criteria_json_returns_common_001(client, fake_vision):
     assert response.json()["code"] == "COMMON-001"
 
 
+def test_upload_notifies_be_c_of_mission_result(client, fake_vision, fake_mission_result_client):
+    fake_vision.queue(VisionVerdict(verdict="PASS", confidence_score=92.5, criteria=[], model_notes="ok"))
+
+    response = _upload(client)
+    clip_id = response.json()["data"]["clipId"]
+
+    assert len(fake_mission_result_client.calls) == 1
+    call = fake_mission_result_client.calls[0]
+    assert call["mission_id"] == 100
+    assert call["clip_id"] == clip_id
+    assert call["result"] == "PASS"
+
+
 def test_invalid_file_extension_returns_file_001(client):
     response = client.post(
         "/api/clips/upload",

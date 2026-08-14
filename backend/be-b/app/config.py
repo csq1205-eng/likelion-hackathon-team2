@@ -19,6 +19,10 @@ class Settings:
         return os.getenv("BE_A_BASE_URL", "").rstrip("/")
 
     @property
+    def be_c_base_url(self) -> str:
+        return os.getenv("BE_C_BASE_URL", "").rstrip("/")
+
+    @property
     def internal_api_key(self) -> str:
         return os.getenv("INTERNAL_API_KEY", "").strip()
 
