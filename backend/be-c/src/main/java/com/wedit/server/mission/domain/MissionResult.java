@@ -61,17 +61,47 @@ public class MissionResult {
     }
 
     private MissionResult(Mission mission, Long clipId, User user, MissionResultType result) {
+        this(mission, clipId, user, result, null, null, "mission-judge-prompt-v1", "wedit-judge-v1", LocalDateTime.now());
+    }
+
+    private MissionResult(
+            Mission mission,
+            Long clipId,
+            User user,
+            MissionResultType result,
+            String reason,
+            BigDecimal confidenceScore,
+            String promptVersion,
+            String modelVersion,
+            LocalDateTime judgedAt
+    ) {
         this.mission = mission;
         this.clipId = clipId;
         this.user = user;
         this.result = result;
-        this.promptVersion = "mission-judge-prompt-v1";
-        this.modelVersion = "wedit-judge-v1";
-        this.judgedAt = LocalDateTime.now();
+        this.reason = reason;
+        this.confidenceScore = confidenceScore;
+        this.promptVersion = promptVersion;
+        this.modelVersion = modelVersion;
+        this.judgedAt = judgedAt;
     }
 
     public static MissionResult create(Mission mission, Long clipId, User user, MissionResultType result) {
         return new MissionResult(mission, clipId, user, result);
+    }
+
+    public static MissionResult create(
+            Mission mission,
+            Long clipId,
+            User user,
+            MissionResultType result,
+            String reason,
+            BigDecimal confidenceScore,
+            String promptVersion,
+            String modelVersion,
+            LocalDateTime judgedAt
+    ) {
+        return new MissionResult(mission, clipId, user, result, reason, confidenceScore, promptVersion, modelVersion, judgedAt);
     }
 
     @PrePersist

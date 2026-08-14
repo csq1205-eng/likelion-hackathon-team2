@@ -8,11 +8,15 @@ import com.wedit.server.user.dto.OnboardingRequest;
 import com.wedit.server.user.dto.OnboardingResponse;
 import com.wedit.server.user.dto.TrainingDataConsentRequest;
 import com.wedit.server.user.dto.TrainingDataConsentResponse;
+import com.wedit.server.user.dto.UserWithdrawalRequest;
+import com.wedit.server.user.dto.UserWithdrawalResponse;
 import com.wedit.server.user.service.UserConsentService;
 import com.wedit.server.user.service.UserOnboardingService;
+import com.wedit.server.user.service.UserWithdrawalService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,15 +31,18 @@ public class UserController {
 
     private final UserConsentService userConsentService;
     private final UserOnboardingService userOnboardingService;
+    private final UserWithdrawalService userWithdrawalService;
     private final TemporaryAccessTokenResolver temporaryAccessTokenResolver;
 
     public UserController(
             UserConsentService userConsentService,
             UserOnboardingService userOnboardingService,
+            UserWithdrawalService userWithdrawalService,
             TemporaryAccessTokenResolver temporaryAccessTokenResolver
     ) {
         this.userConsentService = userConsentService;
         this.userOnboardingService = userOnboardingService;
+        this.userWithdrawalService = userWithdrawalService;
         this.temporaryAccessTokenResolver = temporaryAccessTokenResolver;
     }
 
@@ -65,5 +72,15 @@ public class UserController {
         Long userId = temporaryAccessTokenResolver.resolveUserId(authorizationHeader);
 
         return ApiResponse.success(userOnboardingService.saveOnboarding(userId, request));
+    }
+
+    @DeleteMapping("/{userId}")
+    public ApiResponse<UserWithdrawalResponse> withdraw(
+            @PathVariable Long userId,
+            @RequestBody(required = false) UserWithdrawalRequest request
+    ) {
+        UserWithdrawalRequest withdrawalRequest = request == null ? new UserWithdrawalRequest(null) : request;
+
+        return ApiResponse.success(userWithdrawalService.withdraw(userId, withdrawalRequest));
     }
 }

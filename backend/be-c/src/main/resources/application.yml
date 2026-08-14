@@ -10,6 +10,16 @@ server:
 app:
   cors:
     allowed-origins: http://localhost:3000,http://localhost:5173,http://localhost:8081
+  ai:
+    be-a:
+      base-url: http://localhost:8000
+    be-b:
+      base-url: http://localhost:8001
+  mission:
+    generation:
+      enabled: false
+      cron: "0 0 5 * * *"
+      zone: Asia/Seoul
 
 management:
   endpoints:
