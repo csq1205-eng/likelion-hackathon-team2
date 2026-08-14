@@ -81,10 +81,13 @@ class ReasonClient:
         try:
             response = client.post(f"{self.base_url}/api/ai/verdicts/reason", json=body, headers=headers)
             response.raise_for_status()
-            data = response.json()
-            reason = data.get("reason")
+            payload = response.json()
+            # BE A가 응답을 명세서 공통 봉투({success, data, message})로 감싸도록 바뀌었다.
+            # data가 있으면 그 안을, 없으면(과거 평면 구조) payload 자체를 그대로 본다.
+            result = payload.get("data") or payload
+            reason = result.get("reason")
             if reason:
-                return reason, data.get("reasonSource", "AI")
+                return reason, result.get("reasonSource", "AI")
         except (httpx.HTTPError, ValueError):
             pass
         finally:
