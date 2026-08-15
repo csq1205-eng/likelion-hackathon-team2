@@ -1,5 +1,5 @@
 import re
-from typing import Annotated, Union
+from typing import Annotated, Generic, Optional, TypeVar, Union
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict
 
@@ -37,3 +37,14 @@ class ApiModel(BaseModel):
         alias_generator=to_camel,
         populate_by_name=True,
     )
+
+
+ResponseData = TypeVar("ResponseData")
+
+
+class ApiResponse(ApiModel, Generic[ResponseData]):
+    """최종 API 명세서의 공통 성공 응답."""
+
+    success: bool = True
+    data: Optional[ResponseData] = None
+    message: Optional[str] = None

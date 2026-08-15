@@ -105,4 +105,8 @@ public class UserMissionPreference {
     public List<String> getAvoidedMissionTypes() {
         return avoidedMissionTypes;
     }
+
+    public List<String> getExcludedKeywords() {
+        return excludedKeywords;
+    }
 }

@@ -39,7 +39,7 @@ def test_weekly_report_returns_rule_based_fallback():
     response = client.post("/api/ai/reports/weekly", json=_payload())
 
     assert response.status_code == 200, response.text
-    body = response.json()
+    body = response.json()["data"]
     assert body["groupId"] == "group-demo-1"
     assert body["weekEndDate"] == "2026-08-09"
     assert body["reportSource"] == "FALLBACK"
@@ -53,6 +53,7 @@ def test_weekly_report_rejects_invalid_aggregate_counts():
     payload["completedMissionCount"] = 21
     response = client.post("/api/ai/reports/weekly", json=payload)
     assert response.status_code == 422
+    assert response.json()["code"] == "COMMON-001"
 
 
 def test_weekly_report_rejects_daily_stat_outside_week():

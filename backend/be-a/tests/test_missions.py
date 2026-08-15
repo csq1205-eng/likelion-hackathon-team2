@@ -30,7 +30,10 @@ def test_generate_personalized_missions() -> None:
     )
 
     assert response.status_code == 200
-    body = response.json()
+    envelope = response.json()
+    assert envelope["success"] is True
+    assert envelope["message"] is None
+    body = envelope["data"]
     assert len(body["missions"]) == 3
     assert body["missions"][0]["missionType"] == "SUN_CARE"
     assert "자외선 지수가 8" in body["missions"][0]["reason"]
@@ -56,7 +59,7 @@ def test_bad_dust_and_knee_pain_remove_outdoor_missions() -> None:
     )
 
     assert response.status_code == 200
-    body = response.json()
+    body = response.json()["data"]
     assert all(
         mission["missionType"] != "OUTDOOR_ACTIVITY"
         for mission in body["missions"]
@@ -78,6 +81,7 @@ def test_reject_more_than_three_missions() -> None:
     )
 
     assert response.status_code == 422
+    assert response.json()["code"] == "COMMON-001"
 
 
 def test_response_can_be_saved_by_be_c() -> None:
@@ -97,7 +101,7 @@ def test_response_can_be_saved_by_be_c() -> None:
     )
 
     assert response.status_code == 200
-    body = response.json()
+    body = response.json()["data"]
     assert body["userId"] == 123
     assert body["missions"]
 

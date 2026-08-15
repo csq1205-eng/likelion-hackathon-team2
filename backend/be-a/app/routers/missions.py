@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.dependencies import require_internal_key
+from app.schemas.common import ApiResponse
 from app.schemas.mission import MissionGenerateRequest, MissionGenerateResponse
 from app.services.mission_service import MissionService
 
@@ -12,6 +13,6 @@ router = APIRouter(
 service = MissionService()
 
 
-@router.post("/generate", response_model=MissionGenerateResponse)
-def generate_missions(request: MissionGenerateRequest) -> MissionGenerateResponse:
-    return service.generate(request)
+@router.post("/generate", response_model=ApiResponse[MissionGenerateResponse])
+def generate_missions(request: MissionGenerateRequest) -> ApiResponse[MissionGenerateResponse]:
+    return ApiResponse(data=service.generate(request))

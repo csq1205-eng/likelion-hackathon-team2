@@ -25,6 +25,7 @@ from app.schemas.clip import (
 )
 from app.services import retention_service
 from app.services.frame_extraction import FrameExtractionError, extract_frames
+from app.services.mission_result_client import MissionResultClient
 from app.services.reason_client import ReasonClient
 from app.services.vision_service import (
     VisionService,
@@ -53,10 +54,12 @@ class ClipService:
         vision_service: Optional[VisionService] = None,
         reason_client: Optional[ReasonClient] = None,
         frame_extractor=extract_frames,
+        mission_result_client: Optional[MissionResultClient] = None,
     ):
         self.vision_service = vision_service or VisionService()
         self.reason_client = reason_client or ReasonClient()
         self.frame_extractor = frame_extractor
+        self.mission_result_client = mission_result_client or MissionResultClient()
 
     # ------------------------------------------------------------------
     # 업로드 / 재촬영 (POST /api/clips/upload)
@@ -559,6 +562,17 @@ class ClipService:
                 (mission_id, user_id, clip_id, result, judged_at.isoformat(), retention_service.now_iso()),
             )
 
+        self.mission_result_client.notify_result(
+            mission_id=mission_id,
+            clip_id=clip_id,
+            result=result,
+            judged_at=judged_at,
+            reason=reason,
+            confidence_score=confidence_score,
+            prompt_version=PROMPT_VERSION,
+            model_version=self.vision_service.model,
+        )
+
     def _finalize_error(self, clip_id: int, mission_id: int, user_id: int, judgement_request_id: int) -> None:
         judged_at = _now()
         reason, _source = self.reason_client.get_reason(
@@ -585,3 +599,11 @@ class ClipService:
                 """,
                 (mission_id, user_id, clip_id, judged_at.isoformat(), retention_service.now_iso()),
             )
+
+        self.mission_result_client.notify_result(
+            mission_id=mission_id,
+            clip_id=clip_id,
+            result="ERROR",
+            judged_at=judged_at,
+            reason=reason,
+        )

@@ -89,7 +89,11 @@ python -m pytest -q
   → ffmpeg로 프레임 3~5장 추출 → OpenAI 비전 모델 판정(PASS/FAIL/HOLD)
   → BE A POST /api/ai/verdicts/reason 호출해 사용자용 문장 생성
   → ai_judgement_requests / mission_results 저장 → 보관 정책 계산
+  → BE C POST /api/v1/missions/results 호출해 판정 결과 알림(그룹 진행률/스탬프 계산용)
 ```
+
+- BE C 알림(`mission_result_client.py`)은 **best-effort**입니다. `BE_C_BASE_URL`이 비어있거나
+  호출이 실패해도 BE B의 응답/판정 결과 저장에는 영향을 주지 않고 로그만 남깁니다(재시도 없음).
 
 - 비전 판정 호출이 **설정 오류**(API 키 없음)면 즉시 `AI-001`(502)을 반환합니다.
 - **네트워크/타임아웃** 오류면 `202 Accepted` + `judgementStatus=PROCESSING`을 반환하고,

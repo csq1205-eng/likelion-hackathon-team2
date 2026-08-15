@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.dependencies import require_internal_key
+from app.schemas.common import ApiResponse
 from app.schemas.verdict import VerdictReasonRequest, VerdictReasonResponse
 from app.services.verdict_service import VerdictService
 
@@ -13,6 +14,6 @@ router = APIRouter(
 service = VerdictService()
 
 
-@router.post("/reason", response_model=VerdictReasonResponse)
-def create_verdict_reason(request: VerdictReasonRequest) -> VerdictReasonResponse:
-    return service.create_user_reason(request)
+@router.post("/reason", response_model=ApiResponse[VerdictReasonResponse])
+def create_verdict_reason(request: VerdictReasonRequest) -> ApiResponse[VerdictReasonResponse]:
+    return ApiResponse(data=service.create_user_reason(request))

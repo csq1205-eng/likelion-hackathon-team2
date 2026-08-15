@@ -72,6 +72,11 @@ public class GroupMember {
         return new GroupMember(group, user, GroupMemberRole.MEMBER);
     }
 
+    public void leave() {
+        this.status = GroupMemberStatus.LEFT;
+        this.leftAt = LocalDateTime.now();
+    }
+
     @PrePersist
     public void prePersist() {
         this.joinedAt = LocalDateTime.now();

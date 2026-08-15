@@ -1,6 +1,6 @@
-# WELLOG BE A
+# WEDIT BE A
 
-WELLOG의 **AI 개인별 미션 생성 + 추천 이유 + 안전/제외 필터**를 구현한 FastAPI MVP입니다.
+WEDIT의 **AI 개인별 미션 생성 + 추천 이유 + 안전/제외 필터**를 구현한 FastAPI MVP입니다.
 OpenAI Structured Outputs로 미션을 생성하고, API 키가 없거나 AI 호출이 실패하면 안전한 기본 미션 카탈로그로 자동 전환합니다.
 
 ## 구현 기능
@@ -43,16 +43,52 @@ API JSON은 최종 명세서에 맞춰 `camelCase`를 사용하며, Python 코�
 
 판정 이유 응답의 `reasonSource`는 `AI` 또는 `FALLBACK`입니다.
 
+모든 `/api/ai/*` 성공 응답은 최종 명세서의 공통 형식을 사용합니다.
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": null
+}
+```
+
+입력 검증 및 인증 오류도 `timestamp`, `status`, `code`, `message`, `errors`, `path`를
+포함하는 공통 오류 형식으로 반환합니다. 입력 검증 실패는 `COMMON-001`, 내부 키 누락은
+`AUTH-001`, 유효하지 않은 내부 키는 `AUTH-002`를 사용합니다.
+
+## Docker 배포
+
+```bash
+docker build -t wedit-be-a .
+docker run --rm -p 10000:10000 --env-file .env wedit-be-a
+```
+
+루트 `Dockerfile`은 Linux 이미지에 FFmpeg/FFprobe와 Noto CJK 한글 폰트를 설치하고,
+UID 10001의 비루트 사용자로 서비스를 실행합니다. 배포 플랫폼이 주입하는 `PORT`가 없으면
+10000번 포트를 사용합니다.
+
+## 미션 정책
+
+안전 규칙은 Python 필터 코드와 분리된 `config/mission_policy_rules.json`에서 로드합니다.
+`MISSION_POLICY_RULES_PATH`로 배포 환경별 정책 파일을 주입할 수 있습니다. BE B의
+`mission_policy_rules` API 계약이 확정되면 `FileMissionPolicyRepository`를 BE B 어댑터로
+교체하도록 저장소 경계를 분리했습니다.
+
 ## API
 
 `POST /api/ai/missions/generate`
 
-추가 API:
+BE C와 연동하는 내부 AI API:
 
 - `POST /api/ai/verdicts/reason`: 내부 판정 결과를 사용자용 문장으로 변환
 - `POST /api/ai/highlights/generate`: 클립을 조합해 FFmpeg 하이라이트 영상을 생성
 - `POST /api/ai/highlights/complete`: 저장이 끝난 하이라이트의 각 클립에 대해 BE B 콜백 호출
 - `POST /api/ai/reports/weekly`: BE C가 계산한 주간 그룹 통계를 자연어 리포트로 변환
+
+위 내부 API들은 최종 외부 조회 API가 아닙니다. BE C가 생성 결과를 저장한 뒤
+`GET /api/v1/missions/today`, `GET /api/v1/groups/{groupId}/highlight`,
+`GET /api/v1/groups/{groupId}/report`에서 조회 응답으로 변환합니다.
 
 ## 서버 간 인증
 

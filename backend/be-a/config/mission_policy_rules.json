@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "max_daily_missions_template": "하루 미션은 최대 {max_missions}개",
+  "base_constraints": [
+    "의료 진단·치료·약물·건강기능식품 추천 금지",
+    "각 미션은 짧은 영상으로 행동 여부를 판정할 수 있어야 함"
+  ],
+  "forbidden_keywords": ["진단", "치료", "처방", "복용", "영양제", "건강기능식품"],
+  "outdoor_keywords": ["야외", "산책", "달리기"],
+  "outdoor_mission_types": ["OUTDOOR_ACTIVITY"],
+  "lower_body_keywords": ["달리기", "스쿼트", "점프", "계단", "산책"],
+  "fine_dust_blocking_levels": ["bad", "very_bad"],
+  "heat_threshold_celsius": 33,
+  "high_uv_threshold": 6
+}
