@@ -9,7 +9,7 @@ export default function MyPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('calendar');
 
-  // 백엔드 연동을 위한 더미 데이터들 (BE 개발자와 맞출 명세서 기준)
+  // 더미 데이터
   const userData = {
     name: '홍길동',
     points: 3200,
