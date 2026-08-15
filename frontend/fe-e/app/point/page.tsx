@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { useAuth } from "@/lib/auth/AuthProvider";
+import { useAuth } from "../../lib/auth/AuthProvider";
 
 interface Transaction {
   transactionId: number;

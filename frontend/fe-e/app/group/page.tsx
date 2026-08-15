@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth/AuthProvider";
+import { useAuth } from "../../lib/auth/AuthProvider";
 
 interface GroupSummaryResponse {
   groupId: string;

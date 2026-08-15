@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { loginWithTestAccount, type LoginResponse } from "@/lib/api/auth";
+import { loginWithTestAccount, type LoginResponse } from "../../lib/api/auth";
 
 interface AuthContextValue {
   accessToken: string | null; userId: number | null;
