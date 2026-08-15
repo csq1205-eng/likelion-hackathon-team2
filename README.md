@@ -49,4 +49,4 @@
 | BE B | `http://localhost:8002` |
 | BE C | `http://localhost:8080` |
 
-통합 테스트 시 BE B가 보내는 `X-Internal-Key`와 BE C의 `INTERNAL_API_KEY` 값을 동일하게 맞춰야 한다. 로컬 기본 내부키는 `local-internal-key`이다.
+통합 테스트 시 BE A, BE B, BE C의 `INTERNAL_API_KEY` 값을 동일하게 맞춰야 한다. 로컬에서 `INTERNAL_API_KEY`를 비워두면 내부키 헤더 전송과 검증을 생략한다.

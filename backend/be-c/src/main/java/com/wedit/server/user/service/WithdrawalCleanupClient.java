@@ -5,6 +5,7 @@ import com.wedit.server.user.dto.WithdrawalCleanupRequest;
 import com.wedit.server.user.dto.WithdrawalCleanupResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -30,6 +31,8 @@ public class WithdrawalCleanupClient {
         try {
             ApiResponse<WithdrawalCleanupResponse> response = restClient.post()
                     .uri("/api/ai/clips/withdrawal-cleanup")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
                     .headers(headers -> {
                         if (!internalKey.isBlank()) {
                             headers.set(INTERNAL_KEY_HEADER, internalKey);

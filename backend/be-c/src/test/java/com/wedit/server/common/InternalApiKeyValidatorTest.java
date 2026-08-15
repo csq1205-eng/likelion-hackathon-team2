@@ -18,7 +18,7 @@ class InternalApiKeyValidatorTest {
     }
 
     @Test
-    @DisplayName("내부 API 키가 없거나 일치하지 않으면 거부한다")
+    @DisplayName("내부 API 키가 설정되어 있고 요청 키가 없거나 일치하지 않으면 거부한다")
     void validateInvalidKey() {
         InternalApiKeyValidator validator = new InternalApiKeyValidator("secret-key");
 
@@ -26,5 +26,14 @@ class InternalApiKeyValidatorTest {
                 .isInstanceOf(CustomException.class);
         assertThatThrownBy(() -> validator.validate(null))
                 .isInstanceOf(CustomException.class);
+    }
+
+    @Test
+    @DisplayName("내부 API 키가 설정되지 않으면 로컬 개발 흐름을 위해 검증을 생략한다")
+    void validateSkippedWhenInternalKeyIsBlank() {
+        InternalApiKeyValidator validator = new InternalApiKeyValidator("");
+
+        assertThatCode(() -> validator.validate(null))
+                .doesNotThrowAnyException();
     }
 }
