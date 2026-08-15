@@ -1,147 +1,185 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth/AuthProvider";
+
+interface GroupSummaryResponse {
+  groupId: string;
+  name: string;
+  todayCompletedCount: number;
+  todayTotalCount: number;
+  progressRate: number;
+}
 
 const GROUP_THEMES = [
-  { bg: 'bg-[#A7FBE7]', text: 'text-[#000000]' },
-  { bg: 'bg-[#9884D2]', text: 'text-[#FFFFFF]' },
-  { bg: 'bg-[#FFB74D]', text: 'text-[#FFFFFF]' },
-  { bg: 'bg-[#64B5F6]', text: 'text-[#FFFFFF]' },
-  { bg: 'bg-[#50C2A4]', text: 'text-[#FFFFFF]' },
+  { bg: "bg-[#A7FBE7]", text: "text-[#000000]" },
+  { bg: "bg-[#9884D2]", text: "text-[#FFFFFF]" },
+  { bg: "bg-[#FFB74D]", text: "text-[#FFFFFF]" },
+  { bg: "bg-[#64B5F6]", text: "text-[#FFFFFF]" },
+  { bg: "bg-[#50C2A4]", text: "text-[#FFFFFF]" },
 ];
 
-interface GroupData {
-  id: string;
-  name: string;
-  members: number;
-  progress: number;
-}
+// 임시 데이터
+const FALLBACK_GROUPS = [
+  {
+    groupId: "g1",
+    name: "내 친구들",
+    todayCompletedCount: 2,
+    todayTotalCount: 4,
+    progressRate: 50,
+  },
+  {
+    groupId: "g2",
+    name: "대학 동기들",
+    todayCompletedCount: 4,
+    todayTotalCount: 5,
+    progressRate: 80,
+  },
+];
 
 export default function GroupListJoin() {
   const router = useRouter();
+  const { accessToken, isLoading: authLoading } = useAuth();
 
-  const [myGroups, setMyGroups] = useState<GroupData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [myGroups, setMyGroups] = useState<GroupSummaryResponse[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchGroups = async () => {
+    // 인증 정보 로딩 중 : 잠시 대기
+    if (authLoading) return;
+
+    // 토큰이 없는 경우 (비로그인 상태 등) API 호출 없이 가짜 데이터 렌더링
+    if (!accessToken) {
+      console.warn("엑세스 토큰이 없습니다. 개발용 임시 데이터를 렌더링합니다.");
+      setMyGroups(FALLBACK_GROUPS);
+      setLoading(false);
+      return;
+    }
+
+    // 정상적인 API 호출 시도
+    const fetchMyGroups = async () => {
       try {
         const response = await fetch('/api/v1/groups', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}` 
           },
         });
 
         const result = await response.json();
 
-        if (result.success) {
-          setMyGroups(result.data || []);
+        if (response.ok) {
+                setMyGroups(result.groups || result.data || []);
         } else {
-          console.error('그룹 목록 불러오기 실패:', result.message);
-          useFallbackData();
+          throw new Error(result.message || '응답이 정상이 아닙니다.');
         }
+
       } catch (error) {
-        console.error('API Error:', error);
-        useFallbackData(); // 네트워크 에러 등 실패 시 임시 데이터 사용
+        // 통신 실패 시 가짜 데이터 렌더링
+        console.error("그룹 목록 조회 실패! 임시 데이터를 렌더링합니다:", error);
+        setMyGroups(FALLBACK_GROUPS);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
-    fetchGroups();
-  }, []);
+    fetchMyGroups();
 
-  const useFallbackData = () => {
-    console.log("통신 실패! 임시 테스트 데이터를 띄웁니다.");
-    setMyGroups([
-      { id: 'g1', name: '내 친구들', members: 4, progress: 2 },
-      { id: 'g2', name: '대학 동기들', members: 5, progress: 4 },
-    ]);
-  };
+  }, [authLoading, accessToken]);
 
-  return (
-    <div className="flex flex-col w-full h-full relative bg-white px-5 py-6 pb-[100px]">
+    if (loading) {
+      return (
+        <div className="flex flex-col w-full h-[100dvh] items-center justify-center bg-white">
+          <div className="w-8 h-8 border-4 border-[#A7FBE7] border-t-transparent rounded-full animate-spin mb-3"></div>
+          <p className="text-sm text-[#999]">그룹을 불러오는 중...</p>
+        </div>
+      );
+    }
 
-      {/* 헤더 영역 */}
-      <h3 className="text-[15px] text-[#666666] font-semibold mt-2">
-        내 그룹
-      </h3>
+    return (
+      <div className="flex flex-col w-full h-[100dvh] relative bg-white overflow-hidden">
+              
+        <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-5 pt-6 pb-[90px]">
+          <h3 className="text-[15px] text-[#666666] font-semibold mt-2">
+            내 그룹
+          </h3>
 
-      <h1 className="text-[18px] text-[#000000] font-bold mt-2 mb-6">
-        함께하는 그룹
-      </h1>
+          <h1 className="text-[18px] text-[#000000] font-bold mt-2 mb-6">
+            함께하는 그룹
+          </h1>
 
-      {/* 내 그룹 목록 */}
-      <div className="space-y-3 flex-1 overflow-y-auto pb-[30px]">
-        {myGroups.map((group, index) => {
-          const theme = GROUP_THEMES[index % GROUP_THEMES.length];
+          <div className="space-y-3">
+            {myGroups.map((group, index) => {
+              const theme = GROUP_THEMES[index % GROUP_THEMES.length];
 
-          return (
-            <div
-              key={group.id}
-              onClick={() => router.push(`/group/${group.id}`)}
-              className="bg-[#F9F9F9] p-4 rounded-[20px] flex items-center cursor-pointer hover:bg-gray-50 transition-colors"
-            >
-              {/* 그룹 아이콘 */}
-              <div
-                className={`w-[38px] h-[38px] rounded-full flex items-center justify-center font-bold text-[18px] shrink-0 ${theme.bg} ${theme.text}`}
-              >
-                {group.name.charAt(0)}
-              </div>
-
-              {/* 그룹 정보 */}
-              <div className="flex-1 ml-[12px] flex flex-col justify-center">
-                <h2 className="text-[15px] font-bold text-gray-900 leading-tight">
-                  {group.name}
-                </h2>
-
-                <p className="text-[11px] text-[#888888] font-semibold mt-[2px] mb-[2px]">
-                  오늘 {group.progress}/{group.members}명 완료
-                </p>
-
-                {/* 진행률 */}
-                <div className="w-[70%] bg-gray-200 rounded-full h-1.5 mt-[1px]">
+                return (
                   <div
-                    className={`h-full ${theme.bg} rounded-full transition-all duration-500`}
-                    style={{
-                      width: `${(group.progress / group.members) * 100}%`,
-                    }}
-                  />
-                </div>
-              </div>
+                    key={group.groupId}
+                    onClick={() => router.push(`/group/${group.groupId}`)}
+                    className="bg-[#F9F9F9] p-4 rounded-[20px] flex items-center cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <div
+                      className={`w-[38px] h-[38px] rounded-full flex items-center justify-center font-bold text-[18px] shrink-0 ${theme.bg} ${theme.text}`}
+                    >
+                      {group.name.charAt(0)}
+                    </div>
 
-              {/* 화살표 */}
-              <div className="text-gray-400 shrink-0 ml-2">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </div>
-            </div>
-          );
-        })}
+                    <div className="flex-1 ml-[12px] flex flex-col justify-center">
+                      <h2 className="text-[15px] font-bold text-gray-900 leading-tight">
+                        {group.name}
+                      </h2>
 
-        {/* 새 그룹 만들기 / 참여하기 */}
-        <button
-          onClick={() => router.push('/group/invite/test-group-123')}
-          className="w-full py-3 rounded-xl text-[#8B9A95] font-semibold text-[14px] border-dashed border-[1.2px] border-[#8B9A95] hover:bg-gray-50 transition-colors flex justify-center items-center"
-        >
-          + 새 그룹 만들기 / 참여하기
-        </button>
+                      <p className="text-[11px] text-[#888888] font-semibold mt-[2px] mb-[2px]">
+                        오늘 {group.todayCompletedCount}/{group.todayTotalCount}명 완료
+                      </p>
+
+                      <div className="w-[70%] bg-gray-200 rounded-full h-1.5 mt-[1px]">
+                        <div
+                          className={`h-full ${theme.bg} rounded-full transition-all duration-500`}
+                          style={{
+                            width: `${group.progressRate}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="text-gray-400 shrink-0 ml-2">
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {myGroups.length === 0 && (
+                <p className="text-center text-sm text-[#999] py-10">
+                  참여 중인 그룹이 없어요.
+                </p>
+              )}
+
+          <button
+            onClick={() => router.push("/group/invite/test-group-123")}
+            className="w-full py-3 mt-2 rounded-xl text-[#8B9A95] font-semibold text-[14px] border-dashed border-[1.2px] border-[#8B9A95] hover:bg-gray-50 transition-colors flex justify-center items-center"
+          >
+            + 새 그룹 만들기 / 참여하기
+          </button>
+        </div>
       </div>
 
-      {/* 하단 탭 */}
+      {/* 하단 탭바 */}
       <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 flex justify-between items-center px-5 pt-4 pb-5 z-50">
         <TabIcon
           icon="users"
@@ -172,7 +210,6 @@ export default function GroupListJoin() {
   );
 }
 
-// 하단 탭 아이콘
 function TabIcon({
   icon,
   label,

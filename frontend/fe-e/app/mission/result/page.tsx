@@ -18,7 +18,6 @@ export default function MissionResultPage() {
 
     const fetchResult = async () => {
       try {
-        // [API 12.3] 클립 판정 결과 조회 API 호출
         const response = await fetch(`/api/clips/{clipId}/result`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
