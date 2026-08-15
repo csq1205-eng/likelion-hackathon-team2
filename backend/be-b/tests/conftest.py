@@ -1,8 +1,9 @@
 import os
 
-# 자동 테스트가 실제 OpenAI/BE A 호출을 하지 않도록 격리한다 (be-a와 동일한 패턴).
+# 자동 테스트가 실제 OpenAI/BE A/BE C 호출을 하지 않도록 격리한다 (be-a와 동일한 패턴).
 os.environ["OPENAI_API_KEY"] = ""
 os.environ["BE_A_BASE_URL"] = ""
+os.environ["BE_C_BASE_URL"] = ""
 
 import io
 from typing import List, Optional
@@ -50,6 +51,35 @@ class FakeReasonClient:
         return f"[fake reason] {verdict}", "FALLBACK"
 
 
+class FakeMissionResultClient:
+    def __init__(self):
+        self.calls = []
+
+    def notify_result(
+        self,
+        mission_id,
+        clip_id,
+        result,
+        judged_at,
+        reason=None,
+        confidence_score=None,
+        prompt_version=None,
+        model_version=None,
+    ):
+        self.calls.append(
+            {
+                "mission_id": mission_id,
+                "clip_id": clip_id,
+                "result": result,
+                "judged_at": judged_at,
+                "reason": reason,
+                "confidence_score": confidence_score,
+                "prompt_version": prompt_version,
+                "model_version": model_version,
+            }
+        )
+
+
 def fake_frame_extractor(clip_path, save_frame, frame_count: int = 4):
     """ffmpeg 없이도 프레임 4장을 만들어낸 것처럼 동작한다."""
     for order in range(1, 5):
@@ -87,7 +117,12 @@ def fake_reason_client():
 
 
 @pytest.fixture()
-def client(storage, fake_vision, fake_reason_client, monkeypatch):
+def fake_mission_result_client():
+    return FakeMissionResultClient()
+
+
+@pytest.fixture()
+def client(storage, fake_vision, fake_reason_client, fake_mission_result_client, monkeypatch):
     from app.main import app
     from app.services.clip_service import ClipService
     from app.services.withdrawal_service import WithdrawalService
@@ -98,6 +133,7 @@ def client(storage, fake_vision, fake_reason_client, monkeypatch):
         vision_service=fake_vision,
         reason_client=fake_reason_client,
         frame_extractor=fake_frame_extractor,
+        mission_result_client=fake_mission_result_client,
     )
     monkeypatch.setattr(clips_router, "service", test_clip_service)
     monkeypatch.setattr(internal_router, "service", WithdrawalService())

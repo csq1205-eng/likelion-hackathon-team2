@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthProvider";
@@ -10,6 +11,7 @@ const CONCERNS = [
   { code: "DULLNESS", label: "칙칙함" },
   { code: "ETC", label: "기타" },
 ];
+
 const CAUSES = [
   { code: "STAMINA_DROP", label: "체력저하" },
   { code: "DIET", label: "식습관·다이어트" },
@@ -19,11 +21,12 @@ const CAUSES = [
   { code: "WATER_LACK", label: "물부족" },
   { code: "UV_EXPOSURE", label: "자외선노출" },
 ];
+
 const PRODUCT_CATEGORIES = [
-  { code: "SKINCARE", label: "스킨케어" },
-  { code: "BODY", label: "바디" },
-  { code: "CLEANSING", label: "클렌징" },
-  { code: "ETC", label: "기타" },
+  { code: "SKINCARE", label: "스킨케어", desc: "토너, 앰플, 크림 등" },
+  { code: "BODY", label: "바디", desc: "바디워시, 바디로션, 바디미스트 등" },
+  { code: "CLEANSING", label: "클렌징", desc: "클렌징폼, 클렌징오일, 클렌징워터 등" },
+  { code: "ETC", label: "기타", desc: "그 외 사용 중인 제품" },
 ];
 
 export default function OnboardingPage() {
@@ -75,83 +78,213 @@ export default function OnboardingPage() {
     }
   }
 
+  function handleNext() {
+    if (step < 3) {
+      setStep((s) => s + 1);
+    } else {
+      void handleSubmit();
+    }
+  }
+
   return (
-    <div style={{ padding: 24 }}>
-      <p>{step} / 4</p>
-
-      {step === 1 && (
-        <div>
-          <h2>요즘 제일 신경 쓰이는 건?</h2>
-          {CONCERNS.map((c) => (
-            <button key={c.code} onClick={() => setMainConcern(c.code)}
-              style={{ fontWeight: mainConcern === c.code ? "bold" : "normal" }}>
-              {c.label}
-            </button>
-          ))}
-          <div><button onClick={() => setStep(2)} disabled={!mainConcern}>다음</button></div>
-        </div>
-      )}
-
-      {step === 2 && (
-        <div>
-          <h2>혹시 이런 게 원인일 수도 있어요</h2>
-          {CAUSES.map((c) => (
-            <button key={c.code} onClick={() => toggleCause(c.code)}
-              style={{ fontWeight: causeCandidates.includes(c.code) ? "bold" : "normal" }}>
-              {c.label}
-            </button>
-          ))}
-          <div>
-            <button onClick={() => setStep(1)}>이전</button>
-            <button onClick={() => setStep(3)}>다음</button>
+    <main className="flex min-h-screen justify-center bg-[#F4F6F5] px-4 py-8">
+      <div className="flex w-full max-w-sm flex-col rounded-3xl bg-white px-6 py-7 shadow-[0_8px_30px_rgba(31,42,37,0.06)]">
+        {/* 진행 표시 */}
+        <div className="mb-7">
+          <p className="mb-2.5 text-sm text-[#8A9A92]">정보 입력</p>
+          <div className="flex items-center gap-2">
+            {[1, 2, 3].map((i) => (
+              <span
+                key={i}
+                className={`h-1.5 flex-1 rounded-full transition-colors ${
+                  i <= step ? "bg-[#7BD4B0]" : "bg-[#E6E9E8]"
+                }`}
+              />
+            ))}
           </div>
+          <p className="mt-2 text-right text-xs font-medium text-[#B4BFB9]">{step}/3</p>
         </div>
-      )}
 
-      {step === 3 && (
-        <div>
-          <h2>생활 패턴을 알려주세요</h2>
-          <label>평균 수면시간(h)
-            <input type="number" step={0.5} value={sleepHours}
-              onChange={(e) => setSleepHours(Number(e.target.value))} />
-          </label>
-          <label>물 섭취량(L)
-            <input type="number" step={0.1} value={waterIntake}
-              onChange={(e) => setWaterIntake(Number(e.target.value))} />
-          </label>
-          <label>기상 시간
-            <input type="time" value={wakeUpTime} onChange={(e) => setWakeUpTime(e.target.value)} />
-          </label>
-          <label>취침 시간
-            <input type="time" value={sleepTime} onChange={(e) => setSleepTime(e.target.value)} />
-          </label>
+        {/* 1단계: mainConcern + causeCandidates */}
+        {step === 1 && (
           <div>
-            <button onClick={() => setStep(2)}>이전</button>
-            <button onClick={() => setStep(4)}>다음</button>
-          </div>
-        </div>
-      )}
+            <h1 className="mb-6 text-2xl font-bold text-[#1F2A25] text-balance">
+              당신에 대해 알려주세요!
+            </h1>
 
-      {step === 4 && (
-        <div>
-          <h2>보유 중인 제품이 있나요?</h2>
-          {PRODUCT_CATEGORIES.map((p) => (
-            <div key={p.code}>
-              <span>{p.label}</span>
-              <button onClick={() => setOwnedProducts((prev) => ({ ...prev, [p.code]: true }))}
-                style={{ fontWeight: ownedProducts[p.code] === true ? "bold" : "normal" }}>있음</button>
-              <button onClick={() => setOwnedProducts((prev) => ({ ...prev, [p.code]: false }))}
-                style={{ fontWeight: ownedProducts[p.code] === false ? "bold" : "normal" }}>없음</button>
+            <p className="mb-3 text-sm text-[#8A9A92]">요즘 제일 신경 쓰이는 건?</p>
+            <div className="grid grid-cols-2 gap-2.5">
+              {CONCERNS.map((c) => {
+                const selected = mainConcern === c.code;
+                return (
+                  <button
+                    key={c.code}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => setMainConcern(c.code)}
+                    className={`w-full rounded-[10px] px-4 py-3 text-center text-sm font-medium transition-colors ${
+                      selected
+                        ? "border border-[#86D9B5] bg-[#EAF8F1] text-[#2E9C74]"
+                        : "border border-transparent bg-[#F1F3F2] text-[#4B5851]"
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                );
+              })}
             </div>
-          ))}
-          <div>
-            <button onClick={() => setStep(3)}>이전</button>
-            <button onClick={handleSubmit} disabled={submitting}>
-              {submitting ? "저장 중..." : "완료"}
-            </button>
+
+            <p className="mt-6 mb-3 text-sm text-[#8A9A92]">
+              혹시 최근 이런 게 있었나요? (복수 선택 가능)
+            </p>
+            <div className="grid grid-cols-2 gap-2.5">
+              {CAUSES.map((c) => {
+                const selected = causeCandidates.includes(c.code);
+                return (
+                  <button
+                    key={c.code}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => toggleCause(c.code)}
+                    className={`w-full rounded-[10px] px-4 py-3 text-center text-sm font-medium transition-colors ${
+                      selected
+                        ? "border border-[#86D9B5] bg-[#EAF8F1] text-[#2E9C74]"
+                        : "border border-transparent bg-[#F1F3F2] text-[#4B5851]"
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+
+        {/* 2단계: 수면/물/기상/취침 */}
+        {step === 2 && (
+          <div>
+            <h1 className="mb-6 text-2xl font-bold text-[#1F2A25] text-balance">
+              당신에 대해 알려주세요!
+            </h1>
+
+            <div className="space-y-5">
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-[#2B3A33]">
+                  평균 수면시간
+                </label>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  placeholder="숫자 선택"
+                  value={sleepHours}
+                  onChange={(e) => setSleepHours(Number(e.target.value))}
+                  className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#86D9B5] focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-[#2B3A33]">
+                  물 섭취량
+                </label>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  step="0.1"
+                  placeholder="입력"
+                  value={waterIntake}
+                  onChange={(e) => setWaterIntake(Number(e.target.value))}
+                  className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#86D9B5] focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-[#2B3A33]">
+                  기상 시간
+                </label>
+                <input
+                  type="time"
+                  value={wakeUpTime}
+                  onChange={(e) => setWakeUpTime(e.target.value)}
+                  className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors focus:border-[#86D9B5] focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-[#2B3A33]">
+                  취침 시간
+                </label>
+                <input
+                  type="time"
+                  value={sleepTime}
+                  onChange={(e) => setSleepTime(e.target.value)}
+                  className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors focus:border-[#86D9B5] focus:bg-white"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 3단계: 보유 제품 있음/없음 */}
+        {step === 3 && (
+          <div>
+            <h1 className="mb-6 text-2xl font-bold text-[#1F2A25] text-balance">
+              지금 쓰고 있는 제품이 있나요?
+            </h1>
+
+            <div className="space-y-3">
+              {PRODUCT_CATEGORIES.map((cat) => {
+                const owned = ownedProducts[cat.code];
+                return (
+                  <div key={cat.code} className="rounded-2xl bg-[#F2F4F3] px-4 py-4">
+                    <p className="text-sm font-bold text-[#2B3A33]">{cat.label}</p>
+                    <p className="mt-0.5 text-xs text-[#9AA8A1]">{cat.desc}</p>
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        type="button"
+                        aria-pressed={owned === true}
+                        onClick={() =>
+                          setOwnedProducts((prev) => ({ ...prev, [cat.code]: true }))
+                        }
+                        className={`rounded-full px-6 py-1.5 text-sm font-medium transition-colors ${
+                          owned === true
+                            ? "bg-[#CDEEDF] text-[#2E9C74]"
+                            : "border border-[#E6E9E8] bg-white text-[#8A968F]"
+                        }`}
+                      >
+                        있음
+                      </button>
+                      <button
+                        type="button"
+                        aria-pressed={owned === false}
+                        onClick={() =>
+                          setOwnedProducts((prev) => ({ ...prev, [cat.code]: false }))
+                        }
+                        className={`rounded-full px-6 py-1.5 text-sm font-medium transition-colors ${
+                          owned === false
+                            ? "bg-[#CDEEDF] text-[#2E9C74]"
+                            : "border border-[#E6E9E8] bg-white text-[#8A968F]"
+                        }`}
+                      >
+                        없음
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 다음 / 제출 */}
+        <button
+          type="button"
+          onClick={handleNext}
+          disabled={submitting}
+          className="mt-8 w-full rounded-full bg-[#9EE0C6] py-4 text-base font-semibold text-white transition-opacity disabled:opacity-50"
+        >
+          {step === 3 && submitting ? "저장 중..." : "다음"}
+        </button>
+      </div>
+    </main>
   );
 }

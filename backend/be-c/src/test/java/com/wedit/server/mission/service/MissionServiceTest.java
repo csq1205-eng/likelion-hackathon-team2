@@ -3,6 +3,8 @@ package com.wedit.server.mission.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.wedit.server.mission.domain.Mission;
+import com.wedit.server.mission.domain.MissionStatus;
+import com.wedit.server.mission.dto.MissionResultCreateRequest;
 import com.wedit.server.mission.dto.TodayMissionResponse;
 import com.wedit.server.mission.repository.MissionRepository;
 import com.wedit.server.user.domain.SocialProvider;
@@ -59,5 +61,40 @@ class MissionServiceTest {
         assertThat(response.missions().get(0).missionType()).isEqualTo("HYDRATION");
         assertThat(response.missions().get(0).verificationCriteria()).isEqualTo("사용자가 물을 마시는 장면이 확인되어야 합니다.");
         assertThat(response.missions().get(0).status()).isEqualTo("PENDING");
+    }
+
+    @Test
+    @DisplayName("미션 판정 결과가 PASS이면 미션 상태를 PASSED로 변경한다")
+    void saveMissionResultUpdatesMissionStatus() {
+        User user = userRepository.save(User.create(
+                SocialProvider.KAKAO,
+                "kakao-result-user",
+                "result@example.com",
+                "효림",
+                null
+        ));
+        Mission mission = missionRepository.save(Mission.create(
+                user,
+                null,
+                LocalDate.now(),
+                "MORNING",
+                "아침 물 한 잔 마시기",
+                "기상 후 물을 마시고 인증 클립을 제출해 주세요.",
+                "HYDRATION",
+                "사용자가 물을 마시는 장면이 확인되어야 합니다."
+        ));
+
+        missionService.saveMissionResult(new MissionResultCreateRequest(
+                mission.getId(),
+                100L,
+                "PASS",
+                "물을 마시는 장면이 확인되었습니다.",
+                null,
+                null,
+                null,
+                null
+        ));
+
+        assertThat(mission.getStatus()).isEqualTo(MissionStatus.PASSED);
     }
 }

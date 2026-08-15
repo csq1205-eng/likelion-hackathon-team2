@@ -2,38 +2,48 @@
 import { useState } from "react";
 
 const GUIDE_ANGLES = [
-  { emoji: "✋", label: "손", desc: "손을 클로즈업으로 촬영해보세요" },
-  { emoji: "🥤", label: "컵", desc: "물 마시는 컵을 비춰보세요" },
-  { emoji: "🦶", label: "발", desc: "발이나 신발을 비춰보세요" },
-  { emoji: "🪟", label: "창밖", desc: "창밖 풍경을 비춰보세요" },
+  { emoji: "✋", label: "손" },
+  { emoji: "🥤", label: "컵" },
+  { emoji: "🦶", label: "발" },
+  { emoji: "🪟", label: "창밖" },
 ];
 
 export function CameraGuide({ onDismiss }: { onDismiss: () => void }) {
   const [showDetail, setShowDetail] = useState(false);
 
   return (
-    <div style={{ padding: 16, background: "#f5f5f5", borderRadius: 8, marginBottom: 12 }}>
-      <p style={{ fontWeight: "bold" }}>얼굴이 나오지 않아도 괜찮아요!</p>
-      <p style={{ fontSize: 14 }}>
+    <div className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
+      <p className="font-bold text-sm mb-1">얼굴이 나오지 않아도 괜찮아요!</p>
+      <p className="text-xs text-[#666] mb-3">
         손 · 컵 · 발 · 창밖처럼, 얼굴이 나오지 않는 앵글로 촬영해주세요.
       </p>
 
       {!showDetail ? (
-        <button onClick={() => setShowDetail(true)}>예시 보기</button>
+        <button
+          onClick={() => setShowDetail(true)}
+          className="text-xs font-bold text-[#1F6F5C] underline"
+        >
+          예시 보기
+        </button>
       ) : (
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 8 }}>
+        <div className="flex gap-4 mb-3">
           {GUIDE_ANGLES.map((a) => (
-            <div key={a.label} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 28 }}>{a.emoji}</div>
-              <div style={{ fontSize: 12 }}>{a.label}</div>
+            <div key={a.label} className="flex flex-col items-center gap-1">
+              <div className="w-10 h-10 rounded-full bg-[#C9EDE0] flex items-center justify-center text-lg">
+                {a.emoji}
+              </div>
+              <span className="text-[10px] text-[#666]">{a.label}</span>
             </div>
           ))}
         </div>
       )}
 
-      <div style={{ marginTop: 8 }}>
-        <button onClick={onDismiss}>확인했어요</button>
-      </div>
+      <button
+        onClick={onDismiss}
+        className="mt-2 w-full py-2.5 rounded-full bg-[#6FCDB3] text-white text-xs font-bold"
+      >
+        확인했어요
+      </button>
     </div>
   );
 }

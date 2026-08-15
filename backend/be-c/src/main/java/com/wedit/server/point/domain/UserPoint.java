@@ -29,6 +29,12 @@ public class UserPoint {
     @Column(nullable = false)
     private int balance;
 
+    @Column(name = "total_earned", nullable = false)
+    private int totalEarned;
+
+    @Column(name = "total_used", nullable = false)
+    private int totalUsed;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -41,6 +47,8 @@ public class UserPoint {
     private UserPoint(User user) {
         this.user = user;
         this.balance = 0;
+        this.totalEarned = 0;
+        this.totalUsed = 0;
     }
 
     public static UserPoint create(User user) {
@@ -57,5 +65,35 @@ public class UserPoint {
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void earn(int amount) {
+        this.balance += amount;
+        this.totalEarned += amount;
+    }
+
+    public void use(int amount) {
+        this.balance -= amount;
+        this.totalUsed += amount;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public int getBalance() {
+        return balance;
+    }
+
+    public int getTotalEarned() {
+        return totalEarned;
+    }
+
+    public int getTotalUsed() {
+        return totalUsed;
     }
 }

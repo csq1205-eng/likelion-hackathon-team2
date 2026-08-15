@@ -162,4 +162,12 @@ public class Mission {
     public MissionStatus getStatus() {
         return status;
     }
+
+    public void applyResult(MissionResultType result) {
+        this.status = switch (result) {
+            case PASS -> MissionStatus.PASSED;
+            case FAIL -> MissionStatus.FAILED;
+            case HOLD, ERROR -> MissionStatus.SUBMITTED;
+        };
+    }
 }
