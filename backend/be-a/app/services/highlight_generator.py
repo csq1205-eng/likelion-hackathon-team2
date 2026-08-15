@@ -107,7 +107,7 @@ class FFmpegHighlightGenerator:
             scene_budget / len(request.clips),
         )
 
-        with TemporaryDirectory(prefix="welllog-highlight-") as temp_name:
+        with TemporaryDirectory(prefix="wedit-highlight-") as temp_name:
             temp_dir = Path(temp_name)
             title_path = temp_dir / "scene-title.mp4"
             title_image = temp_dir / "title.png"

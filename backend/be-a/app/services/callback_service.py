@@ -81,4 +81,4 @@ class HighlightCallbackService:
     def _idempotency_key(highlight_id: int, clip_id: ExternalId) -> str:
         raw = "{0}:{1}".format(highlight_id, clip_id).encode("utf-8")
         digest = hashlib.sha256(raw).hexdigest()
-        return "welllog-highlight-{0}".format(digest)
+        return "wedit-highlight-{0}".format(digest)

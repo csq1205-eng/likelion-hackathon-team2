@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const GROUP_THEMES = [
@@ -10,13 +11,55 @@ const GROUP_THEMES = [
   { bg: 'bg-[#50C2A4]', text: 'text-[#FFFFFF]' },
 ];
 
+interface GroupData {
+  id: string;
+  name: string;
+  members: number;
+  progress: number;
+}
+
 export default function GroupListJoin() {
   const router = useRouter();
 
-  const myGroups = [
-    { id: 'g1', name: '내 친구들', members: 3, progress: 2 },
-    { id: 'g2', name: '대학 동기들', members: 5, progress: 4 },
-  ];
+  const [myGroups, setMyGroups] = useState<GroupData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const response = await fetch('/api/v1/groups', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          setMyGroups(result.data || []);
+        } else {
+          console.error('그룹 목록 불러오기 실패:', result.message);
+          useFallbackData();
+        }
+      } catch (error) {
+        console.error('API Error:', error);
+        useFallbackData(); // 네트워크 에러 등 실패 시 임시 데이터 사용
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGroups();
+  }, []);
+
+  const useFallbackData = () => {
+    console.log("통신 실패! 임시 테스트 데이터를 띄웁니다.");
+    setMyGroups([
+      { id: 'g1', name: '내 친구들', members: 4, progress: 2 },
+      { id: 'g2', name: '대학 동기들', members: 5, progress: 4 },
+    ]);
+  };
 
   return (
     <div className="flex flex-col w-full h-full relative bg-white px-5 py-6 pb-[100px]">

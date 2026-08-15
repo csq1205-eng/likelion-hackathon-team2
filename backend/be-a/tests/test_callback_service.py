@@ -39,7 +39,7 @@ def test_callback_retries_retryable_status_with_same_idempotency_key():
     assert delays == [0.1]
     assert calls[0].headers["X-Internal-Key"] == "internal-secret"
     assert calls[0].headers["Idempotency-Key"] == calls[1].headers["Idempotency-Key"]
-    assert calls[0].headers["Idempotency-Key"].startswith("welllog-highlight-")
+    assert calls[0].headers["Idempotency-Key"].startswith("wedit-highlight-")
 
 
 def test_callback_does_not_retry_non_retryable_4xx():

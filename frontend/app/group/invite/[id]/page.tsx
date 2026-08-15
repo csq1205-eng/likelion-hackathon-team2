@@ -12,15 +12,64 @@ export default function JoinCheck() {
 
   const [isLogin, setIsLogin] = useState(true); // 테스트용 (실제로는 전역 상태나 토큰 확인)
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleJoin = () => {
+  const handleJoin = async () => {
     if (!isLogin) {
       alert("로그인이 필요합니다! 로그인 화면으로 이동합니다.");
       return;
     }
-    // 백엔드 API에 참여 요청 보내기
-    alert('그룹에 성공적으로 참여했습니다!');
-    router.push(`/group/${groupId}`); // 참여 완료 후 해당 그룹 피드로 이동
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/v1/groups/join`, { 
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert('그룹에 성공적으로 참여했습니다!');
+        router.push(`/group/${groupId}`); // 참여 완료 후 해당 그룹 피드로 이동
+      } else {
+        alert(result.message || '그룹 참여에 실패했습니다.');
+      }
+    } catch (error) {
+        console.error('그룹 참여 실패:', error);
+        alert('서버와의 통신에 실패했습니다.');
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
+  const handleInvite = async (type: string) => {
+    if (isLoading) return;
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`/api/v1/groups/${groupId}/invite`, { 
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json' 
+        },
+      });
+      
+      const result = await response.json();
+
+      if (result.success) {
+        // 성공적으로 초대 데이터(링크, QR 이미지 URL 등)를 받아왔을 때
+        console.log(`${type} 초대 발급 성공:`, result.data);
+      } else {
+        alert(result.message || `초대 발급에 실패했습니다.`);
+      }
+    } catch (error) {
+      console.error('초대 발급 실패:', error);
+      alert('서버와의 통신에 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -58,19 +107,19 @@ export default function JoinCheck() {
       
       <div className="flex flex-row items-center w-full gap-2">
         <button
-          onClick={() => setShowInviteModal(true)}
+          onClick={() => handleInvite('kakao')}
           className="bg-[#F7F5F5] text-[#000000] w-[80px] h-[37px] rounded-[10px] text-[14px] font-semibold"
         >
           카카오톡
         </button>
         <button
-          onClick={() => setShowInviteModal(true)}
+          onClick={() => handleInvite('url')}
           className="bg-[#F7F5F5] text-[#000000] w-[80px] h-[37px] rounded-[10px] text-[14px] font-semibold"
         >
           URL
         </button>
         <button
-          onClick={() => setShowInviteModal(true)}
+          onClick={() => handleInvite('qr')}
           className="bg-[#F7F5F5] text-[#000000] w-[80px] h-[37px] rounded-[10px] text-[14px] font-semibold"
         >
           QR
