@@ -7,9 +7,11 @@ import com.wedit.server.mission.dto.AiMissionGenerateRequest;
 import com.wedit.server.mission.dto.AiMissionGenerateResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 
 @Component
 public class MissionGenerationClient {
@@ -32,6 +34,8 @@ public class MissionGenerationClient {
         try {
             ApiResponse<AiMissionGenerateResponse> response = restClient.post()
                     .uri("/api/ai/missions/generate")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
                     .headers(headers -> {
                         if (!internalKey.isBlank()) {
                             headers.set(INTERNAL_KEY_HEADER, internalKey);
@@ -46,6 +50,14 @@ public class MissionGenerationClient {
             }
 
             return response.data();
+        } catch (RestClientResponseException exception) {
+            throw new CustomException(
+                    ErrorCode.AI_INTEGRATION_FAILED,
+                    "BE A 미션 생성 API 호출에 실패했습니다. status="
+                            + exception.getStatusCode().value()
+                            + ", body="
+                            + exception.getResponseBodyAsString()
+            );
         } catch (RestClientException exception) {
             throw new CustomException(ErrorCode.AI_INTEGRATION_FAILED, "BE A 미션 생성 API 호출에 실패했습니다.");
         }

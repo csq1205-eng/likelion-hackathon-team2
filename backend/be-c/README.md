@@ -120,7 +120,7 @@
 - BE C에서 호출하는 BE B 기본 주소는 `http://localhost:8002`이다.
 - BE A/BE B 내부 API에 `INTERNAL_API_KEY`가 설정된 환경에서는 BE C도 같은 값을 환경변수로 설정해야 한다.
 - BE C는 내부 연동 호출 시 `X-Internal-Key` 헤더로 키를 전달하고, BE B가 호출하는 `POST /api/v1/missions/results`에서도 같은 헤더를 검증한다.
-- 로컬 기본 내부키는 `local-internal-key`이다. 통합 테스트 시 BE B의 송신 키와 BE C의 `INTERNAL_API_KEY`를 동일하게 맞춰야 한다.
+- 로컬에서 `INTERNAL_API_KEY`를 비워두면 내부키 헤더 전송과 검증을 생략한다. 내부키를 사용하는 통합 테스트나 배포 환경에서는 BE A, BE B, BE C의 `INTERNAL_API_KEY`를 동일하게 맞춰야 한다.
 
 ### 아직 남은 연결 지점
 

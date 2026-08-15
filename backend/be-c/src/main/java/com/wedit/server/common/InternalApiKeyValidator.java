@@ -15,7 +15,10 @@ public class InternalApiKeyValidator {
     }
 
     public void validate(String requestKey) {
-        if (internalKey == null || internalKey.isBlank() || requestKey == null || requestKey.isBlank()) {
+        if (internalKey == null || internalKey.isBlank()) {
+            return;
+        }
+        if (requestKey == null || requestKey.isBlank()) {
             throw new CustomException(ErrorCode.FORBIDDEN, "내부 API 키가 올바르지 않습니다.");
         }
 
