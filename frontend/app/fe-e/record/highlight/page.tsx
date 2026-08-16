@@ -118,8 +118,8 @@ export default function HighlightArchivePage() {
         {/* 필터 탭 */}
         <div className="flex bg-white rounded-full p-1 shadow-sm border border-gray-100">
           <button className="flex-1 py-[10px] bg-[#41C0A1] text-white rounded-full text-[13px] font-extrabold shadow-sm">전체</button>
-          <button className="flex-1 py-[10px] text-[13px] font-bold text-[#888888] hover:text-black">이번 주</button>
-          <button className="flex-1 py-[10px] text-[13px] font-bold text-[#888888] hover:text-black">완주</button>
+          <button className="flex-1 py-[10px] text-[13px] font-bold text-[#666666] hover:text-black">이번 주</button>
+          <button className="flex-1 py-[10px] text-[13px] font-bold text-[#666666] hover:text-black">완주</button>
         </div>
 
         {/* 이번 주 대표 카드 */}
@@ -181,7 +181,7 @@ export default function HighlightArchivePage() {
               <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
                 🔒
               </div>
-              <span className="text-[11px] text-[#888888] font-bold text-center leading-snug mt-1">
+              <span className="text-[11px] text-[#666666] font-bold text-center leading-snug mt-1">
                 미션 완료 후<br/>하이라이트가 생겨요
               </span>
             </div>

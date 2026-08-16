@@ -63,7 +63,7 @@ export default function MissionSharePage() {
           이 클립을 그룹에<br />
           공유할까요?
         </h1>
-        <p className="text-[12px] text-[#888888] font-medium mt-[6px] shrink-0">
+        <p className="text-[12px] text-[#666666] font-medium mt-[6px] shrink-0">
           공유하지 않아도 완료 여부는 그룹에 표시돼요
         </p>
       </div>
@@ -80,7 +80,7 @@ export default function MissionSharePage() {
         <button
           onClick={handlePrivate}
           disabled={isSubmitting}
-          className="w-full py-[16px] rounded-[16px] bg-[#F7F7F7] text-[#000000] font-bold text-[16px] hover:bg-[#E8E8E8] transition-colors disabled:opacity-50"
+          className="w-full py-[16px] rounded-[16px] bg-[#F7F8F8] text-[#000000] font-bold text-[16px] hover:bg-[#E8E8E8] transition-colors disabled:opacity-50"
         >
           {isSubmitting ? '비공개 중...' : '비공개로 두기'}
         </button>

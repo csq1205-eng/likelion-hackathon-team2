@@ -163,13 +163,14 @@ export default function HighlightPage() {
 
         {/* 헤더 */}
         <div className="flex flex-col items-center justify-center relative pt-6 pb-4 shrink-0 z-10">
-          <button onClick={() => router.back()} className="absolute left-5 top-7 text-[22px] font-bold text-black">
+          <button onClick={() => router.back()} 
+            className="absolute left-5 top-7 text-[22px] font-bold text-black">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6"/>
             </svg>
           </button>
           <h1 className="text-[17px] font-extrabold text-[#000000]">{highlightData.title}</h1>
-          <p className="text-[12px] text-[#888888] font-medium mt-1">{highlightData.dateStr}</p>
+          <p className="text-[12px] text-[#666666] font-medium mt-1">{highlightData.dateStr}</p>
         </div>
 
         {/* 중앙 3단 세로 카드 영역 */}
@@ -205,7 +206,7 @@ export default function HighlightPage() {
                     <span className="text-[#41C0A1] text-[10px] mr-1">💧</span>
                     <span className="text-[9px] text-[#555555] font-bold truncate">{member.content}</span>
                   </div>
-                  <span className="text-[9px] text-[#888888] font-medium mt-auto mb-3">{member.time}</span>
+                  <span className="text-[9px] text-[#666666] font-medium mt-auto mb-3">{member.time}</span>
                 </div>
               )}
             </div>
@@ -309,7 +310,7 @@ export default function HighlightPage() {
           <p className="text-[12px] text-[#555555] font-medium text-center leading-relaxed">
             공유 멤버는 실제 클립으로, 비공유 멤버는 완료 카드로<br />AI가 자막을 더해 30초 하이라이트를 만들어요. ✨
           </p>
-          <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#888888] font-medium mt-1">
+          <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#666666] font-medium mt-1">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0110 0v4" />

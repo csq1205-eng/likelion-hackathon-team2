@@ -160,7 +160,7 @@ export default function PagePersonalInfoConsent() {
             <div className="p-4">
               <button 
                 onClick={handleAgreeOnDetail}
-                className="w-full py-3 rounded-xl font-semibold text-sm bg-[#A7FBE7] hover:bg-[#92edd8]"
+                className="w-full py-3 rounded-[12px] font-semibold text-sm bg-[#A7FBE7] hover:bg-[#92edd8]"
               >
                 동의하기
               </button>
@@ -221,10 +221,10 @@ export default function PagePersonalInfoConsent() {
         <button
           onClick={onSubmit}
           disabled={!allRequiredChecked || isSubmitting}
-          className={`mt-auto w-full py-3 rounded-xl font-semibold text-sm transition-colors shrink-0 ${
+          className={`mt-auto w-full py-3 rounded-[12px] font-semibold text-[14px] transition-colors shrink-0 ${
             allRequiredChecked && !isSubmitting
               ? 'bg-[#A7FBE7] hover:bg-[#92edd8]' 
-              : 'bg-[#F7F5F5] text-gray-400 cursor-not-allowed'
+              : 'bg-[#F7F8F8] text-gray-400 cursor-not-allowed'
           }`}
         >
           {isSubmitting ? '처리 중...' : '동의하고 시작하기'}
@@ -250,7 +250,7 @@ function CheckboxCard({
   onView: () => void; 
 }) {
   return (
-    <div className="flex items-center justify-between p-3 bg-[#F7F5F5] rounded-xl hover:bg-[#f0f0f0] transition-colors">
+    <div className="flex items-center justify-between p-3 bg-[#F7F8F8] rounded-[12px] hover:bg-[#f0f0f0] transition-colors">
       <label htmlFor={id} className="flex items-center flex-1 cursor-pointer overflow-hidden">
         <input
           id={id}
@@ -260,7 +260,7 @@ function CheckboxCard({
           className="hidden"
         />
         
-        <div className={`w-6 h-6 rounded-lg flex items-center justify-center mr-3 transition-colors shrink-0 ${
+        <div className={`w-6 h-6 rounded-[8px] flex items-center justify-center mr-[12px] transition-colors shrink-0 ${
           checked ? 'bg-[#A7FBE7]' : 'bg-white shadow-sm'
         }`}>
           {checked && (

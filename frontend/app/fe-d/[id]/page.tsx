@@ -64,7 +64,7 @@ export default function GroupListJoin() {
               className="bg-[#F9F9F9] p-4 rounded-[20px] flex items-center cursor-pointer hover:bg-gray-50 transition-colors"
             >
               <div
-                className={`w-[38px] h-[38px] rounded-full flex items-center justify-center font-bold text-[18px] shrink-0 ${theme.bg} ${theme.text}`}
+                className={`w-[38px] h-[38px] rounded-full flex items-center justify-center font-bold text-[16px] shrink-0 ${theme.bg} ${theme.text}`}
               >
                 {group.name.charAt(0)}
               </div>
@@ -74,7 +74,7 @@ export default function GroupListJoin() {
                   {group.name}
                 </h2>
 
-                <p className="text-[11px] text-[#888888] font-semibold mt-[2px] mb-[2px]">
+                <p className="text-[11px] text-[#666666] font-semibold mt-[2px] mb-[2px]">
                   오늘 {group.todayCompletedCount}/{group.todayTotalCount}명 완료
                 </p>
 
@@ -114,8 +114,8 @@ export default function GroupListJoin() {
         )}
 
         <button
-          onClick={() => router.push("/fe-e/group/invite/test-group-123")}
-          className="w-full py-3 rounded-xl text-[#8B9A95] font-semibold text-[14px] border-dashed border-[1.2px] border-[#8B9A95] hover:bg-gray-50 transition-colors flex justify-center items-center"
+          onClick={() => router.push("/fe-e/group/invite/[id]")}
+          className="w-full py-3 rounded-[12px] text-[#9CA3AF] font-semibold text-[14px] border-dashed border-[1.2px] border-[#8B9A95] hover:bg-gray-50 transition-colors flex justify-center items-center"
         >
           + 새 그룹 만들기 / 참여하기
         </button>

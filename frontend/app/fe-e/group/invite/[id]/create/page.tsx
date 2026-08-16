@@ -155,7 +155,7 @@ export default function GroupInviteCreate() {
           // 로딩 화면
           <div className="flex flex-col items-center justify-center my-auto">
             <div className="w-8 h-8 border-4 border-[#A7FBE7] border-t-transparent rounded-full animate-spin mb-[15px]"></div>
-            <p className="text-[#888888] font-semibold text-[13px]">초대장과 QR코드를 만들고 있어요...</p>
+            <p className="text-[#666666] font-semibold text-[13px]">초대장과 QR코드를 만들고 있어요...</p>
           </div>
         ) : (
           // 결과 화면
@@ -179,7 +179,7 @@ export default function GroupInviteCreate() {
             {/* 링크 복사 영역 */}
             <div className="flex flex-row items-center w-full gap-2 h-[46px] mb-[10px]">
               <div className="flex-1 h-full bg-[#F7F7F7] px-[16px] rounded-[14px] flex items-center overflow-hidden">
-                <span className="text-[13px] text-[#888888] font-medium truncate w-full">
+                <span className="text-[13px] text-[#666666] font-medium truncate w-full">
                   {inviteInfo.link}
                 </span>
               </div>
@@ -197,7 +197,7 @@ export default function GroupInviteCreate() {
         <div className="flex flex-col gap-2 shrink-0 pt-[5px]">
           <button
             onClick={shareToKakao}
-            className="w-full py-[13px] rounded-[14px] font-semibold text-[15px] text-black bg-[#F7F5F5] hover:bg-[#FEE500] transition-colors flex flex-row items-center justify-center gap-[8px] shadow-2xs"
+            className="w-full py-[13px] rounded-[14px] font-semibold text-[15px] text-black bg-[#F7F8F8] hover:bg-[#FEE500] transition-colors flex flex-row items-center justify-center gap-[8px] shadow-2xs"
           >
             <svg className="w-5 h-5 text-[#41C0A1]" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 3c-4.97 0-9 3.134-9 7 0 2.22 1.258 4.195 3.197 5.432-.236.87-.852 2.766-.882 2.87-.038.136.06.262.186.216.12-.045 2.923-1.127 4.092-1.635.8.22 1.636.335 2.502.335 4.97 0 9-3.134 9-7s-4.03-7-9-7z"/>

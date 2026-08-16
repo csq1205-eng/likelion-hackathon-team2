@@ -94,13 +94,13 @@ export default function GroupMainFeedPage() {
       
       {/* 1. 상단 헤더 */}
       <div className="bg-white px-5 py-4 flex items-center shrink-0 z-10 shadow-sm">
-        <button 
-          onClick={() => router.push('/fe-e/group')} 
-          className="text-[20px] font-bold text-[#A0A0A0] mr-3"
-        >
-          ←
-        </button>
-        <h1 className="text-[18px] font-bold text-[#000000]">
+        <button onClick={() => router.back()} 
+            className="absolute top-[21px] text-[22px] font-bold text-black">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+        <h1 className="text-[18px] font-bold text-[#000000] ml-[32px] mt-[4px]">
           {groupDetail.name || "그룹 피드"}
         </h1>
         <button 
@@ -121,7 +121,7 @@ export default function GroupMainFeedPage() {
           </p>
           <button 
             onClick={() => router.push('/fe-d/mission/camera')}
-            className="w-full py-3 bg-[#222222] text-white font-bold rounded-xl text-[15px] hover:bg-black transition-colors"
+            className="w-full py-3 bg-[#222222] text-white font-bold rounded-[12px] text-[15px] hover:bg-black transition-colors"
           >
             미션 인증하기
           </button>

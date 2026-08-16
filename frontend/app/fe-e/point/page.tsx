@@ -18,14 +18,17 @@ interface PointResponse {
   balance: number;
   totalEarned: number;
   totalUsed: number;
+  entryTicketCount: number;
   recentTransactions: Transaction[];
 }
 
+//더미 데이터
 const FALLBACK_POINT_DATA: PointResponse = {
   userId: 1,
   balance: 2450,
   totalEarned: 2000,
   totalUsed: 800,
+  entryTicketCount: 3,
   recentTransactions: [
     { transactionId: 1, transactionType: "EARN", amount: 30, reason: "미션 인증", createdAt: "오늘" },
     { transactionId: 2, transactionType: "EARN", amount: 100, reason: "W 정원 완성", createdAt: "오늘" }
@@ -35,7 +38,6 @@ const FALLBACK_POINT_DATA: PointResponse = {
 export default function PointRewardPage() {
   const router = useRouter();
   const { accessToken, isLoading: authLoading } = useAuth();
-
   const [pointData, setPointData] = useState<PointResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -87,6 +89,20 @@ export default function PointRewardPage() {
     );
   }
 
+  const point = {
+    balance: pointData.balance.toLocaleString(),
+    reward: {
+      count: pointData.entryTicketCount,
+      message: pointData.entryTicketCount > 0 ? '장을 받았어요!' : '장이 필요해요',
+      buttonLabel: pointData.entryTicketCount > 0 ? '응모권 확인' : '응모권 모으기'
+    },
+    transactions: pointData.recentTransactions.map(tx => ({
+      ...tx,
+      formattedAmount: tx.transactionType === 'EARN' ? `+${tx.amount}` : `-${tx.amount}`,
+      isEarn: tx.transactionType === 'EARN'
+    }))
+  };
+
   return (
     <div className="relative w-full h-[100dvh] bg-[#F9F9F9] flex flex-col overflow-hidden">
       
@@ -106,53 +122,46 @@ export default function PointRewardPage() {
       {/* 본문 스크롤 영역 */}
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-5 py-6 pb-[100px] flex flex-col gap-4">
         
-        {/* 1. 보유 포인트 카드 */}
-        <div className="relative bg-gradient-to-r from-[#F0FCF9] to-[#E2F7F2] rounded-[24px] p-6 flex flex-col justify-center overflow-hidden shadow-sm shrink-0">
-          <span className="text-[13px] font-bold text-[#888888] mb-1 z-10">보유 포인트</span>
-          <div className="flex items-baseline gap-1 z-10">
-            <span className="text-[36px] font-extrabold text-[#41C0A1] tracking-tight">2,450</span>
-            <span className="text-[20px] font-bold text-[#41C0A1]">P</span>
-          </div>
-          
-          {/* 장식용 별 */}
-          <div className="absolute top-6 right-[45%] text-[#83E2C4] opacity-80 text-[14px]">✦</div>
-          <div className="absolute bottom-5 left-[45%] text-[#83E2C4] opacity-60 text-[18px]">✦</div>
-          <div className="absolute top-10 right-[10%] text-[#B39DDB] opacity-70 text-[16px]">✦</div>
-
-          {/* 캐릭터 이미지 영역 */}
-          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 w-[110px] h-[110px] z-0">
-            <Image 
-              src="/images/point-character.png" // 실제 캐릭터 이미지 경로로 변경해 주세요
-              alt="캐릭터"
+        {/* 보유 포인트 카드 */}
+        <div className="relative bg-gradient-to-r from-[#F0F9F7] to-[#F4FAF9i] rounded-[16px] p-[10px] flex flex-col justify-center overflow-hidden shadow-sm shrink-0">
+          <Image 
+              src="/bg_point_have.jpg"
+              alt="포인트 bg"
               fill
-              className="object-contain"
-            />
+              className="object-cover object-right"
+          />
+          <span className="text-[13px] font-bold text-[#666666] mb-1 z-10">보유 포인트</span>
+          <div className="flex items-baseline gap-1 z-10">
+            <span className="text-[30px] font-extrabold text-[#41C0A1] tracking-tight">2,450</span>
+            <span className="text-[20px] font-bold text-[#41C0A1]">P</span>
           </div>
         </div>
 
-        {/* 2. W 정원 완성 리워드 카드 */}
-        <div className="bg-white rounded-[24px] p-5 shadow-[0_2px_16px_rgba(0,0,0,0.04)] border border-gray-50 flex flex-row items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-[50px] h-[50px] bg-gradient-to-br from-[#E6E0F8] to-[#C9BFFE] rounded-[16px] flex items-center justify-center shadow-sm relative shrink-0">
-               <span className="text-white font-extrabold text-[22px]">W</span>
-               <div className="absolute -bottom-1 -right-1 text-[#FFD700] text-[12px]">✦</div>
-            </div>
+        {/* W 정원 완성 리워드 카드 */}
+        <div className="relative bg-white rounded-[16px] p-[10px] shadow-[0_2px_16px_rgba(0,0,0,0.04)] border border-gray-50 flex flex-col justify-between overflow-hidden shrink-0">
+          <Image
+            src="/bg_point_entryTicket.jpg"
+            alt="리워드 티켓 bg"
+            fill
+            className="object-cover object-left z-0"
+          />
+          <div className="relative z-10 flex items-center gap-3 pl-[90px]">
             <div className="flex flex-col">
-              <span className="text-[11px] font-bold text-[#888888] mb-0.5">W 정원 완성 리워드</span>
+              <span className="text-[11px] font-bold text-[#666666] mb-0.5">W 정원 완성 리워드</span>
               <span className="text-[14px] font-bold text-[#222222]">응모권 <span className="text-[#41C0A1]">3</span>장을 받았어요!</span>
             </div>
           </div>
-          <button className="px-4 py-2 rounded-full border-[1.5px] border-[#41C0A1] text-[#41C0A1] text-[13px] font-bold hover:bg-[#F0FDF8] transition-colors shrink-0">
+          <button className="relative z-10 w-[100px] py-[4px] mt-[6px] ml-[120px] rounded-full border-[1.5px] border-[#41C0A1] text-[#41C0A1] text-[13px] font-bold hover:bg-[#F0FDF8] transition-colors shrink-0">
             응모권 확인
           </button>
         </div>
 
-        {/* 3. 맞춤 케어 추천 영역 */}
+        {/* 맞춤 케어 추천 영역 */}
         <div className="mt-2 flex flex-col shrink-0">
           <h2 className="text-[18px] font-extrabold text-[#000000]">21일 기록으로 찾은 맞춤 케어</h2>
-          <p className="text-[12px] text-[#888888] font-medium mt-1 mb-4">가지고 있지 않은 제품 중 지금 필요한 순서로 골랐어요.</p>
+          <p className="text-[12px] text-[#666666] font-medium mt-1 mb-4">가지고 있지 않은 제품 중 지금 필요한 순서로 골랐어요.</p>
 
-          {/* 1순위 카드 (민트) */}
+          {/* 1순위 카드 */}
           <div className="relative bg-white rounded-[24px] p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col overflow-hidden mb-3">
             <div className="inline-block bg-[#41C0A1] text-white text-[11px] font-bold px-2.5 py-1 rounded-md w-max mb-2">1순위</div>
             <span className="text-[13px] font-bold text-[#41C0A1]">선크림</span>
@@ -178,7 +187,7 @@ export default function PointRewardPage() {
             </div>
           </div>
 
-          {/* 2순위 카드 (퍼플) */}
+          {/* 2순위 카드 */}
           <div className="relative bg-white rounded-[24px] p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-row items-center justify-between overflow-hidden">
             <div className="flex flex-col z-10 pr-16">
               <div className="inline-block bg-[#B39DDB] text-white text-[11px] font-bold px-2.5 py-1 rounded-md w-max mb-2">2순위</div>
@@ -223,7 +232,7 @@ export default function PointRewardPage() {
                   <span className="text-[14px] text-[#555555] font-medium">미션 인증</span>
                 </div>
               </div>
-              <span className="text-[13px] text-[#888888] font-medium">오늘</span>
+              <span className="text-[13px] text-[#666666] font-medium">오늘</span>
             </div>
 
             {/* 내역 2 */}
@@ -237,7 +246,7 @@ export default function PointRewardPage() {
                   <span className="text-[14px] text-[#555555] font-medium">W 정원 완성</span>
                 </div>
               </div>
-              <span className="text-[13px] text-[#888888] font-medium">오늘</span>
+              <span className="text-[13px] text-[#666666] font-medium">오늘</span>
             </div>
           </div>
         </div>

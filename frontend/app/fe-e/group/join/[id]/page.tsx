@@ -98,25 +98,25 @@ export default function GroupJoinPage() {
       
       {/* 1. 상단 헤더 영역 (크기 고정) */}
       <div className="shrink-0 w-full flex flex-col">
-        <button 
-          onClick={() => router.back()} 
-          className="text-[14px] font-bold text-[#555555] self-start mb-4"
-        >
-          ←
+        <button onClick={() => router.back()} 
+          className="absolute left-5 top-7 text-[22px] font-bold text-[#555555]">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
         </button>
-        <h3 className="text-[15px] text-[#888888] font-bold mb-2">
+        <h3 className="text-[15px] text-[#666666] font-semibold mb-2">
           그룹 참여
         </h3>
       </div>
 
       {isLoading ? (
-        // 로딩 화면 (남은 공간의 정중앙)
+        // 로딩 화면
         <div className="flex flex-col items-center justify-center flex-1 min-h-0">
           <div className="w-10 h-10 border-4 border-[#A7FBE7] border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p className="text-[#888888] font-semibold text-[14px]">그룹 정보를 불러오고 있어요...</p>
+          <p className="text-[#666666] font-semibold text-[14px]">그룹 정보를 불러오고 있어요...</p>
         </div>
       ) : (
-        // 💡 2. 중앙 컨텐츠 영역 (flex-1과 justify-center를 통해 남은 공간의 정중앙에 자동으로 쏙 들어감)
+        // 중앙 컨텐츠 영역
         <div className="flex flex-col items-center justify-center flex-1 w-full min-h-0">
           
           <div className="w-[70px] h-[70px] rounded-full bg-[#EAF9F4] flex items-center justify-center mb-5 shrink-0">
@@ -128,19 +128,19 @@ export default function GroupJoinPage() {
           <h1 className="text-[22px] font-bold text-[#000000] mb-1 text-center shrink-0">
             {groupData.name}
           </h1>
-          <p className="text-[14px] text-[#888888] font-medium mb-6 shrink-0">
+          <p className="text-[14px] text-[#666666] font-medium mb-6 shrink-0">
             그룹에 참여하시겠어요?
           </p>
 
           <div className="flex flex-row items-center justify-center gap-[10px] mb-5 shrink-0 flex-wrap">
             {groupData.members.map((member) => (
               <div key={member.id} className="flex flex-col items-center gap-[4px]">
-                <div className={`w-[40px] h-[40px] rounded-full flex items-center justify-center ${member.bg || 'bg-[#EAF9F4]'}`}>
-                  <span className={`text-[15px] font-bold ${member.text || 'text-[#50C2A4]'}`}>
+                <div className={`w-[38px] h-[38px] rounded-full flex items-center justify-center ${member.bg || 'bg-[#EAF9F4]'}`}>
+                  <span className={`text-[16px] font-bold ${member.text || 'text-[#50C2A4]'}`}>
                     {member.initial}
                   </span>
                 </div>
-                <span className="text-[12px] text-[#888888] font-medium">
+                <span className="text-[11px] text-[#666666] font-medium">
                   {member.name}
                 </span>
               </div>
@@ -159,14 +159,14 @@ export default function GroupJoinPage() {
           <button
             onClick={handleJoin}
             disabled={isLoading || isSubmitting}
-            className="w-full py-[14px] rounded-[16px] bg-[#A7FBE7] text-[#000000] font-semibold text-[16px] hover:bg-[#92edd8] transition-colors disabled:opacity-50"
+            className="w-full py-[14px] rounded-[12px] bg-[#A7FBE7] text-[#000000] font-semibold text-[16px] hover:bg-[#92edd8] transition-colors disabled:opacity-50"
           >
             {isSubmitting ? '참여 하는중...' : '참여하기'}
           </button>
           <button
             onClick={handleLoginAndJoin}
             disabled={isLoading || isSubmitting}
-            className="w-full py-[14px] rounded-[16px] bg-[#F7F7F7] text-[#888888] font-semibold text-[16px] hover:bg-[#E8E8E8] transition-colors disabled:opacity-50"
+            className="w-full py-[14px] rounded-[12px] bg-[#F7F8F8] text-[#666666] font-semibold text-[16px] hover:bg-[#E8E8E8] transition-colors disabled:opacity-50"
           >
             로그인 후 참여할게요
           </button>

@@ -102,11 +102,11 @@ export default function GroupListJoin() {
       <div className="flex flex-col w-full h-[100dvh] relative bg-white overflow-hidden">
               
         <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-5 pt-6 pb-[90px]">
-          <h3 className="text-[15px] text-[#666666] font-semibold mt-2">
+          <h3 className="text-[15px] text-[#666666] font-semibold">
             내 그룹
           </h3>
 
-          <h1 className="text-[18px] text-[#000000] font-bold mt-2 mb-6">
+          <h1 className="text-[18px] text-[#000000] font-semibold mt-4 mb-4">
             함께하는 그룹
           </h1>
 
@@ -118,7 +118,7 @@ export default function GroupListJoin() {
                   <div
                     key={group.groupId}
                     onClick={() => router.push(`/fe-e/group/${group.groupId}`)}
-                    className="bg-[#F9F9F9] p-4 rounded-[20px] flex items-center cursor-pointer hover:bg-gray-50 transition-colors"
+                    className="bg-[#F7F8F8] p-4 rounded-[20px] flex items-center cursor-pointer hover:bg-gray-50 transition-colors"
                   >
                     <div
                       className={`w-[38px] h-[38px] rounded-full flex items-center justify-center font-bold text-[18px] shrink-0 ${theme.bg} ${theme.text}`}
@@ -131,7 +131,7 @@ export default function GroupListJoin() {
                         {group.name}
                       </h2>
 
-                      <p className="text-[11px] text-[#888888] font-semibold mt-[2px] mb-[2px]">
+                      <p className="text-[11px] text-[#666666] font-semibold mt-[2px] mb-[2px]">
                         오늘 {group.todayCompletedCount}/{group.todayTotalCount}명 완료
                       </p>
 
@@ -172,7 +172,7 @@ export default function GroupListJoin() {
 
           <button
             onClick={() => router.push("/fe-e/group/invite/test-group-123")}
-            className="w-full py-3 mt-2 rounded-xl text-[#8B9A95] font-semibold text-[14px] border-dashed border-[1.2px] border-[#8B9A95] hover:bg-gray-50 transition-colors flex justify-center items-center"
+            className="w-full py-3 mt-2 rounded-[12px] text-[#8B9A95] font-semibold text-[14px] border-dashed border-[1.2px] border-[#8B9A95] hover:bg-gray-50 transition-colors flex justify-center items-center"
           >
             + 새 그룹 만들기 / 참여하기
           </button>

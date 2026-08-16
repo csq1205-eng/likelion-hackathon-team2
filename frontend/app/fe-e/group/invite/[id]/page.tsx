@@ -87,14 +87,14 @@ export default function JoinCheck() {
       <div className="flex flex-row items-center w-full gap-[10px] mb-10">
         <button
           onClick={() => router.push('/fe-e/group/invite/{groupId}/create')}
-          className="flex flex-col items-center justify-center bg-[#F7F5F5] text-[#000000] px-[10px] py-[20px] w-[120px] h-[96px] rounded-[10px] text-[15px] font-semibold"
+          className="flex flex-col items-center justify-center bg-[#F7F8F8] text-[#000000] px-[10px] py-[20px] w-[120px] h-[96px] rounded-[10px] text-[15px] font-semibold"
         >
           <img src="/Icon_Plus.svg" alt="그룹 아이콘" className="w-[40px] h-[40px] mb-2 object-contain" />
           <span className="text-[14px] font-semibold">그룹 만들기</span>
         </button>
         <button
           onClick={() => router.push(`/fe-e/group/join/${groupId}`)}
-          className="flex flex-col items-center justify-center bg-[#F7F5F5] text-[#000000] px-[10px] py-[20px] w-[120px] h-[96px] rounded-[10px] text-[15px] font-semibold"
+          className="flex flex-col items-center justify-center bg-[#F7F8F8] text-[#000000] px-[10px] py-[20px] w-[120px] h-[96px] rounded-[10px] text-[15px] font-semibold"
         >
           <img src="/Icon_Link.svg" alt="초대코드 아이콘" className="w-[30px] h-[30px] mt-[5px] mb-[10px] object-contain" />
           <span className="text-[14px] font-semibold mt-[2px]">초대코드로 참여</span>
@@ -108,19 +108,19 @@ export default function JoinCheck() {
       <div className="flex flex-row items-center w-full gap-2">
         <button
           onClick={() => handleInvite('kakao')}
-          className="bg-[#F7F5F5] text-[#000000] w-[80px] h-[37px] rounded-[10px] text-[14px] font-semibold"
+          className="bg-[#F7F8F8] text-[#000000] w-[80px] h-[37px] rounded-[10px] text-[14px] font-semibold"
         >
           카카오톡
         </button>
         <button
           onClick={() => handleInvite('url')}
-          className="bg-[#F7F5F5] text-[#000000] w-[80px] h-[37px] rounded-[10px] text-[14px] font-semibold"
+          className="bg-[#F7F8F8] text-[#000000] w-[80px] h-[37px] rounded-[10px] text-[14px] font-semibold"
         >
           URL
         </button>
         <button
           onClick={() => handleInvite('qr')}
-          className="bg-[#F7F5F5] text-[#000000] w-[80px] h-[37px] rounded-[10px] text-[14px] font-semibold"
+          className="bg-[#F7F8F8] text-[#000000] w-[80px] h-[37px] rounded-[10px] text-[14px] font-semibold"
         >
           QR
         </button>

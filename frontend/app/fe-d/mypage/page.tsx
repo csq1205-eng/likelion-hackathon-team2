@@ -30,7 +30,7 @@ export default function MyPage() {
           <button onClick={() => router.push('/fe-e/group')} className="text-xl font-bold mr-4">←</button>
           <h1 className="text-2xl font-bold text-gray-900">{userData.name}님의 기록</h1>
         </div>
-        <div className="flex space-x-2 bg-gray-100 p-1 rounded-xl">
+        <div className="flex space-x-2 bg-gray-100 p-1 rounded-[12px]">
           <TabButton active={activeTab === 'calendar'} onClick={() => setActiveTab('calendar')} label="미션 달력" />
           <TabButton active={activeTab === 'report'} onClick={() => setActiveTab('report')} label="주간 리포트" />
           <TabButton active={activeTab === 'reward'} onClick={() => setActiveTab('reward')} label="리워드" />
@@ -134,7 +134,7 @@ function ProgressBar({ label, percent, color }: { label: string, percent: number
 
 function RewardItem({ name, point }: { name: string, point: number }) {
   return (
-    <div className="flex items-center justify-between p-3 border border-gray-100 rounded-xl hover:bg-gray-50">
+    <div className="flex items-center justify-between p-3 border border-gray-100 rounded-[12px] hover:bg-gray-50">
       <div>
         <h4 className="font-semibold text-sm text-gray-800">{name}</h4>
         <p className="text-xs text-blue-600 font-bold">{point.toLocaleString()} P</p>

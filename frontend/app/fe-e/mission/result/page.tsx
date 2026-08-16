@@ -70,7 +70,7 @@ export default function MissionResultPage() {
         <h1 className="text-[18px] font-bold text-[#000000] mb-2">
           AI가 판정 중이에요
         </h1>
-        <p className="text-[14px] text-[#888888] font-medium text-center">
+        <p className="text-[14px] text-[#666666] font-medium text-center">
           잠시만 기다려주세요...
         </p>
       </div>
@@ -93,44 +93,34 @@ export default function MissionResultPage() {
       <div className="flex flex-col items-center justify-center flex-1 w-full pb-[40px]">
         {isSuccess ? (
           <>
-            <svg 
-              className="w-[100px] h-[100px] mb-8 text-[#222222]" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="4" 
-              viewBox="0 0 100 100"
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              <circle cx="50" cy="50" r="36" />
-              <path d="M32 50l12 12 24-24" />
-            </svg>
+            <div className="w-[60px] h-[60px] rounded-full bg-[#EAF9F4] flex items-center justify-center text-[#41C0A1] mb-5 shadow-inner">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+            </div>
 
             <h1 className="text-[24px] font-bold text-[#000000] mb-3 text-center">
               미션 완료!
             </h1>
-            <p className="text-[15px] text-[#888888] font-medium text-center">
+            <p className="text-[15px] text-[#666666] font-medium text-center">
               미션 수행이 확인됐어요
             </p>
           </>
         ) : (
           // ================= [ 판정 실패 (재촬영) 화면 ] =================
           <>
-            <svg 
-              className="w-[120px] h-[120px] mb-8" 
-              viewBox="0 0 120 120" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M60 15L15 95H105L60 15Z" fill="#FF4D4D"/>
-              <rect x="56" y="45" width="8" height="24" rx="4" fill="white"/>
-              <circle cx="60" cy="80" r="5" fill="white"/>
-            </svg>
+            <div className="w-[60px] h-[60px] rounded-full bg-[#FFF3F3] flex items-center justify-center text-[#FF5C5C] mb-5 shadow-inner">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </div>
 
             <h1 className="text-[24px] font-bold text-[#000000] mb-3 text-center">
               다시 촬영해주세요
             </h1>
-            <p className="text-[15px] text-[#888888] font-medium text-center leading-relaxed">
+            <p className="text-[15px] text-[#666666] font-medium text-center leading-relaxed">
               미션과 관련된 장면이 확인되지 않았어요<br />
               (재시도 {retryCount}회 남음)
             </p>

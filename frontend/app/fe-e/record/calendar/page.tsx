@@ -158,7 +158,7 @@ export default function MissionCalendarPage() {
 
         {/* 연속 기록 배지 (API 14.1 연동) */}
         {streakData && (
-          <div className="mb-4 px-4 py-2 bg-[#F0FCF9] rounded-xl flex items-center justify-between">
+          <div className="mb-4 px-4 py-2 bg-[#F0FCF9] rounded-[12px] flex items-center justify-between">
             <span className="text-[13px] font-bold text-[#41C0A1]">🔥 연속 완료 기록</span>
             <span className="text-[14px] font-extrabold text-[#222222]">{streakData.currentStreakDays}일째 달성 중! (최고 {streakData.longestStreakDays}일)</span>
           </div>
@@ -167,14 +167,14 @@ export default function MissionCalendarPage() {
         {/* 3. 필터 탭 */}
         <div className="flex bg-[#F9F9F9] rounded-full p-1 mb-6 shrink-0">
           <button className="flex-1 py-[10px] bg-[#A7FBE7] rounded-full text-[14px] font-extrabold text-[#222222] shadow-sm">전체</button>
-          <button className="flex-1 py-[10px] text-[14px] font-bold text-[#888888]">완료</button>
-          <button className="flex-1 py-[10px] text-[14px] font-bold text-[#888888]">미완료</button>
+          <button className="flex-1 py-[10px] text-[14px] font-bold text-[#666666]">완료</button>
+          <button className="flex-1 py-[10px] text-[14px] font-bold text-[#666666]">미완료</button>
         </div>
 
         {/* 4. 달력 요일 헤더 */}
         <div className="grid grid-cols-7 text-center mb-4 shrink-0">
           {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
-            <span key={idx} className="text-[13px] font-bold text-[#888888]">{day}</span>
+            <span key={idx} className="text-[13px] font-bold text-[#666666]">{day}</span>
           ))}
         </div>
 
@@ -209,15 +209,15 @@ export default function MissionCalendarPage() {
         <div className="flex items-center justify-center gap-4 mt-2 mb-8 shrink-0">
           <div className="flex items-center gap-1.5">
             <span className="w-[8px] h-[8px] rounded-full bg-[#A7FBE7]"></span>
-            <span className="text-[12px] font-bold text-[#888888]">개인 완료</span>
+            <span className="text-[12px] font-bold text-[#666666]">개인 완료</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-[8px] h-[8px] rounded-full bg-[#B39DDB]"></span>
-            <span className="text-[12px] font-bold text-[#888888]">그룹 완료</span>
+            <span className="text-[12px] font-bold text-[#666666]">그룹 완료</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-[8px] h-[8px] rounded-full bg-[#F5F5F5]"></span>
-            <span className="text-[12px] font-bold text-[#888888]">미완료</span>
+            <span className="text-[12px] font-bold text-[#666666]">미완료</span>
           </div>
         </div>
 

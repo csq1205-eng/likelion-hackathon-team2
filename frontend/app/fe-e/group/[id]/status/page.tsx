@@ -101,13 +101,13 @@ export default function GroupStatusPage() {
         // 로딩 화면
         <div className="flex flex-col items-center justify-center flex-1">
           <div className="w-10 h-10 border-4 border-[#A7FBE7] border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p className="text-[#888888] font-semibold text-[14px]">현황을 불러오는 중입니다...</p>
+          <p className="text-[#666666] font-semibold text-[14px]">현황을 불러오는 중입니다...</p>
         </div>
       ) : (
         <>
           {/* 요약 텍스트 영역 */}
           <div className="flex items-center justify-between mb-4 px-1 shrink-0">
-            <span className="text-[14px] text-[#888888] font-medium">오늘의 미션 현황</span>
+            <span className="text-[14px] text-[#666666] font-medium">오늘의 미션 현황</span>
             <span className="text-[14px] font-bold text-[#41C0A1]">
               {completedCount} / {members.length}명 완료
             </span>
