@@ -95,7 +95,7 @@ export default function GroupMainFeedPage() {
       {/* 1. 상단 헤더 */}
       <div className="bg-white px-5 py-4 flex items-center shrink-0 z-10 shadow-sm">
         <button 
-          onClick={() => router.push('/group')} 
+          onClick={() => router.push('/fe-e/group')} 
           className="text-[20px] font-bold text-[#A0A0A0] mr-3"
         >
           ←
@@ -104,7 +104,7 @@ export default function GroupMainFeedPage() {
           {groupDetail.name || "그룹 피드"}
         </h1>
         <button 
-          onClick={() => router.push(`/group/${groupId}/status`)}
+          onClick={() => router.push(`/fe-e/group/${groupId}/status`)}
           className="ml-auto text-[13px] font-bold text-[#41C0A1] bg-[#EAF9F4] px-3 py-1.5 rounded-full hover:bg-[#d4f2e9] transition-colors"
         >
           현황 보기
@@ -127,7 +127,7 @@ export default function GroupMainFeedPage() {
           </button>
         </div>
 
-        {/* 3. 멤버들의 클립 피드 및 하이라이트 영역 */}
+        {/* 멤버들의 클립 피드 및 하이라이트 영역 */}
         <div className="flex flex-col gap-4">
           <div className="flex justify-between items-center">
             <h3 className="text-[16px] font-bold text-[#222222]">{groupDetail.title}</h3>

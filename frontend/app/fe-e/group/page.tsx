@@ -117,7 +117,7 @@ export default function GroupListJoin() {
                 return (
                   <div
                     key={group.groupId}
-                    onClick={() => router.push(`/group/${group.groupId}`)}
+                    onClick={() => router.push(`/fe-e/group/${group.groupId}`)}
                     className="bg-[#F9F9F9] p-4 rounded-[20px] flex items-center cursor-pointer hover:bg-gray-50 transition-colors"
                   >
                     <div
@@ -171,7 +171,7 @@ export default function GroupListJoin() {
               )}
 
           <button
-            onClick={() => router.push("/group/invite/test-group-123")}
+            onClick={() => router.push("/fe-e/group/invite/test-group-123")}
             className="w-full py-3 mt-2 rounded-xl text-[#8B9A95] font-semibold text-[14px] border-dashed border-[1.2px] border-[#8B9A95] hover:bg-gray-50 transition-colors flex justify-center items-center"
           >
             + 새 그룹 만들기 / 참여하기
@@ -185,25 +185,25 @@ export default function GroupListJoin() {
           icon="users"
           label="그룹"
           isActive
-          onClick={() => router.push('/group')}
+          onClick={() => router.push('/fe-e/group')}
         />
 
         <TabIcon
           icon="check"
           label="미션"
-          onClick={() => router.push('/mission')}
+          onClick={() => router.push('/fe-e/mission')}
         />
 
         <TabIcon
           icon="leaf"
           label="W 정원"
-          onClick={() => router.push('/garden')}
+          onClick={() => router.push('/fe-e/garden')}
         />
 
         <TabIcon
           icon="bar-chart"
           label="기록"
-          onClick={() => router.push('/record/report')}
+          onClick={() => router.push('/fe-e/record/report')}
         />
       </div>
     </div>

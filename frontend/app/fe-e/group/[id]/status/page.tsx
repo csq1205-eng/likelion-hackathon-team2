@@ -160,7 +160,7 @@ export default function GroupStatusPage() {
       {/* 하단 버튼 영역 */}
       <div className="w-full mt-auto shrink-0 pt-4 border-t border-transparent">
         <button
-          onClick={() => router.push(`/group/${groupId}`)}
+          onClick={() => router.push(`/fe-e/group/${groupId}`)}
           className="w-full py-[14px] rounded-[16px] font-semibold text-[16px] text-black bg-[#A7FBE7] hover:bg-[#92edd8] transition-colors"
         >
           완료

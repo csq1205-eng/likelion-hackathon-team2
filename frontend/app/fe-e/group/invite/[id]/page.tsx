@@ -1,4 +1,4 @@
-// src/app/group/invite/[id]/page.tsx
+// src/app/fe-e/group/invite/[id]/page.tsx
 'use client';
 
 import { Span } from 'next/dist/trace';
@@ -32,7 +32,7 @@ export default function JoinCheck() {
 
       if (result.success) {
         alert('그룹에 성공적으로 참여했습니다!');
-        router.push(`/group/${groupId}`); // 참여 완료 후 해당 그룹 피드로 이동
+        router.push(`/fe-e/group/${groupId}`); // 참여 완료 후 해당 그룹 피드로 이동
       } else {
         alert(result.message || '그룹 참여에 실패했습니다.');
       }
@@ -86,14 +86,14 @@ export default function JoinCheck() {
 
       <div className="flex flex-row items-center w-full gap-[10px] mb-10">
         <button
-          onClick={() => router.push('/group/invite/{groupId}/create')}
+          onClick={() => router.push('/fe-e/group/invite/{groupId}/create')}
           className="flex flex-col items-center justify-center bg-[#F7F5F5] text-[#000000] px-[10px] py-[20px] w-[120px] h-[96px] rounded-[10px] text-[15px] font-semibold"
         >
           <img src="/Icon_Plus.svg" alt="그룹 아이콘" className="w-[40px] h-[40px] mb-2 object-contain" />
           <span className="text-[14px] font-semibold">그룹 만들기</span>
         </button>
         <button
-          onClick={() => router.push(`/group/join/${groupId}`)}
+          onClick={() => router.push(`/fe-e/group/join/${groupId}`)}
           className="flex flex-col items-center justify-center bg-[#F7F5F5] text-[#000000] px-[10px] py-[20px] w-[120px] h-[96px] rounded-[10px] text-[15px] font-semibold"
         >
           <img src="/Icon_Link.svg" alt="초대코드 아이콘" className="w-[30px] h-[30px] mt-[5px] mb-[10px] object-contain" />

@@ -141,7 +141,7 @@ export default function MissionResultPage() {
       <div className="w-full mt-auto shrink-0 pb-2 pt-4">
         {isSuccess ? (
           <button
-            onClick={() => router.push('/mission/share')}
+            onClick={() => router.push('/fe-e/mission/share')}
             className="w-full py-[16px] rounded-[16px] bg-[#A7FBE7] text-[#000000] font-bold text-[16px] hover:bg-[#92edd8] transition-colors"
           >
             확인

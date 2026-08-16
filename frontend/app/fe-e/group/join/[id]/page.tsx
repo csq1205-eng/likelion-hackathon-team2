@@ -76,7 +76,7 @@ export default function GroupJoinPage() {
 
       if (result.success) {
         alert('그룹에 성공적으로 참여했습니다!');
-        router.push(`/group/${groupId}`); 
+        router.push(`/fe-e/group/${groupId}`); 
       } else {
         alert(result.message || '그룹 참여에 실패했습니다.');
       }
@@ -90,14 +90,13 @@ export default function GroupJoinPage() {
 
   const handleLoginAndJoin = () => {
     alert('로그인 페이지로 이동합니다.');
-    // router.push('/login'); 
+    // router.push('/fe-d/login'); 
   };
 
   return (
-    // 💡 전체 화면을 100dvh로 고정하고, 절대 스크롤이 생기지 않도록 overflow-hidden 적용
     <div className="w-full h-[100dvh] bg-white flex flex-col overflow-hidden px-5 py-6">
       
-      {/* 💡 1. 상단 헤더 영역 (크기 고정) */}
+      {/* 1. 상단 헤더 영역 (크기 고정) */}
       <div className="shrink-0 w-full flex flex-col">
         <button 
           onClick={() => router.back()} 

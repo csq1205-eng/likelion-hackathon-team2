@@ -34,7 +34,7 @@ export default function MissionSharePage() {
       // 성공 시
       if (response.ok) {
         alert(isShared ? '그룹에 클립이 공유되었습니다!' : '비공개 처리되었습니다.');
-        router.push(`/group/${groupId}/status`);
+        router.push(`/fe-e/group/${groupId}/status`);
       } else {
         // 에러
         alert(result.message || '상태 변경에 실패했습니다. 다시 시도해 주세요.');

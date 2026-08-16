@@ -69,7 +69,7 @@ export default function OnboardingPage() {
         },
         accessToken
       );
-      router.push("/mission");
+      router.push("/fe-e/mission");
     } catch (err) {
       alert("저장에 실패했어요. 다시 시도해주세요.");
       console.error(err);

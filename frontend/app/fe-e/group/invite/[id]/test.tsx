@@ -1,5 +1,5 @@
 {/*
-    // src/app/group/invite/[id]/page.tsx
+    // src/app/fe-e/group/invite/[id]/page.tsx
     'use client';
     
     import { useParams, useRouter } from 'next/navigation';
@@ -15,12 +15,12 @@
       const handleJoin = () => {
         if (!isLogin) {
           alert("로그인이 필요합니다! 로그인 화면으로 이동합니다.");
-          // router.push('/login');
+          // router.push('/fe-d/login');
           return;
         }
         // TODO: 백엔드 API에 참여 요청 보내기
         alert('그룹에 성공적으로 참여했습니다!');
-        router.push(`/group/${groupId}`); // 참여 완료 후 해당 그룹 피드로 이동
+        router.push(`/fe-e/group/${groupId}`); // 참여 완료 후 해당 그룹 피드로 이동
       };
     
       return (
@@ -51,7 +51,7 @@
               {isLogin ? '참여하기' : '로그인 후 참여하기'}
             </button>
             <button
-              onClick={() => router.push('/group')}
+              onClick={() => router.push('/fe-e/group')}
               className="w-full py-4 rounded-xl font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors"
             >
               돌아가기

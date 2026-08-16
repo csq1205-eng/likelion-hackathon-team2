@@ -202,10 +202,10 @@ export default function HighlightArchivePage() {
 
       {/* 하단 탭 바 (4개 탭 통일) */}
       <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 flex justify-between items-center px-6 pt-3 pb-5 z-50">
-        <TabIcon icon="users" label="그룹" onClick={() => router.push('/group')} />
-        <TabIcon icon="check" label="미션" onClick={() => router.push('/mission')} />
-        <TabIcon icon="leaf" label="W 정원" onClick={() => router.push('/garden')} />
-        <TabIcon icon="bar-chart" label="기록" isActive onClick={() => router.push('/record/report')} />
+        <TabIcon icon="users" label="그룹" onClick={() => router.push('/fe-e/group')} />
+        <TabIcon icon="check" label="미션" onClick={() => router.push('/fe-e/mission')} />
+        <TabIcon icon="leaf" label="W 정원" onClick={() => router.push('/fe-e/garden')} />
+        <TabIcon icon="bar-chart" label="기록" isActive onClick={() => router.push('/fe-e/record/report')} />
       </div>
     </div>
   );

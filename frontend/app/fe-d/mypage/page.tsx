@@ -27,7 +27,7 @@ export default function MyPage() {
       {/* 상단 프로필 및 뒤로가기 */}
       <div className="bg-white px-5 py-6 rounded-b-3xl shadow-sm">
         <div className="flex items-center mb-6">
-          <button onClick={() => router.push('/group')} className="text-xl font-bold mr-4">←</button>
+          <button onClick={() => router.push('/fe-e/group')} className="text-xl font-bold mr-4">←</button>
           <h1 className="text-2xl font-bold text-gray-900">{userData.name}님의 기록</h1>
         </div>
         <div className="flex space-x-2 bg-gray-100 p-1 rounded-xl">

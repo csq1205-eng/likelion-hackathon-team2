@@ -222,7 +222,7 @@ export default function WeeklyReportPage() {
           </div>
 
           <button 
-            onClick={() => router.push('/record/calendar')}
+            onClick={() => router.push('/fe-e/record/calendar')}
             className="w-full py-4 mt-2 rounded-[16px] border-[1.5px] border-[#64DFBC] text-[#41C0A1] font-bold text-[15px] bg-white hover:bg-[#F0FDF8] transition-colors shrink-0"
           >
             지난주 보기
@@ -232,10 +232,10 @@ export default function WeeklyReportPage() {
       </div>
 
       <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 flex justify-between items-center px-5 pt-4 pb-5 z-50">
-        <TabIcon icon="users" label="그룹" onClick={() => router.push('/group')} />
-        <TabIcon icon="check" label="미션" onClick={() => router.push('/mission')} />
-        <TabIcon icon="leaf" label="W 정원" onClick={() => router.push('/garden')} />
-        <TabIcon icon="bar-chart" label="기록" isActive onClick={() => router.push('/record/report')} />
+        <TabIcon icon="users" label="그룹" onClick={() => router.push('/fe-e/group')} />
+        <TabIcon icon="check" label="미션" onClick={() => router.push('/fe-e/mission')} />
+        <TabIcon icon="leaf" label="W 정원" onClick={() => router.push('/fe-e/garden')} />
+        <TabIcon icon="bar-chart" label="기록" isActive onClick={() => router.push('/fe-e/record/report')} />
       </div>
     </div>
   );

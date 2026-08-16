@@ -88,7 +88,7 @@ export default function MissionPage() {
         {missions?.map((m) => (
           <button
             key={m.missionId}
-            onClick={() => router.push(`/mission/camera?missionId=${m.missionId}`)}
+            onClick={() => router.push(`/fe-d/mission/camera?missionId=${m.missionId}`)}
             disabled={m.status === "PASS"}
             className="w-full text-left bg-white rounded-2xl p-5 shadow-sm disabled:opacity-50"
           >
