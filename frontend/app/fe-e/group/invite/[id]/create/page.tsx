@@ -127,16 +127,17 @@ export default function GroupInviteCreate() {
   return (
     <div className="relative w-full h-[100dvh] bg-white flex flex-col overflow-hidden">
       
-      {/* 전체 패딩을 컴팩트하게 조정하여 스크롤 유발 방지 */}
       <div className="w-full h-full px-5 py-5 flex flex-col justify-between">
         
         {/* 상단 타이틀 영역 */}
         <div className="flex flex-col shrink-0">
           <button 
             onClick={() => router.back()} 
-            className="text-[14px] font-bold text-[#555555] self-start mb-1"
+            className="mb-2 text-black w-fit hover:opacity-70 transition-opacity"
           >
-            ←
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
           </button>
 
           <span className="text-[13px] text-[#666666] font-semibold">
@@ -145,7 +146,7 @@ export default function GroupInviteCreate() {
           <h1 className="text-[17px] text-[#000000] font-bold mt-0.5">
             우리 그룹으로 초대하기
           </h1>
-          <p className="text-[11px] text-[#666666] font-semibold">
+          <p className="text-[11px] text-[#666666] font-semibold mb-[10px]">
             카메라로 QR을 찍으면 바로 참여돼요
           </p>
         </div>
@@ -157,7 +158,7 @@ export default function GroupInviteCreate() {
             <p className="text-[#888888] font-semibold text-[13px]">초대장과 QR코드를 만들고 있어요...</p>
           </div>
         ) : (
-          // 결과 화면 (중앙 배치)
+          // 결과 화면
           <div className="flex flex-col items-center justify-center my-auto w-full">
             
             {/* QR 코드 박스 */}

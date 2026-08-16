@@ -118,11 +118,11 @@ export default function PagePersonalInfoConsent() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          agreed: agreements.studydata, // API 명세서 키값에 맞게 'agreed' 부분 수정 필요 시 수정
+          agreed: agreements.studydata,
         }),
       });
 
-      // 3. 두 API 모두 정상 처리되면 온보딩 페이지로 이동!
+      // API 모두 정상 처리 : 온보딩 페이지로 이동
       router.push('/onboarding');
       
     } catch (error) {
