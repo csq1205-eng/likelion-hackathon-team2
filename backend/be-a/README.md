@@ -16,6 +16,7 @@ OpenAI Structured Outputs로 미션을 생성하고, API 키가 없거나 AI 호
 - BE B 판정 결과를 사용자용 문장으로 변환 (`PASS / FAIL / HOLD / ERROR`)
 - OpenAI로 판정 이유를 자연스럽게 생성하고 실패 시 규칙 문장으로 자동 대체
 - 주간 그룹 통계를 AI 리포트로 변환하고 실패 시 규칙 문장으로 자동 대체
+- 개인별 주간 미션 통계를 AI 리포트로 변환하고 실패 시 규칙 문장으로 자동 대체
 - FFmpeg로 세로형 하이라이트 영상 생성 및 자막·완료 카드 합성
 - 하이라이트 저장 성공 후 각 클립의 BE B 완료 콜백 호출
 
@@ -85,6 +86,7 @@ BE C와 연동하는 내부 AI API:
 - `POST /api/ai/highlights/generate`: 클립을 조합해 FFmpeg 하이라이트 영상을 생성
 - `POST /api/ai/highlights/complete`: 저장이 끝난 하이라이트의 각 클립에 대해 BE B 콜백 호출
 - `POST /api/ai/reports/weekly`: BE C가 계산한 주간 그룹 통계를 자연어 리포트로 변환
+- `POST /api/ai/reports/weekly/personal`: BE C가 계산한 개인 주간 미션 통계를 자연어 리포트로 변환
 
 위 내부 API들은 최종 외부 조회 API가 아닙니다. BE C가 생성 결과를 저장한 뒤
 `GET /api/v1/missions/today`, `GET /api/v1/groups/{groupId}/highlight`,
@@ -131,6 +133,144 @@ POST /api/ai/reports/weekly
 ```
 
 응답의 `reportSource`는 `AI` 또는 `FALLBACK`입니다.
+
+## 개인 주간 리포트
+
+BE C의 `GET /api/v1/users/me/weekly-report-data` 응답 `data`를 전달하면 BE A가 개인의
+완료율, 달성 일수, 연속 달성 기록, 미션 유형 및 시간대별 통계를 바탕으로 리포트 문장을 생성합니다.
+AI를 사용할 수 없거나 호출이 실패하면 같은 집계값을 이용한 규칙 기반 문장을 반환합니다.
+
+```http
+POST /api/ai/reports/weekly/personal
+X-Internal-Key: change-me
+Content-Type: application/json
+```
+
+```json
+{
+  "userId": 123,
+  "weekStartDate": "2026-08-03",
+  "weekEndDate": "2026-08-09",
+  "totalMissionCount": 6,
+  "completedMissionCount": 4,
+  "failedMissionCount": 1,
+  "notSubmittedMissionCount": 1,
+  "completionRate": 66.66666666666667,
+  "achievedDayCount": 0,
+  "currentStreakDays": 0,
+  "longestStreakDays": 0,
+  "dailyStats": [
+    {
+      "date": "2026-08-03",
+      "totalMissionCount": 6,
+      "completedMissionCount": 4,
+      "failedMissionCount": 1,
+      "notSubmittedMissionCount": 1,
+      "completionRate": 66.66666666666667,
+      "achieved": false
+    },
+    {
+      "date": "2026-08-04",
+      "totalMissionCount": 0,
+      "completedMissionCount": 0,
+      "failedMissionCount": 0,
+      "notSubmittedMissionCount": 0,
+      "completionRate": 0.0,
+      "achieved": false
+    },
+    {
+      "date": "2026-08-05",
+      "totalMissionCount": 0,
+      "completedMissionCount": 0,
+      "failedMissionCount": 0,
+      "notSubmittedMissionCount": 0,
+      "completionRate": 0.0,
+      "achieved": false
+    },
+    {
+      "date": "2026-08-06",
+      "totalMissionCount": 0,
+      "completedMissionCount": 0,
+      "failedMissionCount": 0,
+      "notSubmittedMissionCount": 0,
+      "completionRate": 0.0,
+      "achieved": false
+    },
+    {
+      "date": "2026-08-07",
+      "totalMissionCount": 0,
+      "completedMissionCount": 0,
+      "failedMissionCount": 0,
+      "notSubmittedMissionCount": 0,
+      "completionRate": 0.0,
+      "achieved": false
+    },
+    {
+      "date": "2026-08-08",
+      "totalMissionCount": 0,
+      "completedMissionCount": 0,
+      "failedMissionCount": 0,
+      "notSubmittedMissionCount": 0,
+      "completionRate": 0.0,
+      "achieved": false
+    },
+    {
+      "date": "2026-08-09",
+      "totalMissionCount": 0,
+      "completedMissionCount": 0,
+      "failedMissionCount": 0,
+      "notSubmittedMissionCount": 0,
+      "completionRate": 0.0,
+      "achieved": false
+    }
+  ],
+  "missionTypeStats": [
+    {
+      "missionType": "HYDRATION",
+      "totalMissionCount": 6,
+      "completedMissionCount": 4,
+      "failedMissionCount": 1,
+      "notSubmittedMissionCount": 1,
+      "completionRate": 66.66666666666667
+    }
+  ],
+  "slotStats": [
+    {
+      "slot": "MORNING",
+      "totalMissionCount": 6,
+      "completedMissionCount": 4,
+      "failedMissionCount": 1,
+      "notSubmittedMissionCount": 1,
+      "completionRate": 66.66666666666667
+    }
+  ]
+}
+```
+
+`dailyStats`에는 요청 주간의 7개 날짜가 하루씩 모두 포함되어야 합니다. 각 통계의 전체
+미션 수는 완료·실패·미제출 수의 합과 같아야 하고, `completionRate`도 해당
+집계와 일치해야 합니다. `dailyStats`, `missionTypeStats`, `slotStats` 각각의 합계 역시 주간
+전체 집계와 일치해야 합니다.
+
+성공 응답 예시:
+
+```json
+{
+  "success": true,
+  "data": {
+    "userId": 123,
+    "weekStartDate": "2026-08-03",
+    "weekEndDate": "2026-08-09",
+    "summaryText": "이번 주에는 총 6개의 미션 중 4개를 완료해 완료율 66.6667%를 기록했어요.",
+    "encouragementText": "완료하지 못한 미션도 괜찮아요. 다음 주에는 한 가지 미션부터 시작해 봐요.",
+    "reportSource": "FALLBACK"
+  },
+  "message": null
+}
+```
+
+응답의 `reportSource`는 OpenAI가 생성한 경우 `AI`, 규칙 기반 문장을 사용한 경우
+`FALLBACK`입니다.
 
 ## 하이라이트 완료 콜백 안정성
 
