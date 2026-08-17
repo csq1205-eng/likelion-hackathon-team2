@@ -233,8 +233,8 @@ export default function WeeklyReportPage() {
 
       <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 flex justify-between items-center px-5 pt-4 pb-5 z-50">
         <TabIcon icon="users" label="그룹" onClick={() => router.push('/fe-e/group')} />
-        <TabIcon icon="check" label="미션" onClick={() => router.push('/fe-e/mission')} />
-        <TabIcon icon="leaf" label="W 정원" onClick={() => router.push('/fe-e/garden')} />
+        <TabIcon icon="check" label="미션" onClick={() => router.push('/fe-d/mission')} />
+        <TabIcon icon="leaf" label="W 정원" onClick={() => router.push('/fe-d/[id]/garden')} />
         <TabIcon icon="bar-chart" label="기록" isActive onClick={() => router.push('/fe-e/record/report')} />
       </div>
     </div>

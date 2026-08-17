@@ -96,10 +96,12 @@ export default function GroupJoinPage() {
   return (
     <div className="w-full h-[100dvh] bg-white flex flex-col overflow-hidden px-5 py-6">
       
-      {/* 1. 상단 헤더 영역 (크기 고정) */}
-      <div className="shrink-0 w-full flex flex-col">
-        <button onClick={() => router.back()} 
-          className="absolute left-5 top-7 text-[22px] font-bold text-[#555555]">
+      {/* 상단 헤더 영역 */}
+      <div className="flex flex-col shrink-0">
+        <button 
+          onClick={() => router.back()} 
+          className="mb-2 text-[#A0A0A0] w-fit hover:opacity-70 transition-opacity"
+        >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M15 18l-6-6 6-6"/>
           </svg>
@@ -166,7 +168,7 @@ export default function GroupJoinPage() {
           <button
             onClick={handleLoginAndJoin}
             disabled={isLoading || isSubmitting}
-            className="w-full py-[14px] rounded-[12px] bg-[#F7F8F8] text-[#666666] font-semibold text-[16px] hover:bg-[#E8E8E8] transition-colors disabled:opacity-50"
+            className="w-full py-[14px] rounded-[12px] bg-[#F7F8F8] text-[#9CA3AF] font-semibold text-[16px] hover:bg-[#E8E8E8] transition-colors disabled:opacity-50"
           >
             로그인 후 참여할게요
           </button>

@@ -133,20 +133,20 @@ export default function GroupInviteCreate() {
         <div className="flex flex-col shrink-0">
           <button 
             onClick={() => router.back()} 
-            className="mb-2 text-black w-fit hover:opacity-70 transition-opacity"
+            className="mb-2 text-[#A0A0A0] w-fit hover:opacity-70 transition-opacity"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6"/>
             </svg>
           </button>
 
-          <span className="text-[13px] text-[#666666] font-semibold">
+          <span className="text-[15px] text-[#666666] font-semibold">
             그룹 초대
           </span>
-          <h1 className="text-[17px] text-[#000000] font-bold mt-0.5">
+          <h1 className="text-[18px] text-[#000000] font-bold mt-0.5">
             우리 그룹으로 초대하기
           </h1>
-          <p className="text-[11px] text-[#666666] font-semibold mb-[10px]">
+          <p className="text-[11px] text-[#666666] font-medium mb-[10px]">
             카메라로 QR을 찍으면 바로 참여돼요
           </p>
         </div>
@@ -197,7 +197,7 @@ export default function GroupInviteCreate() {
         <div className="flex flex-col gap-2 shrink-0 pt-[5px]">
           <button
             onClick={shareToKakao}
-            className="w-full py-[13px] rounded-[14px] font-semibold text-[15px] text-black bg-[#F7F8F8] hover:bg-[#FEE500] transition-colors flex flex-row items-center justify-center gap-[8px] shadow-2xs"
+            className="w-full py-[13px] rounded-[14px] font-semibold text-[14px] text-black bg-[#F7F8F8] hover:bg-[#FEE500] transition-colors flex flex-row items-center justify-center gap-[8px] shadow-2xs"
           >
             <svg className="w-5 h-5 text-[#41C0A1]" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 3c-4.97 0-9 3.134-9 7 0 2.22 1.258 4.195 3.197 5.432-.236.87-.852 2.766-.882 2.87-.038.136.06.262.186.216.12-.045 2.923-1.127 4.092-1.635.8.22 1.636.335 2.502.335 4.97 0 9-3.134 9-7s-4.03-7-9-7z"/>
@@ -207,7 +207,7 @@ export default function GroupInviteCreate() {
 
           <button
             onClick={() => router.push(`/fe-e/group`)}
-            className="w-full py-[13px] rounded-[14px] font-semibold text-[15px] text-black bg-[#A7FBE7] hover:bg-[#92edd8] transition-colors"
+            className="mt-[4px] w-full py-[13px] rounded-[14px] font-semibold text-[14px] text-black bg-[#A7FBE7] hover:bg-[#92edd8] transition-colors"
           >
             완료
           </button>

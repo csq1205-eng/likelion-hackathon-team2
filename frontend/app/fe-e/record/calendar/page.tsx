@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from "@/lib/auth/AuthProvider";
 
-// 💡 14.2 지난 미션 달력 조회 응답 타입
+// 14.2 지난 미션 달력 조회 응답 타입
 interface DayHistory {
   date: string;
   completedMissionCount: number;
@@ -19,7 +19,7 @@ interface HistoryResponse {
   days: DayHistory[];
 }
 
-// 💡 14.1 연속 기록 조회 응답 타입
+// 14.1 연속 기록 조회 응답 타입
 interface StreakResponse {
   userId: number;
   currentStreakDays: number;
@@ -27,7 +27,7 @@ interface StreakResponse {
   lastCompletedDate: string;
 }
 
-// 💡 통신 실패 또는 비로그인 시 보여줄 임시 데이터
+// 통신 실패 또는 비로그인 시 보여줄 임시 데이터
 const FALLBACK_HISTORY: HistoryResponse = {
   userId: 1,
   year: 2026,
@@ -205,7 +205,7 @@ export default function MissionCalendarPage() {
           ))}
         </div>
 
-        {/* 6. 범례 */}
+        {/* 범례 */}
         <div className="flex items-center justify-center gap-4 mt-2 mb-8 shrink-0">
           <div className="flex items-center gap-1.5">
             <span className="w-[8px] h-[8px] rounded-full bg-[#A7FBE7]"></span>
@@ -221,7 +221,7 @@ export default function MissionCalendarPage() {
           </div>
         </div>
 
-        {/* 7. 하단 상세 내역 카드 */}
+        {/* 하단 상세 내역 카드 */}
         <div className="bg-[#F4FBF9] rounded-[24px] p-5 flex flex-col shrink-0 mt-auto border border-gray-50">
           <div className="flex justify-between items-end mb-5">
             <span className="text-[16px] font-extrabold text-[#222222]">8월 12일 수요일</span>
@@ -246,8 +246,8 @@ export default function MissionCalendarPage() {
       {/* 4개 탭 구조의 하단 탭바 */}
       <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 flex justify-between items-center px-5 pt-4 pb-5 z-50">
         <TabIcon icon="users" label="그룹" onClick={() => router.push('/fe-e/group')} />
-        <TabIcon icon="check" label="미션" onClick={() => router.push('/fe-e/mission')} />
-        <TabIcon icon="leaf" label="W 정원" onClick={() => router.push('/fe-e/garden')} />
+        <TabIcon icon="check" label="미션" onClick={() => router.push('/fe-d/mission')} />
+        <TabIcon icon="leaf" label="W 정원" onClick={() => router.push('/fe-d/[id]/garden')} />
         <TabIcon icon="bar-chart" label="기록" isActive onClick={() => router.push('/fe-e/record/report')} />
       </div>
     </div>
