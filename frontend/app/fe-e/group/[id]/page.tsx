@@ -95,7 +95,7 @@ export default function GroupMainFeedPage() {
       {/* 상단 헤더 */}
       <div className="bg-white px-5 py-4 flex items-center shrink-0 z-10 shadow-sm">
         <button onClick={() => router.back()} 
-            className="absolute top-[21px] text-[22px] font-bold text-black">
+            className="absolute top-[21px] text-[22px] font-bold text-[#A0A0A0]">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6"/>
             </svg>

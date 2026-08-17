@@ -38,7 +38,7 @@ const FALLBACK_REPORT: WeeklyReportData = {
   completedCount: 18,
   totalCount: 21,
   bestHabit: { name: "물 2L 마시기", successDays: 5 },
-  aiSummary: "규칙적인 수면과 수분 섭취 습관이 이번 주 성과의 비결이에요.",
+  aiSummary: "규칙적인 수면과 수분 섭취 습관이 이번 주 성과의 비결이에요! 주말에도 꾸준했던 점이 아주 훌륭합니다.",
   weeklyData: [
     { day: '목', count: 1 },
     { day: '금', count: 2 },
@@ -109,128 +109,158 @@ export default function WeeklyReportPage() {
   const maxCount = Math.max(...reportData.weeklyData.map(d => d.count));
 
   return (
-    <div className="relative w-full h-[100dvh] bg-white flex flex-col overflow-hidden">
+    <div className="relative w-full h-[100dvh] bg-[#F9F9F9] flex flex-col overflow-hidden">
       
-      {/* 본문 스크롤 영역 */}
-      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-5 pt-6 pb-[100px] flex flex-col">
-        
-        {/* 상단 헤더 */}
-        <div className="flex flex-col items-center justify-center relative bg-white pb-2 shrink-0">
-          <button 
-            onClick={() => router.back()} 
-            className="absolute left-1 top-1 text-[20px] font-bold text-black"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 18l-6-6 6-6"/>
-            </svg>
-          </button>
-          <h1 className="text-[18px] font-bold text-[#000000]">이번 주 리포트</h1>
-          <p className="text-[13px] text-[#666666] font-medium mt-1">{reportData.startDate} - {reportData.endDate}</p>
+      {/* 1. 상단 헤더 */}
+      <div className="flex items-center justify-center relative bg-white pt-6 pb-4 shrink-0 shadow-sm z-10">
+        <button onClick={() => router.back()} className="absolute left-5 text-[22px] font-bold text-[#A0A0A0] hover:opacity-70 transition-opacity">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <div className="flex flex-col items-center">
+          <h1 className="text-[18px] font-extrabold text-[#000000]">이번 주 리포트</h1>
+          <p className="text-[12px] text-[#888888] font-medium mt-0.5">{reportData.startDate} - {reportData.endDate}</p>
         </div>
+      </div>
 
-        <div className="flex flex-col gap-3 mt-4 shrink-0">
-          
-          {/* 총 완료 미션 카드 */}
-          <div className="bg-[#F0FDF8] rounded-[16px] p-[12px] flex items-center justify-between">
+      {/* 본문 스크롤 영역 */}
+      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-5 pt-5 pb-[100px] flex flex-col gap-4">
+        
+        {/* 주간 요약 & 차트 */}
+        <div className="bg-white rounded-[24px] p-[20px] shadow-[0_2px_16px_rgba(0,0,0,0.03)] border border-gray-50 flex flex-col shrink-0">
+          <div className="flex items-start justify-between mb-6">
             <div className="flex flex-col">
-              <span className="text-[14px] font-bold text-[#333333]">이번 주</span>
-              <div className="flex items-baseline gap-1 mt-[2px]">
-                <span className="text-[30px] font-extrabold text-[#000000] leading-none">{reportData.totalCompleted}</span>
-                <span className="text-[24px] font-bold text-[#000000]">개</span>
+              <span className="text-[14px] font-bold text-[#666666]">이번 주 완료 미션</span>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-[36px] font-extrabold text-[#41C0A1] tracking-tight leading-none">{reportData.totalCompleted}</span>
+                <span className="text-[20px] font-bold text-[#222222]">개</span>
               </div>
-              <span className="text-[13px] text-[#666666] font-medium mt-[2px]">미션 완료</span>
             </div>
-            <div className="w-[60px] h-[60px] flex items-center justify-center text-[#74E3C8]">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
+            <div className="w-[52px] h-[52px] bg-[#E5F7F1] rounded-full flex items-center justify-center text-[#41C0A1]">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-7 h-7">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
             </div>
           </div>
 
-          {/* 요일별 완료 수 바 차트 */}
-          <div className="bg-[#F7F8F8] rounded-[16px] p-[12px] flex flex-col">
-            <h2 className="text-[14px] font-bold text-[#333333] mb-6">요일별 완료 수</h2>
-            <div className="flex justify-between items-end h-[100px] px-2">
-              {reportData.weeklyData.map((data, index) => (
-                <div key={index} className="flex flex-col items-center gap-2">
-                  <span className="text-[12px] font-bold text-[#555555]">{data.count}</span>
-                  <div className="w-[20px] bg-[#97EAD6] rounded-t-md" style={{ height: `${(data.count / maxCount) * 60}px` }}></div>
-                  <span className="text-[12px] text-[#666666] font-medium mt-[2px]">{data.day}</span>
+          {/* 막대 차트 */}
+          <div className="flex justify-between items-end h-[110px]">
+            {reportData.weeklyData.map((data, index) => {
+              const isMax = data.count === maxCount && data.count > 0;
+              const heightPercentage = data.count === 0 ? 0 : (data.count / maxCount) * 100;
+              
+              return (
+                <div key={index} className="flex flex-col items-center gap-2 flex-1">
+                  <span className={`text-[12px] font-bold transition-colors ${isMax ? 'text-[#41C0A1]' : 'text-[#A0A0A0]'}`}>
+                    {data.count > 0 ? data.count : ''}
+                  </span>
+                  <div className="w-full h-[70px] flex items-end justify-center">
+                    {data.count > 0 ? (
+                      <div 
+                        className={`w-[14px] rounded-full transition-all duration-500 ease-out ${isMax ? 'bg-[#41C0A1] shadow-sm' : 'bg-[#E5F7F1]'}`} 
+                        style={{ height: `${heightPercentage}%` }} 
+                      />
+                    ) : (
+                      <div className="w-[14px] h-[4px] rounded-full bg-[#F0F0F0]" /> // 0일때 빈칸 표시
+                    )}
+                  </div>
+                  <span className={`text-[12px] font-bold ${isMax ? 'text-[#222222]' : 'text-[#888888]'}`}>{data.day}</span>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
+        </div>
 
-          {/* 2단 그리드 카드 영역 */}
-          <div className="grid grid-cols-2 gap-[14px]">
+        {/* AI 한줄 리포트 */}
+        <div className="bg-gradient-to-r from-[#F0FCF9] to-[#F4FBF9] rounded-[24px] p-5 border border-[#E2F7F2] shadow-sm shrink-0 flex flex-col gap-2">
+          <div className="flex items-center gap-1.5">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#41C0A1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+            <span className="text-[14px] font-extrabold text-[#41C0A1]">AI 리포트</span>
+          </div>
+          <p className="text-[11.5px] text-[#555555] font-medium leading-relaxed">
+            {reportData.aiSummary}
+          </p>
+        </div>
+
+        {/* 4. 2단 그리드 카드 (달성률 & 최고 습관) */}
+        <div className="grid grid-cols-2 gap-3 shrink-0">
+          
+          {/* 달성률 (도넛 차트 안에 텍스트 배치) */}
+          <div className="bg-white rounded-[24px] p-5 shadow-[0_2px_16px_rgba(0,0,0,0.03)] border border-gray-50 flex flex-col items-center">
+            <span className="text-[14px] font-bold text-[#666666] w-full mb-3">달성률</span>
             
-            {/* 달성률 도넛 차트 */}
-            <div className="bg-[#F7F8F8] rounded-[24px] p-[16px] flex flex-col items-center text-center">
-              <span className="text-[13px] font-bold text-[#333333] w-full text-left">달성률</span>
-              <span className="text-[28px] font-extrabold text-[#41C0A1] mt-2 leading-none">{reportData.achievementRate}%</span>
-              <span className="text-[12px] font-semibold text-[#8B9A95] mt-1 mb-3">{reportData.completedCount} / {reportData.totalCount}</span>
-              <div className="relative w-[70px] h-[70px]">
-                <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90 overflow-visible">
-                  <path className="text-[#E8F8F3]" strokeWidth="6" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                  <path className="text-[#64DFBC]" strokeWidth="6" strokeDasharray={`${reportData.achievementRate}, 100`} stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                </svg>
-              </div>
-            </div>
-
-            {/* 가장 잘 지킨 습관 */}
-            <div className="bg-[#F7F8F8] rounded-[24px] p-[16px] flex flex-col items-center justify-center text-center">
-              <span className="text-[13px] font-bold text-[#333333] w-full text-left">가장 잘 지킨 습관</span>
-              <svg className="w-8 h-8 text-[#41C0A1] mt-2 mb-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z" />
+            <div className="relative w-[85px] h-[85px] flex items-center justify-center">
+              <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90 overflow-visible">
+                {/* 배경 원 */}
+                <path className="text-[#F0F0F0]" strokeWidth="4.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                {/* 채워지는 원 */}
+                <path className="text-[#41C0A1]" strokeWidth="4.5" strokeLinecap="round" strokeDasharray={`${reportData.achievementRate}, 100`} stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
               </svg>
-              <span className="text-[12px] text-[#555555] font-semibold mt-1">
-                {reportData.bestHabit.name}<br /><span className="text-[#41C0A1]">{reportData.bestHabit.successDays}일 성공</span>
-              </span>
-            </div>
-
-            {/* AI 한줄 리포트 */}
-            <div className="bg-[#F7F8F8] rounded-[24px] p-[16px] flex flex-col justify-center">
-              <span className="text-[13px] font-bold text-[#333333] mb-2">AI 한줄 리포트</span>
-              <p className="text-[12px] text-[#666666] font-medium leading-relaxed">
-                {reportData.aiSummary}
-              </p>
-            </div>
-
-            {/* 연속 달성 (API 14.1 연동) */}
-            <div className="bg-[#F7F8F8] rounded-[24px] p-[16px] flex flex-col items-center justify-center text-center">
-              <span className="text-[13px] font-bold text-[#333333] w-full text-left">연속 달성</span>
-              <div className="flex items-baseline gap-1 mt-2">
-                <span className="text-[38px] font-extrabold text-[#41C0A1] leading-none">{streakData.currentStreakDays}</span>
-                <span className="text-[16px] font-bold text-[#41C0A1]">일</span>
+              {/* 차트 중앙 텍스트 */}
+              <div className="absolute flex flex-col items-center justify-center mt-1">
+                <span className="text-[20px] font-extrabold text-[#222222] leading-none">{reportData.achievementRate}<span className="text-[12px] font-bold ml-[1px]">%</span></span>
               </div>
-              <span className="text-[10px] text-[#666666] mt-1">최고 기록: {streakData.longestStreakDays}일</span>
             </div>
-
+            <span className="text-[14px] text-center font-bold text-[#A0A0A0] mt-3 bg-[#F5F5F5] px-[10px] py-1 rounded-[12px]">
+              {reportData.completedCount} / {reportData.totalCount} 완료
+            </span>
           </div>
 
-          {/* 기록 알림 배너 */}
-          <div className="bg-[#F3EFFF] rounded-[24px] p-[16px] mt-2 flex flex-row items-center gap-4 shadow-sm">
-            <div className="w-[40px] h-[40px] shrink-0 bg-white rounded-[12px] flex items-center justify-center shadow-sm">
-              <svg className="w-6 h-6 text-[#7B61FF]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          {/* 최고 기록 및 연속 달성 병합 카드 */}
+          <div className="flex flex-col gap-3">
+            {/* 베스트 습관 */}
+            <div className="bg-white rounded-[20px] p-4 shadow-[0_2px_16px_rgba(0,0,0,0.03)] border border-gray-50 flex flex-col flex-1 justify-center">
+              <span className="text-[13px] font-bold text-[#666666] mb-1">베스트 습관</span>
+              <span className="text-[15px] font-extrabold text-[#222222] truncate">{reportData.bestHabit.name}</span>
+              <span className="text-[13px] font-bold text-[#41C0A1] mt-1">{reportData.bestHabit.successDays}일 성공</span>
+            </div>
+            
+            {/* 연속 달성 */}
+            <div className="bg-white rounded-[20px] p-4 shadow-[0_2px_16px_rgba(0,0,0,0.03)] border border-gray-50 flex flex-col flex-1 justify-center relative overflow-hidden">
+              <span className="text-[13px] font-bold text-[#666666] mb-1 z-10">연속 달성</span>
+              <div className="flex items-baseline gap-1 z-10">
+                <span className="text-[24px] font-extrabold text-[#41C0A1] leading-none">{streakData.currentStreakDays}</span>
+                <span className="text-[14px] font-bold text-[#222222]">일째</span>
+              </div>
+              <span className="text-[11px] text-[#A0A0A0] font-medium mt-1 z-10">최고기록 {streakData.longestStreakDays}일</span>
+              
+              {/* 배경 장식 */}
+              <div className="absolute right-[-15px] bottom-[-15px] text-[#F9F9F9]">
+                <svg width="70" height="70" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15 8H21L16.5 12.5L18 19L12 15.5L6 19L7.5 12.5L3 8H9L12 2Z"/></svg>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* 5. 하단 배너 및 버튼 */}
+        <div className="shrink-0">
+          <div className="bg-[#F3EDFF] rounded-[20px] p-[16px] flex flex-row items-center gap-4 shadow-sm border border-[#EADDFF]">
+            <div className="w-[44px] h-[44px] shrink-0 bg-white rounded-[14px] flex items-center justify-center shadow-sm">
+              <svg className="w-6 h-6 text-[#7E6CD3]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
               </svg>
             </div>
             <div className="flex flex-col">
-              <span className="text-[14px] font-bold text-[#5B3BC4]">{streakData.currentStreakDays}일 기록이 쌓이고 있어요</span>
-              <span className="text-[12px] text-[#666666] font-medium mt-1 leading-snug">완주하면 행동 기록을 바탕으로 필요한 케어를 알려드려요.</span>
+              <span className="text-[12px] font-bold text-[#7E6CD3]">계속해서 기록이 쌓이고 있어요!</span>
+              <span className="text-[11px] text-[#666666] font-medium mt-0.5 leading-snug">꾸준한 행동 기록은 맞춤 케어의 비결이에요.</span>
             </div>
           </div>
 
           <button 
             onClick={() => router.push('/fe-e/record/calendar')}
-            className="w-full py-4 mt-2 rounded-[16px] border-[1.5px] border-[#64DFBC] text-[#41C0A1] font-bold text-[15px] bg-white hover:bg-[#F0FDF8] transition-colors shrink-0"
+            className="w-full py-4 mt-[14px] rounded-[15px] border-[1.5px] border-[#41C0A1] text-[#41C0A1] font-extrabold text-[15px] bg-[#F7F7F7] hover:bg-[#F0FDF8] transition-colors shadow-sm"
           >
-            지난주 보기
+            지난 미션 보기
           </button>
-
         </div>
+
       </div>
 
+      {/* 하단 탭바 */}
       <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 flex justify-between items-center px-5 pt-4 pb-5 z-50">
         <TabIcon icon="users" label="그룹" onClick={() => router.push('/fe-e/group')} />
         <TabIcon icon="check" label="미션" onClick={() => router.push('/fe-d/mission')} />

@@ -179,7 +179,7 @@ export default function MissionCalendarPage() {
       {/* 상단 헤더 */}
       <div className="flex items-center justify-center relative bg-white pt-6 pb-4 shrink-0">
         <button onClick={() => router.back()} 
-          className="absolute left-5 text-[22px] font-bold text-black">
+          className="absolute left-5 text-[22px] font-bold text-[#A0A0A0]">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <h1 className="text-[18px] font-extrabold text-[#000000]">지난 미션</h1>

@@ -90,7 +90,7 @@ export default function HighlightArchivePage() {
       
       {/* 상단 헤더 */}
       <div className="bg-white px-5 py-4 flex items-center justify-center shrink-0 shadow-sm z-10 relative">
-        <button onClick={() => router.back()} className="absolute left-5 text-[22px] font-bold text-black">
+        <button onClick={() => router.back()} className="absolute left-5 text-[22px] font-bold text-[#A0A0A0]">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M15 18l-6-6 6-6"/>
           </svg>

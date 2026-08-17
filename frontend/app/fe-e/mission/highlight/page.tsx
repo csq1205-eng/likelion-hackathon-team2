@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
+import Image from 'next/image';
 import { useAuth } from "@/lib/auth/AuthProvider";
 
 interface HighlightMemberItem {
@@ -87,7 +88,7 @@ export default function HighlightPage() {
     fetchHighlight();
   }, [authLoading, accessToken]);
 
-  // --- 비디오 플레이어 조작 핸들러 ---
+  // 비디오 플레이어 조작 핸들러
   const togglePlay = () => {
     if (!videoRef.current) return;
     if (isPlaying) {
@@ -152,61 +153,77 @@ export default function HighlightPage() {
       />
 
       {/* 본문 스크롤 */}
-      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-[100px] flex flex-col relative">
-        
-        {/* 상단 배경 꾸밈 요소 */}
-        <div className="absolute top-0 left-0 w-full h-[450px] bg-gradient-to-b from-[#E8F8F5] to-white -z-10"></div>
-        <div className="absolute top-[80px] left-[10%] text-[#83E2C4] opacity-70">✦</div>
-        <div className="absolute top-[60px] left-[30%] text-[#A7FBE7] text-[20px]">✦</div>
-        <div className="absolute top-[70px] right-[25%] text-[#83E2C4] opacity-80 text-[18px]">✦</div>
-        <div className="absolute top-[90px] right-[10%] text-[#B39DDB] opacity-80 text-[14px]">✦</div>
+      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-[100px] flex flex-col relative bg-gradient-to-b from-[#EAF7F7] from-[15%] to-white">
 
-        {/* 헤더 */}
-        <div className="flex flex-col items-center justify-center relative pt-6 pb-4 shrink-0 z-10">
+        {/* 배경 별 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[5%] left-[-10%] w-[60%] h-[400px] bg-gradient-to-br from-[#E2F7F2] to-transparent rounded-full blur-[80px] -z-10 opacity-70 pointer-events-none"></div>
+        <div className="absolute top-[10%] right-[-10%] w-[50%] h-[300px] bg-gradient-to-bl from-[#F3EDFF] to-transparent rounded-full blur-[80px] -z-10 opacity-70 pointer-events-none"></div>
+        <div className="absolute top-[100px] left-[12%] text-[#83E2C4] opacity-50 text-[16px] pointer-events-none z-0">✦</div>
+        <div className="absolute top-[85px] left-[35%] text-[#A7FBE7] opacity-80 text-[24px] pointer-events-none z-0 drop-shadow-sm">✦</div>
+        <div className="absolute top-[95px] right-[10%] text-[#B39DDB] opacity-70 text-[22px] pointer-events-none z-0 drop-shadow-sm">✦</div>
+        <div className="absolute top-[425px] right-[78%] text-[#83E2C4] opacity-60 text-[18px] pointer-events-none z-0">✦</div>
+        <div className="absolute top-[490px] left-[33%] text-[#EADDFF] opacity-60 text-[20px] pointer-events-none z-0">✦</div>
+        <div className="absolute top-[480px] right-[10%] text-[#A7FBE7] opacity-50 text-[14px] pointer-events-none z-0">✦</div>
+      </div>
+
+        {/* 상단 배경 꾸밈 요소 */}
+        <div className="sticky top-0 z-50 flex flex-col items-center justify-center pt-6 pb-4 shrink-0 bg-white border-b border-[#EAF7F7]/50 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
           <button onClick={() => router.back()} 
-            className="absolute left-5 top-7 text-[22px] font-bold text-black">
+            className="absolute left-5 top-7 text-[22px] font-bold text-[#A0A0A0] hover:opacity-70 transition-opacity">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6"/>
             </svg>
           </button>
           <h1 className="text-[17px] font-extrabold text-[#000000]">{highlightData.title}</h1>
-          <p className="text-[12px] text-[#666666] font-medium mt-1">{highlightData.dateStr}</p>
+          <p className="text-[12px] text-[#666666] font-medium mt-0.5">{highlightData.dateStr}</p>
         </div>
 
         {/* 중앙 3단 세로 카드 영역 */}
-        <div className="flex flex-row justify-center gap-3 w-full px-5 mt-4 z-10">
-          {highlightData.members.map((member, idx) => (
+        <div className="flex flex-row justify-center gap-2.5 w-full px-5 mt-[30px] z-10">
+          {highlightData.members.map((member) => (
             <div key={member.id} className="flex flex-col items-center w-1/3">
-              <NumberStar num={idx + 1} color="#B39DDB" />
               
               {member.type === 'clip' ? (
-                <div className="relative w-full aspect-[4/9] rounded-[16px] overflow-hidden shadow-md mt-[-14px]">
+                <div className="relative w-full aspect-[4/9] rounded-[16px] overflow-hidden shadow-sl bg-white transform transition-transform hover:-translate-y-1">
                   <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${member.mediaUrl}')` }}></div>
-                  <div className="absolute top-3 left-0 w-full flex justify-center z-10">
-                    <span className="bg-[#41C0A1] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                  
+                  {/* 상단 밀착 라벨 */}
+                  <div className="absolute top-0 left-0 w-full z-10">
+                    <div className="bg-[#41C0A1] text-white text-[10px] font-semibold py-[4px] text-center rounded-b-[0px] rounded-t-none shadow-sm">
                       {member.name} · 클립
-                    </span>
+                    </div>
                   </div>
+
                   <div className="absolute bottom-0 w-full pt-8 pb-3 bg-gradient-to-t from-black/80 to-transparent">
-                    <p className="text-white text-[12px] font-semibold text-center italic">{member.content}</p>
+                    <p className="text-white text-[10px] font-semibold text-center italic">{member.content}</p>
                   </div>
                 </div>
               ) : (
-                <div className="relative w-full aspect-[4/9] rounded-[16px] overflow-hidden shadow-md mt-[-14px] bg-gradient-to-b from-[#EAF9F4] to-[#BCEFE0] flex flex-col items-center border-[1.5px] border-white">
-                  <div className="absolute top-3 left-0 w-full flex justify-center z-10">
-                    <span className="bg-[#B39DDB] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                <div className="relative w-full aspect-[4/9] rounded-[16px] overflow-hidden shadow-sm flex flex-col items-center transform transition-transform hover:-translate-y-1">
+                  <div className="absolute inset-0 z-0">
+                    <Image 
+                      src="/highlight_longCard.png"
+                      alt="비공유 롱카드 배경"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+
+                  <div className="absolute top-0 left-0 w-full z-10">
+                    <div className="bg-[#B39DDB] text-white text-[10px] font-semibold py-[4px] text-center rounded-b-[0px] rounded-t-none shadow-sm">
                       비공유 · 완료
-                    </span>
+                    </div>
                   </div>
-                  <div className="mt-[50%] w-[50px] h-[50px] bg-gradient-to-tr from-[#91EAD0] to-[#E8F8F5] rounded-full flex items-center justify-center shadow-inner">
-                    <span className="text-2xl">👾</span>
+
+                  <div className="mt-auto mb-[2px] flex flex-col items-center w-full px-[4px] z-10">
+                    <span className="text-[13px] font-extrabold text-[#222222]">{member.name}</span>
+                    
+                    <div className="bg-white/80 rounded-[8px] px-[2px] py-1.5 flex items-center justify-center mt-[3px] w-full shadow-sm">
+                      <span className="text-[10px] text-[#5B3BC4] font-bold truncate tracking-tight">{member.content}</span>
+                    </div>
+                    <span className="text-[9px] text-[#888888] font-medium mt-[5px] mb-[11px]">{member.time}</span>
                   </div>
-                  <span className="text-[13px] font-extrabold text-[#222222] mt-3">{member.name}</span>
-                  <div className="bg-white/80 rounded-full px-2 py-1 flex items-center justify-center mt-1 w-[85%] shadow-sm">
-                    <span className="text-[#41C0A1] text-[10px] mr-1">💧</span>
-                    <span className="text-[9px] text-[#555555] font-bold truncate">{member.content}</span>
-                  </div>
-                  <span className="text-[9px] text-[#666666] font-medium mt-auto mb-3">{member.time}</span>
                 </div>
               )}
             </div>
@@ -214,7 +231,7 @@ export default function HighlightPage() {
         </div>
 
         {/* 썸네일 & 타임라인 플레이어 카드 */}
-        <div className="px-5 mt-6">
+        <div className="px-[16px] mt-[20px]">
           <div className="bg-white rounded-[24px] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.04)] w-full border border-gray-50 flex flex-col">
             <div className="flex gap-2 justify-between">
               {highlightData.members.map((m, idx) => (
@@ -222,7 +239,14 @@ export default function HighlightPage() {
                   {m.mediaUrl ? (
                     <div className="absolute inset-0 bg-cover bg-center opacity-80" style={{ backgroundImage: `url('${m.mediaUrl}')` }}></div>
                   ) : (
-                    <span className="text-lg">👾</span>
+                    <div className="absolute inset-0 z-0">
+                    <Image 
+                      src="/highlight_shortCard.png"
+                      alt="비공유 숏카드 배경"
+                      fill
+                      className="object-cover"
+                    />
+                    </div>
                   )}
                   <div className="absolute top-1 w-full flex justify-center">
                     <span className={`${m.type === 'clip' ? 'bg-[#41C0A1]' : 'bg-[#B39DDB]'} text-white text-[7px] font-bold px-1.5 py-[2px] rounded-full`}>
@@ -307,10 +331,10 @@ export default function HighlightPage() {
 
         {/* 안내 문구 */}
         <div className="flex flex-col items-center px-6 mt-6 gap-2">
-          <p className="text-[12px] text-[#555555] font-medium text-center leading-relaxed">
-            공유 멤버는 실제 클립으로, 비공유 멤버는 완료 카드로<br />AI가 자막을 더해 30초 하이라이트를 만들어요. ✨
+          <p className="text-[11px] text-[#555555] font-medium text-center leading-relaxed">
+            공유 멤버는 실제 클립으로, 비공유 멤버는 완료 카드로<br />AI가 자막을 더해 30초 하이라이트를 만들어요!
           </p>
-          <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#666666] font-medium mt-1">
+          <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#888888] font-medium mt-1">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0110 0v4" />
@@ -320,7 +344,7 @@ export default function HighlightPage() {
         </div>
 
         {/* 하단 액션 버튼 */}
-        <div className="flex flex-row w-full px-5 gap-3 mt-6">
+        <div className="flex flex-row w-full px-5 gap-[8px] mt-6">
           <button 
             onClick={() => {
               if (videoRef.current) {
@@ -329,18 +353,17 @@ export default function HighlightPage() {
                 setIsPlaying(true);
               }
             }}
-            className="flex-1 py-[14px] rounded-full border-[1.5px] border-[#E0E0E0] text-[#333333] font-bold text-[15px] bg-white hover:bg-gray-50 transition-colors"
+            className="flex-1 py-[12px] rounded-[14px] border-[1.5px] border-[#E0E0E0] text-[#333333] font-bold text-[15px] bg-white hover:bg-gray-50 transition-colors"
           >
             다시 보기
           </button>
           <button 
             onClick={() => alert("하이라이트 링크가 복사되었습니다!")}
-            className="flex-1 py-[14px] rounded-full text-white font-bold text-[15px] bg-[#41C0A1] hover:bg-[#38a88d] transition-colors shadow-sm"
+            className="flex-1 py-[12px] rounded-[14px] text-white font-bold text-[15px] bg-[#41C0A1] hover:bg-[#38a88d] transition-colors shadow-sm"
           >
             공유하기
           </button>
         </div>
-
       </div>
 
       {/* 하단 탭 바 (4개 탭 구조 통일) */}
