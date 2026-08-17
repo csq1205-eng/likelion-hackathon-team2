@@ -216,7 +216,7 @@ export default function WeeklyReportPage() {
               </svg>
             </div>
             <div className="flex flex-col">
-              <span className="text-[14px] font-bold text-[#5B3BC4]">21일 기록이 쌓이고 있어요</span>
+              <span className="text-[14px] font-bold text-[#5B3BC4]">{streakData.currentStreakDays}일 기록이 쌓이고 있어요</span>
               <span className="text-[12px] text-[#666666] font-medium mt-1 leading-snug">완주하면 행동 기록을 바탕으로 필요한 케어를 알려드려요.</span>
             </div>
           </div>

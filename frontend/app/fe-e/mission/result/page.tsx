@@ -52,10 +52,10 @@ export default function MissionResultPage() {
       }
     };
 
-    // 1. 컴포넌트 마운트 시 최초 1회 실행
+    // 컴포넌트 마운트 시 최초 1회 실행
     fetchResult();
 
-    // 2. 이후 2초(2000ms)마다 주기적으로 API 재요청 (폴링 기준)
+    // 이후 2초(2000ms)마다 주기적으로 API 재요청 (폴링 기준)
     pollingInterval = setInterval(fetchResult, 2000);
 
     // 컴포넌트 언마운트 시 인터벌 정리 (메모리 누수 방지)

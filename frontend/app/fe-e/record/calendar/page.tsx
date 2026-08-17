@@ -4,12 +4,23 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from "@/lib/auth/AuthProvider";
 
-// 14.2 지난 미션 달력 조회 응답 타입
+// 개별 미션 상세 타입
+interface MissionDetail {
+  id: number;
+  title: string;
+  completed: boolean;
+  type: 'walk' | 'water' | 'sleep' | 'general';
+  isGroup?: boolean;
+}
+
 interface DayHistory {
   date: string;
   completedMissionCount: number;
   totalMissionCount: number;
   completed: boolean;
+  personalCompleted?: boolean;
+  groupCompleted?: boolean;
+  missions?: MissionDetail[];
 }
 
 interface HistoryResponse {
@@ -19,7 +30,6 @@ interface HistoryResponse {
   days: DayHistory[];
 }
 
-// 14.1 연속 기록 조회 응답 타입
 interface StreakResponse {
   userId: number;
   currentStreakDays: number;
@@ -27,16 +37,31 @@ interface StreakResponse {
   lastCompletedDate: string;
 }
 
-// 통신 실패 또는 비로그인 시 보여줄 임시 데이터
+// 더미 데이터
 const FALLBACK_HISTORY: HistoryResponse = {
   userId: 1,
   year: 2026,
   month: 8,
   days: [
-    { date: "2026-08-03", completedMissionCount: 3, totalMissionCount: 3, completed: true },
-    { date: "2026-08-05", completedMissionCount: 3, totalMissionCount: 3, completed: true },
-    { date: "2026-08-10", completedMissionCount: 2, totalMissionCount: 3, completed: false },
-    { date: "2026-08-12", completedMissionCount: 3, totalMissionCount: 3, completed: true },
+    { date: "2026-08-03", completedMissionCount: 2, totalMissionCount: 2, completed: true, personalCompleted: true, groupCompleted: false }, // 개인만 완료 -> 민트색 원
+    { date: "2026-08-05", completedMissionCount: 2, totalMissionCount: 2, completed: true, personalCompleted: false, groupCompleted: true }, // 그룹만 완료 -> 보라색 원
+    { date: "2026-08-10", completedMissionCount: 0, totalMissionCount: 3, completed: false, personalCompleted: false, groupCompleted: false }, // 미완료 -> 회색 원
+    { 
+      date: "2026-08-12", completedMissionCount: 3, totalMissionCount: 4, completed: false, personalCompleted: true, groupCompleted: true, // 둘다 완료(그룹 우선) -> 보라색 원
+      missions: [
+        { id: 101, title: '20분 걷기', completed: true, type: 'walk', isGroup: false },
+        { id: 102, title: '물 2L 마시기', completed: true, type: 'water', isGroup: false },
+        { id: 103, title: '다같이 하루 1만보 걷기', completed: true, type: 'general', isGroup: true },
+        { id: 104, title: '밤 12시 전 취침', completed: false, type: 'sleep', isGroup: false }
+      ]
+    },
+    { date: "2026-08-14", completedMissionCount: 3, totalMissionCount: 3, completed: true, personalCompleted: true, groupCompleted: false },
+    { date: "2026-08-16", completedMissionCount: 3, totalMissionCount: 3, completed: true, personalCompleted: false, groupCompleted: true },
+    { date: "2026-08-18", completedMissionCount: 3, totalMissionCount: 3, completed: true, personalCompleted: true, groupCompleted: false },
+    { date: "2026-08-21", completedMissionCount: 3, totalMissionCount: 3, completed: true, personalCompleted: false, groupCompleted: true },
+    { date: "2026-08-24", completedMissionCount: 3, totalMissionCount: 3, completed: true, personalCompleted: true, groupCompleted: false },
+    { date: "2026-08-26", completedMissionCount: 3, totalMissionCount: 3, completed: true, personalCompleted: false, groupCompleted: true },
+    { date: "2026-08-30", completedMissionCount: 3, totalMissionCount: 3, completed: true, personalCompleted: true, groupCompleted: true },
   ]
 };
 
@@ -44,8 +69,10 @@ const FALLBACK_STREAK: StreakResponse = {
   userId: 1,
   currentStreakDays: 7,
   longestStreakDays: 14,
-  lastCompletedDate: "2026-08-03"
+  lastCompletedDate: "2026-08-12"
 };
+
+type FilterType = 'ALL' | 'COMPLETED' | 'INCOMPLETE';
 
 export default function MissionCalendarPage() {
   const router = useRouter();
@@ -55,9 +82,10 @@ export default function MissionCalendarPage() {
   const [streakData, setStreakData] = useState<StreakResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 연도/월 상태 관리 (기본값: 2026년 8월)
-  const [year] = useState(2026);
-  const [month] = useState(8);
+  const [year, setYear] = useState(2026);
+  const [month, setMonth] = useState(8);
+  const [selectedDate, setSelectedDate] = useState<string>("2026-08-12");
+  const [filter, setFilter] = useState<FilterType>('ALL');
 
   useEffect(() => {
     if (authLoading) return;
@@ -71,30 +99,20 @@ export default function MissionCalendarPage() {
 
     const fetchData = async () => {
       try {
-        // 14.1 연속 기록 조회 API
-        const streakRes = await fetch(`/api/v1/users/{userId}/streak`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
-        });
-        const streakResult = await streakRes.json();
-        if (streakRes.ok && streakResult.success) {
-          setStreakData(streakResult.data);
-        }
+        const [streakRes, historyRes] = await Promise.all([
+          fetch(`/api/v1/users/me/streak`, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` } }), 
+          fetch(`/api/v1/users/me/missions/history?year=${year}&month=${month}`, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` } })
+        ]);
 
-        // 14.2 지난 미션 달력 조회 API (Query 파라미터 year, month 포함)
-        const historyRes = await fetch(`/api/v1/users/{userId}/missions/history?year=${year}&month=${month}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
-        });
+        const streakResult = await streakRes.json();
         const historyResult = await historyRes.json();
-        if (historyRes.ok && historyResult.success) {
-          setHistoryData(historyResult.data);
-        } else {
-          throw new Error('달력 데이터를 불러오지 못했습니다.');
-        }
+
+        if (streakRes.ok && streakResult.success) setStreakData(streakResult.data);
+        if (historyRes.ok && historyResult.success) setHistoryData(historyResult.data);
+        else throw new Error('달력 데이터를 불러오지 못했습니다.');
 
       } catch (error) {
-        console.error("캘린더 API 연동 실패! 임시 데이터를 렌더링합니다:", error);
+        console.error("API 연동 실패! 임시 데이터를 렌더링합니다:", error);
         setHistoryData(FALLBACK_HISTORY);
         setStreakData(FALLBACK_STREAK);
       } finally {
@@ -105,21 +123,52 @@ export default function MissionCalendarPage() {
     fetchData();
   }, [authLoading, accessToken, year, month]);
 
-  // 임시 데이터
-  const calendarData = [
-    { day: 26, isCurrent: false, type: 'none' }, { day: 27, isCurrent: false, type: 'none' }, { day: 28, isCurrent: false, type: 'none' }, { day: 29, isCurrent: false, type: 'none' }, { day: 30, isCurrent: false, type: 'none' }, { day: 31, isCurrent: false, type: 'none' }, { day: 1, isCurrent: true, type: 'incomplete' },
-    { day: 2, isCurrent: true, type: 'incomplete' }, { day: 3, isCurrent: true, type: 'personal-group' }, { day: 4, isCurrent: true, type: 'incomplete' }, { day: 5, isCurrent: true, type: 'personal-group' }, { day: 6, isCurrent: true, type: 'incomplete' }, { day: 7, isCurrent: true, type: 'incomplete' }, { day: 8, isCurrent: true, type: 'incomplete' },
-    { day: 9, isCurrent: true, type: 'group-only' }, { day: 10, isCurrent: true, type: 'personal-group' }, { day: 11, isCurrent: true, type: 'incomplete' }, { day: 12, isCurrent: true, type: 'selected' }, { day: 13, isCurrent: true, type: 'incomplete' }, { day: 14, isCurrent: true, type: 'personal-group' }, { day: 15, isCurrent: true, type: 'incomplete' },
-    { day: 16, isCurrent: true, type: 'personal-group' }, { day: 17, isCurrent: true, type: 'incomplete' }, { day: 18, isCurrent: true, type: 'personal-group' }, { day: 19, isCurrent: true, type: 'incomplete' }, { day: 20, isCurrent: true, type: 'incomplete' }, { day: 21, isCurrent: true, type: 'personal-group' }, { day: 22, isCurrent: true, type: 'incomplete' },
-    { day: 23, isCurrent: true, type: 'incomplete' }, { day: 24, isCurrent: true, type: 'personal-group' }, { day: 25, isCurrent: true, type: 'incomplete' }, { day: 26, isCurrent: true, type: 'personal-group' }, { day: 27, isCurrent: true, type: 'incomplete' }, { day: 28, isCurrent: true, type: 'incomplete' }, { day: 29, isCurrent: true, type: 'incomplete' },
-    { day: 30, isCurrent: true, type: 'personal-group' }, { day: 31, isCurrent: true, type: 'incomplete' }, { day: 1, isCurrent: false, type: 'none' }, { day: 2, isCurrent: false, type: 'none' }, { day: 3, isCurrent: false, type: 'none' }, { day: 4, isCurrent: false, type: 'none' }, { day: 5, isCurrent: false, type: 'none' },
-  ];
+  const handlePrevMonth = () => {
+    if (month === 1) { setYear(prev => prev - 1); setMonth(12); }
+    else { setMonth(prev => prev - 1); }
+  };
+
+  const handleNextMonth = () => {
+    if (month === 12) { setYear(prev => prev + 1); setMonth(1); }
+    else { setMonth(prev => prev + 1); }
+  };
+
+  const generateCalendar = () => {
+    if (!historyData) return [];
+    const firstDay = new Date(year, month - 1, 1).getDay();
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const daysInPrevMonth = new Date(year, month - 1, 0).getDate();
+
+    const days = [];
+    for (let i = firstDay - 1; i >= 0; i--) {
+      days.push({ day: daysInPrevMonth - i, isCurrentMonth: false, dateStr: '' });
+    }
+    for (let i = 1; i <= daysInMonth; i++) {
+      const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+      const record = historyData.days.find(d => d.date === dateStr);
+      days.push({ day: i, isCurrentMonth: true, dateStr, record });
+    }
+    const remaining = 42 - days.length;
+    for (let i = 1; i <= remaining; i++) {
+      days.push({ day: i, isCurrentMonth: false, dateStr: '' });
+    }
+    return days;
+  };
+
+  const calendarDays = generateCalendar();
+  const selectedDayInfo = historyData?.days.find(d => d.date === selectedDate);
+
+  const filteredMissions = selectedDayInfo?.missions?.filter(mission => {
+    if (filter === 'ALL') return true;
+    if (filter === 'COMPLETED') return mission.completed;
+    if (filter === 'INCOMPLETE') return !mission.completed;
+    return true;
+  });
 
   if (isLoading || !historyData) {
     return (
       <div className="flex flex-col w-full h-[100dvh] items-center justify-center bg-white">
         <div className="w-8 h-8 border-4 border-[#41C0A1] border-t-transparent rounded-full animate-spin mb-3"></div>
-        <p className="text-sm text-[#999]">기록을 불러오는 중...</p>
       </div>
     );
   }
@@ -127,123 +176,172 @@ export default function MissionCalendarPage() {
   return (
     <div className="relative w-full h-[100dvh] bg-white flex flex-col overflow-hidden">
       
-      {/* 본문 스크롤 영역 */}
-      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-5 pt-6 pb-[100px] flex flex-col">
+      {/* 상단 헤더 */}
+      <div className="flex items-center justify-center relative bg-white pt-6 pb-4 shrink-0">
+        <button onClick={() => router.back()} 
+          className="absolute left-5 text-[22px] font-bold text-black">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <h1 className="text-[18px] font-extrabold text-[#000000]">지난 미션</h1>
+        <button className="absolute right-5 text-black">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16h6" strokeLinecap="round"/></svg>
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-5 pt-2 pb-[100px] flex flex-col">
         
-        {/* 1. 상단 헤더 */}
-        <div className="flex items-center justify-center relative bg-white pb-6 shrink-0">
-          <button onClick={() => router.back()} className="absolute left-1 top-0 text-[22px] font-bold text-black">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 18l-6-6 6-6"/>
-            </svg>
-          </button>
-          <h1 className="text-[18px] font-extrabold text-[#000000]">지난 미션</h1>
-          <button className="absolute right-1 top-0 text-black">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
-              <path d="M9 16h6" strokeLinecap="round"/>
-            </svg>
-          </button>
+        {/* 월 이동 네비게이션 */}
+        <div className="flex items-center justify-between px-2 mb-6 shrink-0">
+          <button onClick={handlePrevMonth} className="p-2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <span className="text-[17px] font-bold text-[#222222]">{year}년 {month}월</span>
+          <button onClick={handleNextMonth} className="p-2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 18l6-6-6-6"/></svg></button>
         </div>
 
-        {/* 2. 월 이동 네비게이션 */}
-        <div className="flex items-center justify-between px-4 mb-5 shrink-0">
-          <button className="p-2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>
-          <span className="text-[16px] font-extrabold text-[#222222]">{historyData.year}년 {historyData.month}월</span>
-          <button className="p-2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 18l6-6-6-6"/></svg></button>
+        {/* 슬라이드 형식 필터 탭 */}
+        <div className="flex bg-[#F9F9F9] rounded-full p-1 mb-8 shrink-0 relative">
+          <button onClick={() => setFilter('ALL')} className={`flex-1 py-[8px] rounded-full text-[13px] font-bold transition-all duration-300 ${filter === 'ALL' ? 'bg-[#A7FBE7] text-[#222222] shadow-sm' : 'text-[#888888]'}`}>전체</button>
+          <button onClick={() => setFilter('COMPLETED')} className={`flex-1 py-[8px] rounded-full text-[13px] font-bold transition-all duration-300 ${filter === 'COMPLETED' ? 'bg-[#A7FBE7] text-[#222222] shadow-sm' : 'text-[#888888]'}`}>완료</button>
+          <button onClick={() => setFilter('INCOMPLETE')} className={`flex-1 py-[8px] rounded-full text-[13px] font-bold transition-all duration-300 ${filter === 'INCOMPLETE' ? 'bg-[#A7FBE7] text-[#222222] shadow-sm' : 'text-[#888888]'}`}>미완료</button>
         </div>
 
-        {/* 연속 기록 배지 (API 14.1 연동) */}
-        {streakData && (
-          <div className="mb-4 px-4 py-2 bg-[#F0FCF9] rounded-[12px] flex items-center justify-between">
-            <span className="text-[13px] font-bold text-[#41C0A1]">🔥 연속 완료 기록</span>
-            <span className="text-[14px] font-extrabold text-[#222222]">{streakData.currentStreakDays}일째 달성 중! (최고 {streakData.longestStreakDays}일)</span>
-          </div>
-        )}
-
-        {/* 3. 필터 탭 */}
-        <div className="flex bg-[#F9F9F9] rounded-full p-1 mb-6 shrink-0">
-          <button className="flex-1 py-[10px] bg-[#A7FBE7] rounded-full text-[14px] font-extrabold text-[#222222] shadow-sm">전체</button>
-          <button className="flex-1 py-[10px] text-[14px] font-bold text-[#666666]">완료</button>
-          <button className="flex-1 py-[10px] text-[14px] font-bold text-[#666666]">미완료</button>
-        </div>
-
-        {/* 4. 달력 요일 헤더 */}
-        <div className="grid grid-cols-7 text-center mb-4 shrink-0">
+        {/* 달력 요일 헤더 */}
+        <div className="grid grid-cols-7 text-center mb-5 shrink-0">
           {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
-            <span key={idx} className="text-[13px] font-bold text-[#666666]">{day}</span>
+            <span key={idx} className="text-[12px] font-medium text-[#888888]">{day}</span>
           ))}
         </div>
 
-        {/* 5. 달력 그리드 */}
+        {/* 동적 달력 그리드 */}
         <div className="grid grid-cols-7 gap-y-6 gap-x-1 shrink-0 mb-6">
-          {calendarData.map((item, index) => (
-            <div key={index} className="flex flex-col items-center relative">
-              <div className={`w-[32px] h-[32px] rounded-full flex items-center justify-center text-[14px] font-bold relative z-10
-                ${!item.isCurrent ? 'text-[#D0D0D0]' : 'text-[#333333]'}
-                ${item.type === 'incomplete' || item.type === 'group-only' ? 'bg-[#F5F5F5]' : ''}
-                ${item.type === 'personal-group' ? 'bg-[#A7FBE7]' : ''}
-                ${item.type === 'selected' ? 'border-[1.5px] border-[#41C0A1] text-[#222222]' : ''}
-              `}>
-                {item.day}
-              </div>
+          {calendarDays.map((item, index) => {
+            const isSelected = item.dateStr === selectedDate;
+            const hasRecord = !!item.record;
+            
+            // 필터링 적용 로직
+            let isPersonalCompleted = item.record?.personalCompleted || false;
+            let isGroupCompleted = item.record?.groupCompleted || false;
+            let hasIncomplete = hasRecord && item.record!.completedMissionCount < item.record!.totalMissionCount;
+
+            let showMintBg = false;
+            let showPurpleBg = false;
+            let showGrayBg = false;
+
+            if (hasRecord) {
+              if (filter === 'ALL') {
+                if (isGroupCompleted) showPurpleBg = true;
+                else if (isPersonalCompleted) showMintBg = true;
+                else if (hasIncomplete) showGrayBg = true;
+              } else if (filter === 'COMPLETED') {
+                if (isGroupCompleted) showPurpleBg = true;
+                else if (isPersonalCompleted) showMintBg = true;
+              } else if (filter === 'INCOMPLETE') {
+                if (hasIncomplete) showGrayBg = true;
+              }
+            }
+
+            let circleClass = "w-[34px] h-[34px] rounded-full flex items-center justify-center text-[14px] font-medium transition-all mx-auto ";
+            if (!item.isCurrentMonth) {
+              circleClass += "text-[#D0D0D0] cursor-default";
+            } else {
+              circleClass += "text-[#333333] cursor-pointer ";
               
-              <div className="absolute -bottom-[8px] flex gap-[2px] z-20">
-                {item.type === 'personal-group' && <span className="w-[4px] h-[4px] rounded-full bg-[#B39DDB]"></span>}
-                {item.type === 'group-only' && <span className="w-[4px] h-[4px] rounded-full bg-[#B39DDB]"></span>}
-                {item.type === 'selected' && (
-                  <>
-                    <span className="w-[5px] h-[5px] rounded-full bg-[#41C0A1] border-[1px] border-white"></span>
-                    <span className="w-[5px] h-[5px] rounded-full bg-[#B39DDB] border-[1px] border-white"></span>
-                  </>
-                )}
+              if (isSelected) {
+                circleClass += "border-[1.5px] border-[#41C0A1] ";
+              }
+              
+              if (showPurpleBg) circleClass += "bg-[#EADDFF]";
+              else if (showMintBg) circleClass += "bg-[#A7FBE7]";
+              else if (showGrayBg) circleClass += "bg-[#F5F5F5]";
+              else if (isSelected) circleClass += "bg-white";
+            }
+
+            return (
+              <div key={index} className="flex flex-col items-center justify-center" onClick={() => item.isCurrentMonth && setSelectedDate(item.dateStr)}>
+                <div className={circleClass}>
+                  {item.day}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* 범례 */}
-        <div className="flex items-center justify-center gap-4 mt-2 mb-8 shrink-0">
+        {/* 하단 범례 */}
+        <div className="flex items-center justify-center gap-5 mt-2 mb-8 shrink-0">
           <div className="flex items-center gap-1.5">
-            <span className="w-[8px] h-[8px] rounded-full bg-[#A7FBE7]"></span>
-            <span className="text-[12px] font-bold text-[#666666]">개인 완료</span>
+            <span className="w-[12px] h-[12px] rounded-full bg-[#A7FBE7]"></span>
+            <span className="text-[12px] font-medium text-[#888888]">개인 완료</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-[8px] h-[8px] rounded-full bg-[#B39DDB]"></span>
-            <span className="text-[12px] font-bold text-[#666666]">그룹 완료</span>
+            <span className="w-[12px] h-[12px] rounded-full bg-[#EADDFF]"></span>
+            <span className="text-[12px] font-medium text-[#888888]">그룹 완료</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-[8px] h-[8px] rounded-full bg-[#F5F5F5]"></span>
-            <span className="text-[12px] font-bold text-[#666666]">미완료</span>
+            <span className="w-[12px] h-[12px] rounded-full bg-[#F5F5F5]"></span>
+            <span className="text-[12px] font-medium text-[#888888]">미완료</span>
           </div>
         </div>
 
         {/* 하단 상세 내역 카드 */}
-        <div className="bg-[#F4FBF9] rounded-[24px] p-5 flex flex-col shrink-0 mt-auto border border-gray-50">
-          <div className="flex justify-between items-end mb-5">
-            <span className="text-[16px] font-extrabold text-[#222222]">8월 12일 수요일</span>
-            <span className="text-[13px] font-bold text-[#41C0A1]">3 / 3 완료</span>
+        <div className="bg-[#F9F9F9] rounded-[24px] p-5 flex flex-col shrink-0 mt-auto">
+          <div className="flex justify-between items-center mb-5">
+            <span className="text-[16px] font-bold text-[#222222]">
+              {selectedDate ? `${month}월 ${parseInt(selectedDate.split('-')[2])}일` : '날짜를 선택해주세요'}
+            </span>
+            {selectedDayInfo && (
+              <span className="text-[13px] font-bold text-[#41C0A1]">
+                {selectedDayInfo.completedMissionCount} / {selectedDayInfo.totalMissionCount} 완료
+              </span>
+            )}
           </div>
           
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-[32px] h-[32px] rounded-full bg-[#E5F7F1] flex items-center justify-center text-[#41C0A1]">
-                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <div className="flex flex-col gap-1">
+            {filteredMissions && filteredMissions.length > 0 ? (
+              filteredMissions.map((mission) => (
+                <div 
+                  key={mission.id} 
+                  onClick={() => router.push(`/fe-e/record/detail/${mission.id}`)}
+                  className="flex items-center justify-between py-2 cursor-pointer group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={`w-[32px] h-[32px] rounded-full flex items-center justify-center text-[#222222] ${mission.completed ? (mission.isGroup ? 'bg-[#F3EDFF]' : 'bg-[#E5F7F1]') : 'bg-gray-200 text-gray-500'}`}>
+                      {mission.type === 'walk' ? (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/><path d="M14 8l-2-2-2 2v6l-2 2"/><path d="M12 14l2 2v6"/></svg>
+                      ) : mission.type === 'water' ? (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                      ) : (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                      )}
+                    </div>
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[15px] font-bold transition-colors ${mission.completed ? 'text-[#222222]' : 'text-[#888888] group-hover:text-gray-500'}`}>
+                          {mission.title}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {mission.completed && (
+                    <svg 
+                      width="22" 
+                      height="22" 
+                      viewBox="0 0 24 24" 
+                      fill={mission.isGroup ? "#B39DDB" : "#41C0A1"}
+                    >
+                      <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1.177-7.86l-2.765-2.767L7 12.431l3.823 3.824 7.653-7.568-1.06-1.06-6.593 6.513z"/>
+                    </svg>
+                  )}
                 </div>
-                <span className="text-[14px] font-bold text-[#333333]">20분 걷기</span>
-              </div>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#41C0A1"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1.177-7.86l-2.765-2.767L7 12.431l3.823 3.824 7.653-7.568-1.06-1.06-6.593 6.513z"/></svg>
-            </div>
+              ))
+            ) : (
+              <p className="text-[13px] text-[#999999] py-4 text-center">조건에 맞는 미션이 없습니다.</p>
+            )}
           </div>
         </div>
 
       </div>
 
-      {/* 4개 탭 구조의 하단 탭바 */}
+      {/* 하단 탭바 */}
       <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 flex justify-between items-center px-5 pt-4 pb-5 z-50">
         <TabIcon icon="users" label="그룹" onClick={() => router.push('/fe-e/group')} />
         <TabIcon icon="check" label="미션" onClick={() => router.push('/fe-d/mission')} />
@@ -259,7 +357,7 @@ function TabIcon({ icon, label, isActive = false, onClick }: { icon: string, lab
   return (
     <div onClick={onClick} className={`flex flex-col items-center justify-center gap-1 cursor-pointer w-12 ${colorClass}`}>
       {icon === 'users' && <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
-      {icon === 'check' && <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>}
+      {icon === 'check' && <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>}
       {icon === 'leaf' && <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>}
       {icon === 'bar-chart' && <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4 10h3v10H4zM10 4h3v16h-3zM16 14h3v6h-3z" /></svg>}
       <span className="text-[10px] font-bold">{label}</span>

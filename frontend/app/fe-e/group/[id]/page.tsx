@@ -92,7 +92,7 @@ export default function GroupMainFeedPage() {
   return (
     <div className="flex flex-col w-full h-[100dvh] relative bg-[#F9F9F9] overflow-hidden">
       
-      {/* 1. 상단 헤더 */}
+      {/* 상단 헤더 */}
       <div className="bg-white px-5 py-4 flex items-center shrink-0 z-10 shadow-sm">
         <button onClick={() => router.back()} 
             className="absolute top-[21px] text-[22px] font-bold text-black">
@@ -113,7 +113,7 @@ export default function GroupMainFeedPage() {
 
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-5 py-6 flex flex-col gap-6">
          
-        {/* 2. 오늘의 미션 영역 */}
+        {/* 오늘의 미션 영역 */}
         <div className="bg-white rounded-[20px] p-5 shadow-sm">
           <h2 className="text-[13px] text-[#41C0A1] font-bold mb-1">오늘의 미션</h2>
           <p className="text-[18px] font-bold text-[#222222] mb-5">
