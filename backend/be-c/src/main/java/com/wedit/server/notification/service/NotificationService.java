@@ -4,6 +4,8 @@ import com.wedit.server.common.CustomException;
 import com.wedit.server.common.ErrorCode;
 import com.wedit.server.notification.domain.Notification;
 import com.wedit.server.notification.domain.PushDeviceToken;
+import com.wedit.server.notification.dto.NotificationCreateRequest;
+import com.wedit.server.notification.dto.NotificationCreateResponse;
 import com.wedit.server.notification.dto.NotificationItemResponse;
 import com.wedit.server.notification.dto.NotificationListResponse;
 import com.wedit.server.notification.dto.NotificationReadResponse;
@@ -62,6 +64,27 @@ public class NotificationService {
                 .stream()
                 .map(this::toNotificationItemResponse)
                 .toList());
+    }
+
+    @Transactional
+    public NotificationCreateResponse createNotification(Long userId, NotificationCreateRequest request) {
+        User user = findUser(userId);
+        Notification notification = notificationRepository.save(Notification.create(
+                user,
+                request.title(),
+                request.body(),
+                request.notificationType()
+        ));
+
+        return new NotificationCreateResponse(
+                notification.getId(),
+                notification.getUser().getId(),
+                notification.getTitle(),
+                notification.getBody(),
+                notification.getNotificationType(),
+                notification.isRead(),
+                notification.getCreatedAt()
+        );
     }
 
     @Transactional

@@ -7,6 +7,8 @@ import com.wedit.server.mission.domain.MissionStatus;
 import com.wedit.server.mission.dto.MissionResultCreateRequest;
 import com.wedit.server.mission.dto.TodayMissionResponse;
 import com.wedit.server.mission.repository.MissionRepository;
+import com.wedit.server.point.dto.PointResponse;
+import com.wedit.server.point.service.PointService;
 import com.wedit.server.user.domain.SocialProvider;
 import com.wedit.server.user.domain.User;
 import com.wedit.server.user.repository.UserRepository;
@@ -30,6 +32,9 @@ class MissionServiceTest {
     @Autowired
     private MissionRepository missionRepository;
 
+    @Autowired
+    private PointService pointService;
+
     @Test
     @DisplayName("오늘 저장된 미션을 조회하고 저장된 ID를 missionId로 반환한다")
     void getTodayMissions() {
@@ -48,7 +53,8 @@ class MissionServiceTest {
                 "아침 물 한 잔 마시기",
                 "기상 후 물을 마시고 인증 클립을 제출해 주세요.",
                 "HYDRATION",
-                "사용자가 물을 마시는 장면이 확인되어야 합니다."
+                "사용자가 물을 마시는 장면이 확인되어야 합니다.",
+                "최근 수분 섭취량이 낮게 입력되어 추천되었습니다."
         ));
 
         TodayMissionResponse response = missionService.getTodayMissions(user.getId());
@@ -61,6 +67,7 @@ class MissionServiceTest {
         assertThat(response.missions().get(0).missionType()).isEqualTo("HYDRATION");
         assertThat(response.missions().get(0).verificationCriteria()).isEqualTo("사용자가 물을 마시는 장면이 확인되어야 합니다.");
         assertThat(response.missions().get(0).status()).isEqualTo("PENDING");
+        assertThat(response.missions().get(0).reason()).isEqualTo("최근 수분 섭취량이 낮게 입력되어 추천되었습니다.");
     }
 
     @Test
@@ -96,5 +103,55 @@ class MissionServiceTest {
         ));
 
         assertThat(mission.getStatus()).isEqualTo(MissionStatus.PASSED);
+    }
+
+    @Test
+    @DisplayName("미션 판정 결과가 PASS이면 포인트를 적립하고 같은 미션은 중복 적립하지 않는다")
+    void saveMissionResultEarnsPointOnce() {
+        User user = userRepository.save(User.create(
+                SocialProvider.KAKAO,
+                "kakao-point-user",
+                "point@example.com",
+                "정효림",
+                null
+        ));
+        Mission mission = missionRepository.save(Mission.create(
+                user,
+                null,
+                LocalDate.now(),
+                "MORNING",
+                "아침 물 한 잔 마시기",
+                "기상 후 물을 마시고 인증 클립을 제출해 주세요.",
+                "HYDRATION",
+                "사용자가 물을 마시는 장면이 확인되어야 합니다."
+        ));
+
+        missionService.saveMissionResult(new MissionResultCreateRequest(
+                mission.getId(),
+                101L,
+                "PASS",
+                "물을 마시는 장면이 확인되었습니다.",
+                null,
+                null,
+                null,
+                null
+        ));
+        missionService.saveMissionResult(new MissionResultCreateRequest(
+                mission.getId(),
+                102L,
+                "PASS",
+                "재판정에서도 통과했습니다.",
+                null,
+                null,
+                null,
+                null
+        ));
+
+        PointResponse response = pointService.getPoints(user.getId());
+
+        assertThat(response.balance()).isEqualTo(100);
+        assertThat(response.totalEarned()).isEqualTo(100);
+        assertThat(response.recentTransactions()).hasSize(1);
+        assertThat(response.recentTransactions().get(0).transactionType()).isEqualTo("EARN");
     }
 }

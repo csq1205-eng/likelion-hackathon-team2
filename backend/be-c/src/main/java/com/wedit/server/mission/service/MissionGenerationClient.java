@@ -1,5 +1,7 @@
 package com.wedit.server.mission.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wedit.server.common.ApiResponse;
 import com.wedit.server.common.CustomException;
 import com.wedit.server.common.ErrorCode;
@@ -20,18 +22,22 @@ public class MissionGenerationClient {
 
     private final RestClient restClient;
     private final String internalKey;
+    private final ObjectMapper objectMapper;
 
     public MissionGenerationClient(
             RestClient.Builder restClientBuilder,
             @Value("${app.ai.be-a.base-url:http://localhost:8001}") String baseUrl,
-            @Value("${app.ai.internal-key:}") String internalKey
+            @Value("${app.ai.internal-key:}") String internalKey,
+            ObjectMapper objectMapper
     ) {
         this.restClient = restClientBuilder.baseUrl(baseUrl).build();
         this.internalKey = internalKey;
+        this.objectMapper = objectMapper;
     }
 
     public AiMissionGenerateResponse generate(AiMissionGenerateRequest request) {
         try {
+            String requestBody = toRequestBody(request);
             ApiResponse<AiMissionGenerateResponse> response = restClient.post()
                     .uri("/api/ai/missions/generate")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -41,7 +47,7 @@ public class MissionGenerationClient {
                             headers.set(INTERNAL_KEY_HEADER, internalKey);
                         }
                     })
-                    .body(request)
+                    .body(requestBody)
                     .retrieve()
                     .body(new ParameterizedTypeReference<>() {
                     });
@@ -60,6 +66,14 @@ public class MissionGenerationClient {
             );
         } catch (RestClientException exception) {
             throw new CustomException(ErrorCode.AI_INTEGRATION_FAILED, "BE A 미션 생성 API 호출에 실패했습니다.");
+        }
+    }
+
+    private String toRequestBody(AiMissionGenerateRequest request) {
+        try {
+            return objectMapper.writeValueAsString(request);
+        } catch (JsonProcessingException exception) {
+            throw new CustomException(ErrorCode.AI_INTEGRATION_FAILED, "BE A 미션 생성 요청 변환에 실패했습니다.");
         }
     }
 }

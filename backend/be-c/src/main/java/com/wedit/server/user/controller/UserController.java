@@ -7,11 +7,19 @@ import com.wedit.server.common.ErrorCode;
 import com.wedit.server.highlight.dto.HighlightListResponse;
 import com.wedit.server.highlight.service.HighlightService;
 import com.wedit.server.notification.dto.NotificationListResponse;
+import com.wedit.server.notification.dto.NotificationCreateRequest;
+import com.wedit.server.notification.dto.NotificationCreateResponse;
 import com.wedit.server.notification.dto.PushTokenRequest;
 import com.wedit.server.notification.dto.PushTokenResponse;
 import com.wedit.server.notification.service.NotificationService;
 import com.wedit.server.point.dto.PointResponse;
 import com.wedit.server.point.service.PointService;
+import com.wedit.server.product.domain.ProductRecommendationType;
+import com.wedit.server.product.dto.ProductRecommendationCreateResponse;
+import com.wedit.server.product.dto.ProductRecommendationListResponse;
+import com.wedit.server.product.service.ProductRecommendationService;
+import com.wedit.server.reward.dto.RewardGrantListResponse;
+import com.wedit.server.reward.service.RewardService;
 import com.wedit.server.user.dto.ConsentRequest;
 import com.wedit.server.user.dto.ConsentResponse;
 import com.wedit.server.user.dto.MissionHistoryResponse;
@@ -52,6 +60,8 @@ public class UserController {
     private final PointService pointService;
     private final HighlightService highlightService;
     private final NotificationService notificationService;
+    private final ProductRecommendationService productRecommendationService;
+    private final RewardService rewardService;
     private final TemporaryAccessTokenResolver temporaryAccessTokenResolver;
 
     public UserController(
@@ -62,6 +72,8 @@ public class UserController {
             PointService pointService,
             HighlightService highlightService,
             NotificationService notificationService,
+            ProductRecommendationService productRecommendationService,
+            RewardService rewardService,
             TemporaryAccessTokenResolver temporaryAccessTokenResolver
     ) {
         this.userConsentService = userConsentService;
@@ -71,6 +83,8 @@ public class UserController {
         this.pointService = pointService;
         this.highlightService = highlightService;
         this.notificationService = notificationService;
+        this.productRecommendationService = productRecommendationService;
+        this.rewardService = rewardService;
         this.temporaryAccessTokenResolver = temporaryAccessTokenResolver;
     }
 
@@ -150,6 +164,56 @@ public class UserController {
         return ApiResponse.success(pointService.getPoints(userId));
     }
 
+    @GetMapping("/{userId}/reward-grants")
+    @SecurityRequirement(name = "bearerAuth")
+    public ApiResponse<RewardGrantListResponse> getRewardGrants(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @PathVariable Long userId
+    ) {
+        validateRequester(authorizationHeader, userId);
+
+        return ApiResponse.success(rewardService.getRewardGrants(userId));
+    }
+
+    @GetMapping("/{userId}/product-recommendations")
+    @SecurityRequirement(name = "bearerAuth")
+    public ApiResponse<ProductRecommendationListResponse> getProductRecommendations(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @PathVariable Long userId,
+            @RequestParam(required = false) ProductRecommendationType type
+    ) {
+        validateRequester(authorizationHeader, userId);
+
+        return ApiResponse.success(productRecommendationService.getRecommendations(userId, type));
+    }
+
+    @PostMapping("/{userId}/product-recommendations/missing-products")
+    @SecurityRequirement(name = "bearerAuth")
+    public ApiResponse<ProductRecommendationCreateResponse> createMissingProductRecommendations(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @PathVariable Long userId
+    ) {
+        validateRequester(authorizationHeader, userId);
+
+        return ApiResponse.success(productRecommendationService.createMissingProductRecommendations(userId));
+    }
+
+    @PostMapping("/{userId}/groups/{groupId}/product-recommendations/commerce")
+    @SecurityRequirement(name = "bearerAuth")
+    public ApiResponse<ProductRecommendationCreateResponse> createCommerceRecommendations(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @PathVariable Long userId,
+            @PathVariable Long groupId
+    ) {
+        validateRequester(authorizationHeader, userId);
+
+        return ApiResponse.success(productRecommendationService.createCommerceRecommendations(userId, groupId));
+    }
+
     @GetMapping("/{userId}/highlights")
     @SecurityRequirement(name = "bearerAuth")
     public ApiResponse<HighlightListResponse> getHighlights(
@@ -185,6 +249,19 @@ public class UserController {
         validateRequester(authorizationHeader, userId);
 
         return ApiResponse.success(notificationService.getNotifications(userId));
+    }
+
+    @PostMapping("/{userId}/notifications")
+    @SecurityRequirement(name = "bearerAuth")
+    public ApiResponse<NotificationCreateResponse> createNotification(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @PathVariable Long userId,
+            @Valid @RequestBody NotificationCreateRequest request
+    ) {
+        validateRequester(authorizationHeader, userId);
+
+        return ApiResponse.success(notificationService.createNotification(userId, request));
     }
 
     private void validateRequester(String authorizationHeader, Long userId) {

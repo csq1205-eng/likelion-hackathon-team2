@@ -52,6 +52,9 @@ public class Mission {
     @Column(name = "verification_criteria", length = 1000)
     private String verificationCriteria;
 
+    @Column(length = 500)
+    private String reason;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private MissionStatus status;
@@ -73,7 +76,8 @@ public class Mission {
             String title,
             String description,
             String missionType,
-            String verificationCriteria
+            String verificationCriteria,
+            String reason
     ) {
         this.user = user;
         this.group = group;
@@ -83,6 +87,7 @@ public class Mission {
         this.description = description;
         this.missionType = missionType;
         this.verificationCriteria = verificationCriteria;
+        this.reason = reason;
         this.status = MissionStatus.PENDING;
     }
 
@@ -95,7 +100,7 @@ public class Mission {
             String description,
             String missionType
     ) {
-        return new Mission(user, group, missionDate, slot, title, description, missionType, null);
+        return new Mission(user, group, missionDate, slot, title, description, missionType, null, null);
     }
 
     public static Mission create(
@@ -108,7 +113,21 @@ public class Mission {
             String missionType,
             String verificationCriteria
     ) {
-        return new Mission(user, group, missionDate, slot, title, description, missionType, verificationCriteria);
+        return new Mission(user, group, missionDate, slot, title, description, missionType, verificationCriteria, null);
+    }
+
+    public static Mission create(
+            User user,
+            Group group,
+            LocalDate missionDate,
+            String slot,
+            String title,
+            String description,
+            String missionType,
+            String verificationCriteria,
+            String reason
+    ) {
+        return new Mission(user, group, missionDate, slot, title, description, missionType, verificationCriteria, reason);
     }
 
     @PrePersist
@@ -157,6 +176,10 @@ public class Mission {
 
     public String getVerificationCriteria() {
         return verificationCriteria;
+    }
+
+    public String getReason() {
+        return reason;
     }
 
     public MissionStatus getStatus() {

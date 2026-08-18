@@ -46,6 +46,17 @@ public class Notification {
     protected Notification() {
     }
 
+    private Notification(User user, String title, String body, String notificationType) {
+        this.user = user;
+        this.title = title;
+        this.body = body;
+        this.notificationType = notificationType;
+    }
+
+    public static Notification create(User user, String title, String body, String notificationType) {
+        return new Notification(user, title, body, notificationType);
+    }
+
     public void read() {
         if (this.read) {
             return;
