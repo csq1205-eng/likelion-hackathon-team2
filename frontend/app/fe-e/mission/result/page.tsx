@@ -1,16 +1,15 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 
-export default function MissionResultPage() {
+function MissionResultInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const missionId = searchParams.get('missionId') || '1';
 
   const [isSuccess, setIsSuccess] = useState(false); 
   const [retryCount, setRetryCount] = useState(2);
-
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -147,5 +146,17 @@ export default function MissionResultPage() {
       </div>
 
     </div>
+  );
+}
+
+export default function MissionResultPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col w-full h-[100dvh] items-center justify-center bg-white">
+        <div className="w-8 h-8 border-4 border-[#A7FBE7] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    }>
+      <MissionResultInner />
+    </Suspense>
   );
 }

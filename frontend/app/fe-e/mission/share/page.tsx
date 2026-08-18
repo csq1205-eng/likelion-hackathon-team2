@@ -1,11 +1,10 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 
-export default function MissionSharePage() {
+function MissionShareInner() {
   const router = useRouter();
-  
   const searchParams = useSearchParams();
   const clipId = searchParams.get('clipId') || '1';
   const groupId = searchParams.get('groupId') || '1';
@@ -87,5 +86,17 @@ export default function MissionSharePage() {
       </div>
 
     </div>
+  );
+}
+
+export default function MissionSharePage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col w-full h-[100dvh] items-center justify-center bg-white">
+        <div className="w-8 h-8 border-4 border-[#A7FBE7] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    }>
+      <MissionShareInner />
+    </Suspense>
   );
 }
