@@ -76,6 +76,11 @@ export default function HighlightArchivePage() {
     fetchHighlights();
   }, [authLoading, accessToken]);
 
+  const handleGardenClick = () => {
+    const savedGroupId = typeof window !== 'undefined' ? localStorage.getItem('myGroupId') || '1' : '1';
+    router.push(`/fe-d/${savedGroupId}/garden`);
+  };
+
   if (isLoading || !archiveData) {
     return (
       <div className="flex flex-col w-full h-[100dvh] items-center justify-center bg-white">
@@ -204,7 +209,7 @@ export default function HighlightArchivePage() {
       <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 flex justify-between items-center px-6 pt-3 pb-5 z-50">
         <TabIcon icon="users" label="그룹" onClick={() => router.push('/fe-e/group')} />
         <TabIcon icon="check" label="미션" onClick={() => router.push('/fe-d/mission')} />
-        <TabIcon icon="leaf" label="W 정원" onClick={() => router.push('/fe-d/[id]/garden')} />
+        <TabIcon icon="leaf" label="W 정원" onClick={handleGardenClick} />
         <TabIcon icon="bar-chart" label="기록" isActive onClick={() => router.push('/fe-e/record/report')} />
       </div>
     </div>

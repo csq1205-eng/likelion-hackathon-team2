@@ -70,10 +70,10 @@ export default function PointRewardPage() {
     const fetchPoints = async () => {
       try {
         const [pointsRes, streakRes] = await Promise.all([
-          fetch(`/api/v1/users/{userId}/points`, {
+          fetch('/api/v1/users/{userId}/points', {
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` }
           }),
-          fetch('/api/v1/users/{userId}/streak', {
+          fetch(`/api/v1/users/{userId}/streak`, {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` }
           })
         ]);
@@ -106,6 +106,11 @@ export default function PointRewardPage() {
 
     fetchPoints();
   }, [authLoading, accessToken]);
+
+  const handleGardenClick = () => {
+    const savedGroupId = typeof window !== 'undefined' ? localStorage.getItem('myGroupId') || '1' : '1';
+    router.push(`/fe-d/${savedGroupId}/garden`);
+  };
 
   if (isLoading || !pointData || !streakData) {
     return (
@@ -145,7 +150,7 @@ export default function PointRewardPage() {
         className="absolute left-5 text-[22px] font-bold text-[#A0A0A0] mt-[14px]"
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M15 18l-6-6 6-6"/>s
+          <path d="M15 18l-6-6 6-6"/>
         </svg>
       </button>
       <h1 className="text-[18px] font-bold text-[#000000] text-center mt-[12px] mb-[12px]">포인트</h1>
@@ -155,7 +160,7 @@ export default function PointRewardPage() {
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pt-[12px] pb-[100px] flex flex-col gap-4">
         
         {/* 보유 포인트 카드 */}
-        <div className="relative bg-gradient-to-r from-[#F0F9F7] to-[#F4FAF9i] rounded-[16px] p-[10px] flex flex-col justify-center overflow-hidden shadow-sm shrink-0">
+        <div className="relative bg-gradient-to-r from-[#F0F9F7] to-[#F4FAF9] rounded-[16px] p-[10px] flex flex-col justify-center overflow-hidden shadow-sm shrink-0">
           <Image 
               src="/bg_point_have.jpg"
               alt="포인트 bg"
@@ -191,7 +196,7 @@ export default function PointRewardPage() {
         {/* 맞춤 케어 추천 영역 */}
         <div className="mt-2 flex flex-col shrink-0">
           <h2 className="text-[15px] font-extrabold text-[#000000]">{streakData.currentStreakDays}일 기록으로 찾은 맞춤 케어</h2>
-          <p className="text-[11px] text-[#666666] font-medium mt mb-[12px]">가지고 있지 않은 제품 중 지금 필요한 순서로 골랐어요.</p>
+          <p className="text-[11px] text-[#666666] font-medium mb-[12px]">가지고 있지 않은 제품 중 지금 필요한 순서로 골랐어요.</p>
 
           {/* 1순위 카드 */}
           <div className="relative bg-white rounded-[24px] p-[16px] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col overflow-hidden mb-3">
@@ -300,7 +305,7 @@ export default function PointRewardPage() {
       <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 flex justify-between items-center px-5 pt-4 pb-5 z-50">
         <TabIcon icon="users" label="그룹" onClick={() => router.push('/fe-e/group')} />
         <TabIcon icon="check" label="미션" onClick={() => router.push('/fe-d/mission')} />
-        <TabIcon icon="leaf" label="W 정원" isActive onClick={() => router.push('/fe-d/[id]/garden')} />
+        <TabIcon icon="leaf" label="W 정원" isActive onClick={handleGardenClick} />
         <TabIcon icon="bar-chart" label="기록" onClick={() => router.push('/fe-e/record/report')} />
       </div>
     </div>

@@ -98,6 +98,8 @@ export default function GroupListJoin() {
       );
     }
 
+    const firstGroupId = myGroups.length > 0 ? myGroups[0].groupId : '1';
+
     return (
       <div className="flex flex-col w-full h-[100dvh] relative bg-white overflow-hidden">
               
@@ -179,6 +181,8 @@ export default function GroupListJoin() {
         </div>
       </div>
 
+      
+
       {/* 하단 탭바 */}
       <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 flex justify-between items-center px-5 pt-4 pb-5 z-50">
         <TabIcon
@@ -191,13 +195,13 @@ export default function GroupListJoin() {
         <TabIcon
           icon="check"
           label="미션"
-          onClick={() => router.push('/fe-e/mission')}
+          onClick={() => router.push('/fe-d/mission')}
         />
 
         <TabIcon
           icon="leaf"
           label="W 정원"
-          onClick={() => router.push('/fe-e/garden')}
+          onClick={() => router.push(`/fe-d/${firstGroupId}/garden`)}
         />
 
         <TabIcon

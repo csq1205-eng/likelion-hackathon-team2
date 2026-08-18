@@ -123,7 +123,7 @@ export default function PagePersonalInfoConsent() {
       });
 
       // API 모두 정상 처리 : 온보딩 페이지로 이동
-      router.push('/onboarding');
+      router.push('/fe-d/onboarding');
       
     } catch (error) {
       console.error('API Error:', error);

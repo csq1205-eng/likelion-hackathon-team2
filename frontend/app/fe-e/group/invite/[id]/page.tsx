@@ -86,7 +86,7 @@ export default function JoinCheck() {
 
       <div className="flex flex-row items-center w-full gap-[10px] mb-10">
         <button
-          onClick={() => router.push('/fe-e/group/invite/{groupId}/create')}
+          onClick={() => router.push(`/fe-e/group/invite/${groupId}/create`)}
           className="flex flex-col items-center justify-center bg-[#F7F8F8] text-[#000000] px-[10px] py-[20px] w-[120px] h-[96px] rounded-[10px] text-[15px] font-semibold"
         >
           <img src="/Icon_Plus.svg" alt="그룹 아이콘" className="w-[40px] h-[40px] mb-2 object-contain" />
