@@ -76,7 +76,7 @@ type FilterType = 'ALL' | 'COMPLETED' | 'INCOMPLETE';
 
 export default function MissionCalendarPage() {
   const router = useRouter();
-  const { accessToken, isLoading: authLoading } = useAuth();
+  const { accessToken, userId, isLoading: authLoading } = useAuth();
 
   const [historyData, setHistoryData] = useState<HistoryResponse | null>(null);
   const [streakData, setStreakData] = useState<StreakResponse | null>(null);
@@ -100,8 +100,8 @@ export default function MissionCalendarPage() {
     const fetchData = async () => {
       try {
         const [streakRes, historyRes] = await Promise.all([
-          fetch(`/api/v1/users/me/streak`, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` } }), 
-          fetch(`/api/v1/users/me/missions/history?year=${year}&month=${month}`, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` } })
+          fetch(`/api/v1/users/${userId}/streak`, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` } }), 
+          fetch(`/api/v1/users/${userId}/missions/history?year=${year}&month=${month}`, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` } })
         ]);
 
         const streakResult = await streakRes.json();

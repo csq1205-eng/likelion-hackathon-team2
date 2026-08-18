@@ -94,7 +94,7 @@ export default function PagePersonalInfoConsent() {
     try {
       const userId = 1; 
 
-      const consentResponse = await fetch(`/api/v1/users/{userId}/consent`, {
+      const consentResponse = await fetch(`/api/v1/users/${userId}/consent`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

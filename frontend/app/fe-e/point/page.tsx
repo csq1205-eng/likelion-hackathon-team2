@@ -51,7 +51,9 @@ const FALLBACK_STREAK_DATA: StreakResponse = {
 
 export default function PointRewardPage() {
   const router = useRouter();
-  const { accessToken, isLoading: authLoading } = useAuth();
+  
+  const { accessToken, userId, isLoading: authLoading } = useAuth();
+
   const [pointData, setPointData] = useState<PointResponse | null>(null);
   const [streakData, setStreakData] = useState<StreakResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -70,10 +72,10 @@ export default function PointRewardPage() {
     const fetchPoints = async () => {
       try {
         const [pointsRes, streakRes] = await Promise.all([
-          fetch('/api/v1/users/{userId}/points', {
+          fetch(`/api/v1/users/${userId}/points`, {
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` }
           }),
-          fetch(`/api/v1/users/{userId}/streak`, {
+          fetch(`/api/v1/users/${userId}/streak`, {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` }
           })
         ]);
@@ -105,7 +107,7 @@ export default function PointRewardPage() {
     };
 
     fetchPoints();
-  }, [authLoading, accessToken]);
+  }, [authLoading, accessToken, userId]);
 
   const handleGardenClick = () => {
     const savedGroupId = typeof window !== 'undefined' ? localStorage.getItem('myGroupId') || '1' : '1';

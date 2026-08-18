@@ -33,7 +33,7 @@ const FALLBACK_HIGHLIGHTS: HighlightArchiveResponse = {
 
 export default function HighlightArchivePage() {
   const router = useRouter();
-  const { accessToken, isLoading: authLoading } = useAuth();
+  const { accessToken, userId, isLoading: authLoading } = useAuth();
   
   const [archiveData, setArchiveData] = useState<HighlightArchiveResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,7 +50,7 @@ export default function HighlightArchivePage() {
     const fetchHighlights = async () => {
       try {
         // 13.3 하이라이트 모아보기 API 
-        const response = await fetch(`/api/v1/users/{userId}/highlights?year=2026&month=8`, {
+        const response = await fetch(`/api/v1/users/${userId}/highlights?year=2026&month=8`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

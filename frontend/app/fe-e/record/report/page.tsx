@@ -52,7 +52,7 @@ const FALLBACK_REPORT: WeeklyReportData = {
 
 export default function WeeklyReportPage() {
   const router = useRouter();
-  const { accessToken, isLoading: authLoading } = useAuth();
+  const { accessToken, userId, isLoading: authLoading } = useAuth();
 
   const [reportData, setReportData] = useState<WeeklyReportData | null>(null);
   const [streakData, setStreakData] = useState<StreakResponse | null>(null);
@@ -70,7 +70,7 @@ export default function WeeklyReportPage() {
 
     const fetchData = async () => {
       try {
-        const streakRes = await fetch(`/api/v1/users/{userId}/streak`, {
+        const streakRes = await fetch(`/api/v1/users/${userId}/streak`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
         });
