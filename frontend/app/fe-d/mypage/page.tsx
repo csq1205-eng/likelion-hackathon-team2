@@ -38,7 +38,7 @@ export default function MyPage() {
       </div>
 
       <div className="p-5 flex-1">
-        {/* 14. 지난 미션 달력 탭 */}
+        {/* 지난 미션 달력 탭 */}
         {activeTab === 'calendar' && (
           <section className="bg-white p-5 rounded-2xl shadow-sm animate-fade-in-up">
             <h2 className="font-bold text-lg mb-4 text-gray-800">8월 미션 기록</h2>
@@ -60,7 +60,7 @@ export default function MyPage() {
           </section>
         )}
 
-        {/* 12. 주간 리포트 탭 */}
+        {/* 주간 리포트 탭 */}
         {activeTab === 'report' && (
           <section className="space-y-4 animate-fade-in-up">
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-5 rounded-2xl text-white shadow-md">
@@ -77,7 +77,7 @@ export default function MyPage() {
           </section>
         )}
 
-        {/* 13. 포인트 화면 탭 */}
+        {/* 포인트 화면 탭 */}
         {activeTab === 'reward' && (
           <section className="space-y-4 animate-fade-in-up">
             <div className="bg-white p-6 rounded-2xl shadow-sm text-center border-2 border-blue-100">

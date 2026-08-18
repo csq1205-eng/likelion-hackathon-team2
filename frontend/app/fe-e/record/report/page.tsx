@@ -4,33 +4,24 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from "@/lib/auth/AuthProvider";
 
-interface StreakResponse {
-  userId: number;
-  currentStreakDays: number;
-  longestStreakDays: number;
-  lastCompletedDate: string;
-}
-
-interface WeeklyReportData {
+interface WeeklyReportResponse {
   startDate: string;
   endDate: string;
   totalCompleted: number;
   achievementRate: number;
   completedCount: number;
   totalCount: number;
+  failedCount?: number;
+  unsubmittedCount?: number;
   bestHabit: { name: string; successDays: number };
   aiSummary: string;
   weeklyData: { day: string; count: number }[];
+  currentStreakDays: number;
+  longestStreakDays: number;
 }
 
-const FALLBACK_STREAK: StreakResponse = {
-  userId: 1,
-  currentStreakDays: 7,
-  longestStreakDays: 14,
-  lastCompletedDate: "2026-08-03"
-};
-
-const FALLBACK_REPORT: WeeklyReportData = {
+// 더미 데이터
+const FALLBACK_REPORT: WeeklyReportResponse = {
   startDate: "8. 6",
   endDate: "8. 12",
   totalCompleted: 18,
@@ -47,15 +38,16 @@ const FALLBACK_REPORT: WeeklyReportData = {
     { day: '월', count: 2 },
     { day: '화', count: 4 },
     { day: '수', count: 2 },
-  ]
+  ],
+  currentStreakDays: 7,
+  longestStreakDays: 14,
 };
 
 export default function WeeklyReportPage() {
   const router = useRouter();
-  const { accessToken, userId, isLoading: authLoading } = useAuth();
+  const { accessToken, isLoading: authLoading } = useAuth();
 
-  const [reportData, setReportData] = useState<WeeklyReportData | null>(null);
-  const [streakData, setStreakData] = useState<StreakResponse | null>(null);
+  const [reportData, setReportData] = useState<WeeklyReportResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -63,38 +55,35 @@ export default function WeeklyReportPage() {
 
     if (!accessToken) {
       setReportData(FALLBACK_REPORT);
-      setStreakData(FALLBACK_STREAK);
       setIsLoading(false);
       return;
     }
 
-    const fetchData = async () => {
+    const fetchReportData = async () => {
       try {
-        const streakRes = await fetch(`/api/v1/users/${userId}/streak`, {
+        // 개인별 통합 주간 리포트 API
+        const response = await fetch(`/api/v1/users/me/weekly-report-data`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
         });
-        const streakResult = await streakRes.json();
         
-        if (streakRes.ok && streakResult.success) {
-          setStreakData(streakResult.data);
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+          setReportData(result.data);
         } else {
-          setStreakData(FALLBACK_STREAK);
+          throw new Error('주간 리포트 데이터를 불러오지 못했습니다.');
         }
 
-        // 주간 리포트 데이터 세팅 (임시 및 추후 확장용)
-        setReportData(FALLBACK_REPORT);
-
       } catch (error) {
-        console.error("리포트/연속 기록 조회 실패! 임시 데이터를 렌더링합니다:", error);
+        console.error("리포트 조회 실패! 임시 데이터를 렌더링합니다:", error);
         setReportData(FALLBACK_REPORT);
-        setStreakData(FALLBACK_STREAK);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchData();
+    fetchReportData();
   }, [authLoading, accessToken]);
 
   const handleGardenClick = () => {
@@ -102,7 +91,7 @@ export default function WeeklyReportPage() {
     router.push(`/fe-d/${savedGroupId}/garden`);
   };
 
-  if (isLoading || !reportData || !streakData) {
+  if (isLoading || !reportData) {
     return (
       <div className="flex flex-col w-full h-[100dvh] items-center justify-center bg-white">
         <div className="w-8 h-8 border-4 border-[#41C0A1] border-t-transparent rounded-full animate-spin mb-3"></div>
@@ -111,12 +100,14 @@ export default function WeeklyReportPage() {
     );
   }
 
-  const maxCount = Math.max(...reportData.weeklyData.map(d => d.count));
+  const maxCount = reportData.weeklyData?.length > 0 
+    ? Math.max(...reportData.weeklyData.map(d => d.count)) 
+    : 1;
 
   return (
     <div className="relative w-full h-[100dvh] bg-[#F9F9F9] flex flex-col overflow-hidden">
       
-      {/* 1. 상단 헤더 */}
+      {/* 상단 헤더 */}
       <div className="flex items-center justify-center relative bg-white pt-6 pb-4 shrink-0 shadow-sm z-10">
         <button onClick={() => router.back()} className="absolute left-5 text-[22px] font-bold text-[#A0A0A0] hover:opacity-70 transition-opacity">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -151,7 +142,7 @@ export default function WeeklyReportPage() {
 
           {/* 막대 차트 */}
           <div className="flex justify-between items-end h-[110px]">
-            {reportData.weeklyData.map((data, index) => {
+            {reportData.weeklyData?.map((data, index) => {
               const isMax = data.count === maxCount && data.count > 0;
               const heightPercentage = data.count === 0 ? 0 : (data.count / maxCount) * 100;
               
@@ -167,7 +158,7 @@ export default function WeeklyReportPage() {
                         style={{ height: `${heightPercentage}%` }} 
                       />
                     ) : (
-                      <div className="w-[14px] h-[4px] rounded-full bg-[#F0F0F0]" /> // 0일때 빈칸 표시
+                      <div className="w-[14px] h-[4px] rounded-full bg-[#F0F0F0]" />
                     )}
                   </div>
                   <span className={`text-[12px] font-bold ${isMax ? 'text-[#222222]' : 'text-[#888888]'}`}>{data.day}</span>
@@ -190,21 +181,18 @@ export default function WeeklyReportPage() {
           </p>
         </div>
 
-        {/* 4. 2단 그리드 카드 (달성률 & 최고 습관) */}
+        {/* 2단 그리드 카드 (달성률 & 최고 습관) */}
         <div className="grid grid-cols-2 gap-3 shrink-0">
           
-          {/* 달성률 (도넛 차트 안에 텍스트 배치) */}
+          {/* 달성률 */}
           <div className="bg-white rounded-[24px] p-5 shadow-[0_2px_16px_rgba(0,0,0,0.03)] border border-gray-50 flex flex-col items-center">
             <span className="text-[14px] font-bold text-[#666666] w-full mb-3">달성률</span>
             
             <div className="relative w-[85px] h-[85px] flex items-center justify-center">
               <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90 overflow-visible">
-                {/* 배경 원 */}
                 <path className="text-[#F0F0F0]" strokeWidth="4.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                {/* 채워지는 원 */}
                 <path className="text-[#41C0A1]" strokeWidth="4.5" strokeLinecap="round" strokeDasharray={`${reportData.achievementRate}, 100`} stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
               </svg>
-              {/* 차트 중앙 텍스트 */}
               <div className="absolute flex flex-col items-center justify-center mt-1">
                 <span className="text-[20px] font-extrabold text-[#222222] leading-none">{reportData.achievementRate}<span className="text-[12px] font-bold ml-[1px]">%</span></span>
               </div>
@@ -219,20 +207,19 @@ export default function WeeklyReportPage() {
             {/* 베스트 습관 */}
             <div className="bg-white rounded-[20px] p-4 shadow-[0_2px_16px_rgba(0,0,0,0.03)] border border-gray-50 flex flex-col flex-1 justify-center">
               <span className="text-[13px] font-bold text-[#666666] mb-1">베스트 습관</span>
-              <span className="text-[15px] font-extrabold text-[#222222] truncate">{reportData.bestHabit.name}</span>
-              <span className="text-[13px] font-bold text-[#41C0A1] mt-1">{reportData.bestHabit.successDays}일 성공</span>
+              <span className="text-[15px] font-extrabold text-[#222222] truncate">{reportData.bestHabit?.name || '정보 없음'}</span>
+              <span className="text-[13px] font-bold text-[#41C0A1] mt-1">{reportData.bestHabit?.successDays || 0}일 성공</span>
             </div>
             
             {/* 연속 달성 */}
             <div className="bg-white rounded-[20px] p-4 shadow-[0_2px_16px_rgba(0,0,0,0.03)] border border-gray-50 flex flex-col flex-1 justify-center relative overflow-hidden">
               <span className="text-[13px] font-bold text-[#666666] mb-1 z-10">연속 달성</span>
               <div className="flex items-baseline gap-1 z-10">
-                <span className="text-[24px] font-extrabold text-[#41C0A1] leading-none">{streakData.currentStreakDays}</span>
+                <span className="text-[24px] font-extrabold text-[#41C0A1] leading-none">{reportData.currentStreakDays}</span>
                 <span className="text-[14px] font-bold text-[#222222]">일째</span>
               </div>
-              <span className="text-[11px] text-[#A0A0A0] font-medium mt-1 z-10">최고기록 {streakData.longestStreakDays}일</span>
+              <span className="text-[11px] text-[#A0A0A0] font-medium mt-1 z-10">최고기록 {reportData.longestStreakDays}일</span>
               
-              {/* 배경 장식 */}
               <div className="absolute right-[-15px] bottom-[-15px] text-[#F9F9F9]">
                 <svg width="70" height="70" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15 8H21L16.5 12.5L18 19L12 15.5L6 19L7.5 12.5L3 8H9L12 2Z"/></svg>
               </div>
@@ -241,7 +228,7 @@ export default function WeeklyReportPage() {
 
         </div>
 
-        {/* 5. 하단 배너 및 버튼 */}
+        {/* 하단 배너 및 버튼 */}
         <div className="shrink-0">
           <div className="bg-[#F3EDFF] rounded-[20px] p-[16px] flex flex-row items-center gap-4 shadow-sm border border-[#EADDFF]">
             <div className="w-[44px] h-[44px] shrink-0 bg-white rounded-[14px] flex items-center justify-center shadow-sm">
