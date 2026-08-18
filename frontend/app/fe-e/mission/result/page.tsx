@@ -79,7 +79,7 @@ function MissionResultInner() {
   return (
     <div className="flex flex-col w-full h-[100dvh] relative bg-white px-5 py-6 overflow-hidden">
 
-      {/* 개발용 임시 버튼 (실제 서비스 시 삭제 필요) */}
+      {/* 개발용 임시 버튼 (실제 서비스 시 삭제 필요)
       {process.env.NODE_ENV === 'development' && (
         <button 
           onClick={() => setIsSuccess(!isSuccess)}
@@ -87,7 +87,7 @@ function MissionResultInner() {
         >
           상태 전환 테스트 (현재: {isSuccess ? '성공' : '실패'})
         </button>
-      )}
+      )}*/}
 
       <div className="flex flex-col items-center justify-center flex-1 w-full pb-[40px]">
         {isSuccess ? (
