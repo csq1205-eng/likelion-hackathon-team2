@@ -2,7 +2,7 @@ spring:
   application:
     name: wedit-server
   profiles:
-    active: local
+    active: ${SPRING_PROFILES_ACTIVE:local}
 
 server:
   port: 8080
@@ -13,9 +13,9 @@ app:
   ai:
     internal-key: ${INTERNAL_API_KEY:}
     be-a:
-      base-url: http://localhost:8001
+      base-url: ${APP_AI_BE_A_BASE_URL:http://localhost:8001}
     be-b:
-      base-url: http://localhost:8002
+      base-url: ${APP_AI_BE_B_BASE_URL:http://localhost:8002}
   mission:
     generation:
       enabled: false
