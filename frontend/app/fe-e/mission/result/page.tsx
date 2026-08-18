@@ -2,27 +2,38 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { apiRequest, API_B_URL } from "@/lib/api/client";
+
+interface AIResultResponse {
+  status: 'PROCESSING' | 'SUCCESS' | 'FAIL';
+  isPassed?: boolean;
+  remainRetryCount?: number;
+}
 
 function MissionResultInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const missionId = searchParams.get('missionId') || '1';
+  const clipId = searchParams.get('clipId') || '1';
+
+  const { accessToken } = useAuth();
 
   const [isSuccess, setIsSuccess] = useState(false); 
   const [retryCount, setRetryCount] = useState(2);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!accessToken) return;
+
     let pollingInterval: NodeJS.Timeout;
 
     const fetchResult = async () => {
       try {
-        const response = await fetch(`/api/clips/{clipId}/result`, {
+        const result = await apiRequest<AIResultResponse>(`/clips/${clipId}/result`, {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+          accessToken,
+          customBaseUrl: API_B_URL, 
         });
-
-        const result = await response.json();
 
         // PROCESSING : 상태 유지, 다음 폴링 기다림
         if (result.status === 'PROCESSING') {
@@ -35,12 +46,11 @@ function MissionResultInner() {
         setIsLoading(false);
 
         // 결과에 따라 상태 업데이트
-        if (result.success && result.data.isPassed) {
+        if (result.isPassed) {
           setIsSuccess(true);
         } else {
           setIsSuccess(false);
-          // 백엔드에서 내려주는 남은 재시도 횟수 세팅
-          setRetryCount(result.data.remainRetryCount ?? 2);
+          setRetryCount(result.remainRetryCount ?? 2);
         }
       } catch (error) {
         console.error('판정 결과 조회 실패:', error);
@@ -59,7 +69,7 @@ function MissionResultInner() {
 
     // 컴포넌트 언마운트 시 인터벌 정리 (메모리 누수 방지)
     return () => clearInterval(pollingInterval);
-  }, [missionId]);
+  }, [clipId, accessToken]);
 
   // 로딩(판정 중) 화면
   if (isLoading) {
@@ -130,7 +140,7 @@ function MissionResultInner() {
       <div className="w-full mt-auto shrink-0 pb-2 pt-4">
         {isSuccess ? (
           <button
-            onClick={() => router.push('/fe-e/mission/share')}
+            onClick={() => router.push(`/fe-e/mission/share?clipId=${clipId}`)}
             className="w-full py-[16px] rounded-[16px] bg-[#A7FBE7] text-[#000000] font-bold text-[16px] hover:bg-[#92edd8] transition-colors"
           >
             확인

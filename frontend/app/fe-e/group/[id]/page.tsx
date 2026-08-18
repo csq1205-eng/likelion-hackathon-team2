@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { apiRequest } from '@/lib/api/client';
 
 interface GroupDetailResponse {
   groupId: number;
@@ -46,25 +47,17 @@ export default function GroupMainFeedPage() {
     }
 
     const fetchGroupDetail = async () => {
+      if (!accessToken) return;
+
       try {
-        const response = await fetch(`/api/v1/groups/${groupId}/highlight`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}` 
-          },
+        const data = await apiRequest<GroupDetailResponse>(`/groups/${groupId}/highlight`, {
+          accessToken, 
         });
 
-        const result = await response.json();
-
-        if (response.ok) {
-          setGroupDetail(prev => ({
-            ...FALLBACK_GROUP_DETAIL,
-            ...(result.data || result)
-          }));
-        } else {
-          throw new Error(result.message || '그룹 정보를 불러오지 못했습니다.');
-        }
+        setGroupDetail(prev => ({
+          ...FALLBACK_GROUP_DETAIL,
+          ...data
+        }));
 
       } catch (error) {
         console.error("그룹 피드 조회 실패! 임시 데이터를 렌더링합니다:", error);

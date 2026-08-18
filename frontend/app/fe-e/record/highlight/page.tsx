@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { apiRequest } from "@/lib/api/client";
 
 interface HighlightItem {
   id: number;
@@ -50,21 +51,12 @@ export default function HighlightArchivePage() {
     const fetchHighlights = async () => {
       try {
         // 13.3 하이라이트 모아보기 API 
-        const response = await fetch(`/api/v1/users/${userId}/highlights?year=2026&month=8`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          },
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-          setArchiveData(result.data);
-        } else {
-          throw new Error('하이라이트 목록을 불러오지 못했습니다.');
-        }
+        const data = await apiRequest<HighlightArchiveResponse>(
+          `/users/${userId}/highlights?year=2026&month=8`, 
+          { accessToken }
+        );
+        
+        setArchiveData(data);
       } catch (error) {
         console.error("하이라이트 조회 실패! 임시 데이터를 렌더링합니다:", error);
         setArchiveData(FALLBACK_HIGHLIGHTS);
@@ -74,7 +66,7 @@ export default function HighlightArchivePage() {
     };
 
     fetchHighlights();
-  }, [authLoading, accessToken]);
+  }, [authLoading, accessToken, userId]);
 
   const handleGardenClick = () => {
     const savedGroupId = typeof window !== 'undefined' ? localStorage.getItem('myGroupId') || '1' : '1';

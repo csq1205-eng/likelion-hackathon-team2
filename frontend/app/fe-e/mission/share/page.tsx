@@ -2,6 +2,8 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, Suspense } from 'react';
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { apiRequest, API_B_URL } from "@/lib/api/client"; 
 
 function MissionShareInner() {
   const router = useRouter();
@@ -9,35 +11,32 @@ function MissionShareInner() {
   const clipId = searchParams.get('clipId') || '1';
   const groupId = searchParams.get('groupId') || '1';
 
+  const { accessToken } = useAuth();
+
   // API 중복 호출 방지용 상태
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 공개/비공개 상태 백엔드로 전송
   const updateClipVisibility = async (isShared: boolean) => {
+    if (!accessToken) {
+      alert('로그인이 필요한 서비스입니다.');
+      return;
+    }
+    
     if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`/api/clips/${clipId}/share`, {
+      await apiRequest(`/clips/${clipId}/share`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          shared: isShared, 
-        }),
+        body: { shared: isShared },
+        accessToken,
+        customBaseUrl: API_B_URL,
       });
 
-      const result = await response.json();
+      alert(isShared ? '그룹에 클립이 공유되었습니다!' : '비공개 처리되었습니다.');
+      router.push(`/fe-e/group/${groupId}/status`);
 
-      // 성공 시
-      if (response.ok) {
-        alert(isShared ? '그룹에 클립이 공유되었습니다!' : '비공개 처리되었습니다.');
-        router.push(`/fe-e/group/${groupId}/status`);
-      } else {
-        // 에러
-        alert(result.message || '상태 변경에 실패했습니다. 다시 시도해 주세요.');
-      }
     } catch (error) {
       console.error('API Error:', error);
       alert('서버와의 통신에 실패했습니다.');

@@ -8,7 +8,7 @@ export interface StreakResponse {
 }
 
 export async function getStreak(userId: number, accessToken: string) {
-  return apiRequest<StreakResponse>(`/api/v1/users/${userId}/streak`, {
+  return apiRequest<StreakResponse>(`/users/${userId}/streak`, {
     method: "GET",
     accessToken,
   });

@@ -2,11 +2,15 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { apiRequest } from "@/lib/api/client";
 
 export default function GroupJoinPage() {
   const router = useRouter();
   const params = useParams();
-  const groupId = params.id;
+  const groupId = params.id as string;
+
+  const { accessToken } = useAuth();
 
   // 임시 그룹 데이터 (API에서 받아올 데이터 구조)
   const [groupData, setGroupData] = useState({
@@ -17,36 +21,6 @@ export default function GroupJoinPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    const fetchGroupPreview = async () => {
-      try {
-        const response = await fetch(`/api/v1/groups/invite/preview`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          setGroupData(result.data);
-        } else {
-          useFallbackData();
-        }
-      } catch (error) {
-        console.error('그룹 정보 불러오기 실패:', error);
-        useFallbackData(); // 통신 실패 시 임시 데이터 사용
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (groupId) {
-      fetchGroupPreview();
-    }
-  }, [groupId]);
 
   const useFallbackData = () => {
     console.log("통신 실패! 임시 테스트 데이터를 띄웁니다.");
@@ -60,29 +34,50 @@ export default function GroupJoinPage() {
     });
   };
 
+  useEffect(() => {
+    const fetchGroupPreview = async () => {
+      try {
+        const data = await apiRequest<any>(`/groups/invite/${groupId}/preview`, {
+          method: 'GET',
+        });
+
+        setGroupData(data);
+      } catch (error) {
+        console.error('그룹 정보 불러오기 실패:', error);
+        useFallbackData(); // 통신 실패 시 임시 데이터 사용
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (groupId) {
+      fetchGroupPreview();
+    }
+  }, [groupId]);
+
   const handleJoin = async () => {
+    if (!accessToken) {
+      alert('로그인이 필요한 서비스입니다.');
+      router.push('/fe-d/login'); // 로그인 페이지로 유도
+      return;
+    }
+
     if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`/api/v1/groups/join`, {
+      await apiRequest(`/groups/join`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        body: { inviteCode: groupId },
+        accessToken,
       });
 
-      const result = await response.json();
+      alert('그룹에 성공적으로 참여했습니다!');
+      router.push(`/fe-e/group/${groupId}`);
 
-      if (result.success) {
-        alert('그룹에 성공적으로 참여했습니다!');
-        router.push(`/fe-e/group/${groupId}`); 
-      } else {
-        alert(result.message || '그룹 참여에 실패했습니다.');
-      }
     } catch (error) {
       console.error('API Error:', error);
-      alert('서버와의 통신에 실패했습니다.');
+      alert('그룹 참여에 실패했습니다.');
     } finally {
       setIsSubmitting(false);
     }

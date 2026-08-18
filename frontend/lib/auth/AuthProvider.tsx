@@ -3,36 +3,66 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { loginWithTestAccount, type LoginResponse } from "../api/auth";
 
 interface AuthContextValue {
-  accessToken: string | null; userId: number | null;
-  onboardingCompleted: boolean; requiredConsentCompleted: boolean;
-  isLoading: boolean; error: string | null;
+  accessToken: string | null; 
+  userId: number | null;
+  onboardingCompleted: boolean; 
+  requiredConsentCompleted: boolean;
+  isLoading: boolean; 
+  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 const STORAGE_KEY = "wedit_auth";
 
+const MOCK_FALLBACK_AUTH = {
+  accessToken: "mock-access-token-999999",
+  userId: 1,
+  onboardingCompleted: true,
+  requiredConsentCompleted: true,
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthContextValue>({
-    accessToken: null, userId: null, onboardingCompleted: false,
-    requiredConsentCompleted: false, isLoading: true, error: null,
+    accessToken: null, 
+    userId: null, 
+    onboardingCompleted: false,
+    requiredConsentCompleted: false, 
+    isLoading: true, 
+    error: null,
   });
 
-  useEffect(() => { initializeAuth(); }, []);
+  useEffect(() => { 
+    initializeAuth(); 
+  }, []);
 
   async function initializeAuth() {
+    // 기존 저장 캐시 확인
     const cached = readCachedAuth();
-    if (cached) { setAuthState({ ...cached, isLoading: false, error: null }); return; }
+    if (cached) { 
+      setAuthState({ ...cached, isLoading: false, error: null }); 
+      return; 
+    }
+
     try {
       const result = await loginWithTestAccount();
       saveCachedAuth(result);
       setAuthState({
-        accessToken: result.accessToken, userId: result.userId,
+        accessToken: result.accessToken, 
+        userId: result.userId,
         onboardingCompleted: result.onboardingCompleted,
         requiredConsentCompleted: result.requiredConsentCompleted,
-        isLoading: false, error: null,
+        isLoading: false, 
+        error: null,
       });
-    } catch {
-      setAuthState((prev) => ({ ...prev, isLoading: false, error: "로그인에 실패했어요." }));
+    } catch (error) {
+      // 백엔드 서버가 응답하지 않을 때 : 가짜 데이터 렌더링
+      console.warn("백엔드 서버가 응답하지 않아 임시 데이터로 자동 전환합니다.", error);
+      saveCachedAuth(MOCK_FALLBACK_AUTH);
+      setAuthState({ 
+        ...MOCK_FALLBACK_AUTH, 
+        isLoading: false, 
+        error: null 
+      });
     }
   }
 
@@ -52,9 +82,10 @@ function readCachedAuth(): Omit<AuthContextValue, "isLoading" | "error"> | null 
   try { return JSON.parse(raw); } catch { return null; }
 }
 
-function saveCachedAuth(result: LoginResponse) {
+function saveCachedAuth(result: any) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    accessToken: result.accessToken, userId: result.userId,
+    accessToken: result.accessToken, 
+    userId: result.userId,
     onboardingCompleted: result.onboardingCompleted,
     requiredConsentCompleted: result.requiredConsentCompleted,
   }));

@@ -3,6 +3,8 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { apiRequest } from "@/lib/api/client";
 
 declare global {
   interface Window {
@@ -13,7 +15,9 @@ declare global {
 export default function GroupInviteCreate() {
   const params = useParams();
   const router = useRouter();
-  const groupId = params.id;
+  const groupId = params.id as string;
+
+  const { accessToken } = useAuth();
 
   // API에서 받아올 링크와 QR 데이터를 저장할 상태
   const [inviteInfo, setInviteInfo] = useState({ link: '', qrImage: '' });
@@ -47,25 +51,18 @@ export default function GroupInviteCreate() {
 
   useEffect(() => {
     const generateInvite = async () => {
+      if (!accessToken) return;
       try {
-        const response = await fetch(`/api/v1/groups/${groupId}/invite`, { 
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json' 
-        },
-      });
-
-      const result = await response.json();
-      
-      if (!result.success && result.data) {
-        setInviteInfo({ 
-          link: result.data.inviteLink, 
-          qrImage: result.data.qrImageUrl 
+        const data = await apiRequest<any>(`/groups/${groupId}/invite`, { 
+          method: 'GET',
+          accessToken, 
         });
-      } else {
-        throw new Error(result.message || '초대 정보를 불러오지 못했습니다.');
-      }
 
+        setInviteInfo({ 
+          link: data.inviteLink, 
+          qrImage: data.qrImageUrl 
+        });
+      
       } catch (error) {
         console.error('초대 정보 생성 실패:', error);
         
@@ -82,7 +79,7 @@ export default function GroupInviteCreate() {
     if (groupId) {
       generateInvite();
     }
-  }, [groupId]);
+  }, [groupId, accessToken]);
 
   // 클립보드 복사 기능
   const handleCopy = () => {

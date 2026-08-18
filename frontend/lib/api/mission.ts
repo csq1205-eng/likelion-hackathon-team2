@@ -16,7 +16,7 @@ export interface TodayMissionsResponse {
 }
 
 export async function getTodayMissions(accessToken: string) {
-  return apiRequest<TodayMissionsResponse>("/api/v1/missions/today", {
+  return apiRequest<TodayMissionsResponse>("/missions/today", {
     method: "GET",
     accessToken,
   });

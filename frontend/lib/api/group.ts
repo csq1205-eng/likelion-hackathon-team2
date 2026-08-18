@@ -16,7 +16,7 @@ export interface MyGroupsResponse {
 }
 
 export async function getMyGroups(accessToken: string) {
-  return apiRequest<MyGroupsResponse>("/api/v1/groups", {
+  return apiRequest<MyGroupsResponse>("/groups", {
     method: "GET",
     accessToken,
   });
@@ -37,7 +37,7 @@ export interface GroupProgressResponse {
 }
 
 export async function getGroupProgress(groupId: number, accessToken: string) {
-  return apiRequest<GroupProgressResponse>(`/api/v1/groups/${groupId}/progress`, {
+  return apiRequest<GroupProgressResponse>(`/groups/${groupId}/progress`, {
     method: "GET",
     accessToken,
   });
