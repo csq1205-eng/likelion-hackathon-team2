@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile("local")
+@Profile({"local", "prod"})
 public class LocalSocialTokenVerifier implements SocialTokenVerifier {
 
     private static final String TOKEN_SEPARATOR = ":";

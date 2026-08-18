@@ -30,6 +30,8 @@ export function useClipRecorder(stream: MediaStream | null) {
     };
 
     recorder.onstop = () => {
+      console.log("녹화 MIME 타입:", mimeType);
+console.log("녹화 Blob 크기:", chunksRef.current.reduce((sum, chunk) => sum + chunk.size, 0));
       const blob = new Blob(chunksRef.current, { type: mimeType });
       setRecordedBlob(blob);
       setRecordedUrl(URL.createObjectURL(blob));
