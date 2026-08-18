@@ -274,7 +274,8 @@ public class MissionService {
                 item.title(),
                 item.description(),
                 item.missionType(),
-                toVerificationCriteriaJson(item)
+                toVerificationCriteriaJson(item),
+                item.reason()
         );
     }
 
@@ -303,7 +304,7 @@ public class MissionService {
                 mission.getMissionType(),
                 mission.getVerificationCriteria(),
                 mission.getStatus().name(),
-                null
+                mission.getReason()
         );
     }
 }
