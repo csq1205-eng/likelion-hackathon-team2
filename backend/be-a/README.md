@@ -18,7 +18,8 @@ OpenAI Structured Outputs로 미션을 생성하고, API 키가 없거나 AI 호
 - 주간 그룹 통계를 AI 리포트로 변환하고 실패 시 규칙 문장으로 자동 대체
 - 개인별 주간 미션 통계를 AI 리포트로 변환하고 실패 시 규칙 문장으로 자동 대체
 - FFmpeg로 세로형 하이라이트 영상 생성 및 자막·완료 카드 합성
-- 하이라이트 저장 성공 후 각 클립의 BE B 완료 콜백 호출
+- 생성된 하이라이트 메타데이터를 BE C에 저장
+- BE C 저장 성공 후 각 클립의 BE B 완료 콜백 호출
 
 ## 실행
 
@@ -32,12 +33,28 @@ uvicorn app.main:app --reload --port 8001
 - Swagger UI: http://127.0.0.1:8001/docs
 - 상태 확인: http://127.0.0.1:8001/health
 
-`.env.example`을 복사한 `.env` 또는 실행 환경에 `OPENAI_API_KEY`, `BE_B_BASE_URL`, `INTERNAL_API_KEY`를 설정하세요.
+`.env.example`을 복사한 `.env` 또는 실행 환경에 `OPENAI_API_KEY`, `BE_B_BASE_URL`,
+`BE_C_BASE_URL`, `INTERNAL_API_KEY`를 설정하세요.
 
 ```bash
 export OPENAI_API_KEY="발급받은 키"
 export OPENAI_MODEL="gpt-5.6-sol"
 ```
+
+로컬에서 하이라이트 생성 후 BE C 저장과 BE B 완료 콜백까지 확인하려면 두 연동 기능을
+명시적으로 활성화해야 합니다.
+
+```dotenv
+BE_B_BASE_URL=http://localhost:8002
+BE_C_BASE_URL=http://localhost:8080
+INTERNAL_API_KEY=change-me
+HIGHLIGHT_STORAGE_ENABLED=true
+HIGHLIGHT_CALLBACK_ENABLED=true
+```
+
+`APP_ENV`가 `local` 또는 `test`이면 저장과 콜백은 기본적으로 비활성화됩니다. 그 외 환경에서는
+각 `HIGHLIGHT_*_ENABLED` 값이 없을 때 기본 활성화됩니다. 서버 간 인증을 사용하는 경우 BE A,
+BE B, BE C의 `INTERNAL_API_KEY`를 동일하게 설정해야 합니다.
 
 API JSON은 최종 명세서에 맞춰 `camelCase`를 사용하며, Python 코드 내부에서는 `snake_case`를 사용합니다.
 응답의 `generationMode`가 `ai`이면 AI 생성, `fallback`이면 기본 미션으로 대체된 결과입니다.
@@ -83,7 +100,7 @@ UID 10001의 비루트 사용자로 서비스를 실행합니다. 배포 플랫�
 BE C와 연동하는 내부 AI API:
 
 - `POST /api/ai/verdicts/reason`: 내부 판정 결과를 사용자용 문장으로 변환
-- `POST /api/ai/highlights/generate`: 클립을 조합해 FFmpeg 하이라이트 영상을 생성
+- `POST /api/ai/highlights/generate`: FFmpeg 하이라이트 생성 후 BE C 저장 및 BE B 완료 콜백 수행
 - `POST /api/ai/highlights/complete`: 저장이 끝난 하이라이트의 각 클립에 대해 BE B 콜백 호출
 - `POST /api/ai/reports/weekly`: BE C가 계산한 주간 그룹 통계를 자연어 리포트로 변환
 - `POST /api/ai/reports/weekly/personal`: BE C가 계산한 개인 주간 미션 통계를 자연어 리포트로 변환
@@ -272,9 +289,39 @@ Content-Type: application/json
 응답의 `reportSource`는 OpenAI가 생성한 경우 `AI`, 규칙 기반 문장을 사용한 경우
 `FALLBACK`입니다.
 
-## 하이라이트 완료 콜백 안정성
+## 하이라이트 저장 및 완료 콜백
 
-하이라이트 영상 저장이 성공한 뒤 BE B의 다음 API를 클립별로 호출합니다.
+`POST /api/ai/highlights/generate`는 다음 순서로 처리됩니다.
+
+1. 공유 클립을 내려받아 FFmpeg로 하이라이트 영상을 생성합니다.
+2. `HIGHLIGHT_STORAGE_ENABLED=true`이면 BE C의 내부 저장 API를 호출합니다.
+3. BE C 저장이 성공하고 `HIGHLIGHT_CALLBACK_ENABLED=true`이면 각 클립의 BE B 완료 API를 호출합니다.
+
+BE C 저장 요청은 다음 API로 전달됩니다.
+
+```http
+POST /api/v1/internal/highlights
+X-Internal-Key: change-me
+```
+
+요청에는 `userId`, `groupId`, `highlightDate`, `title`, `summary`, `videoUrl`이 포함됩니다.
+BE C가 반환한 실제 저장 ID는 생성 응답의 `storedHighlightId`에서 확인할 수 있습니다. 요청의
+`highlightId`는 생성 작업과 BE B 콜백 식별에 사용되므로 `storedHighlightId`와 다를 수 있습니다.
+
+- `storageStatus=COMPLETED`: BE C 저장 성공
+- `storageStatus=SKIPPED`: 현재 환경에서 BE C 저장 비활성화
+- BE C 저장 실패: BE B 완료 콜백을 실행하지 않고 API가 `502 Bad Gateway` 반환
+- `408`, `425`, `429`, `5xx` 및 네트워크 오류: 기본 3회까지 재시도
+- 그 외 `4xx`: 재시도 없이 실패 처리
+
+```dotenv
+BE_C_BASE_URL=http://localhost:8080
+HIGHLIGHT_STORAGE_ENABLED=true
+HIGHLIGHT_STORAGE_RETRY_ATTEMPTS=3
+HIGHLIGHT_STORAGE_BACKOFF_SECONDS=0.25
+```
+
+BE C 저장에 성공한 뒤 BE B의 다음 API를 클립별로 호출합니다.
 
 ```http
 POST /api/clips/{clipId}/highlight-complete
@@ -298,6 +345,8 @@ POST /api/clips/{clipId}/highlight-complete
 콜백 실패가 발생해도 이미 저장된 하이라이트 영상의 `status`는 `COMPLETED`로 유지됩니다.
 
 ```dotenv
+BE_B_BASE_URL=http://localhost:8002
+HIGHLIGHT_CALLBACK_ENABLED=true
 HIGHLIGHT_CALLBACK_RETRY_ATTEMPTS=3
 HIGHLIGHT_CALLBACK_BACKOFF_SECONDS=0.25
 ```
