@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth/AuthProvider";
-import { getMyGroups, type GroupSummaryResponse } from "@/lib/api/group";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth/AuthProvider';
+import { getMyGroups, type GroupSummaryResponse } from '@/lib/api/group';
 
 const GROUP_THEMES = [
   { bg: "bg-[#A7FBE7]", text: "text-[#000000]" },

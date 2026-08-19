@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { getTodayMissions, type Mission } from "@/lib/api/mission";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const SLOT_LABEL: Record<string, string> = {
   MORNING: "아침",
@@ -52,12 +53,8 @@ export default function MissionPage() {
 }
 
   if (authLoading || loading) {
-    return (
-      <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center">
-        <p className="text-sm text-[#999]">불러오는 중...</p>
-      </div>
-    );
-  }
+  return <LoadingSpinner />;
+}
 
   if (error) {
     return (
