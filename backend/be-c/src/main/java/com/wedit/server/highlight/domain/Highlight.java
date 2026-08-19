@@ -49,6 +49,39 @@ public class Highlight {
     protected Highlight() {
     }
 
+    private Highlight(
+            User user,
+            Group group,
+            LocalDate highlightDate,
+            String title,
+            String summary,
+            String videoUrl
+    ) {
+        this.user = user;
+        this.group = group;
+        this.highlightDate = highlightDate;
+        this.title = title;
+        this.summary = summary;
+        this.videoUrl = videoUrl;
+    }
+
+    public static Highlight create(
+            User user,
+            Group group,
+            LocalDate highlightDate,
+            String title,
+            String summary,
+            String videoUrl
+    ) {
+        return new Highlight(user, group, highlightDate, title, summary, videoUrl);
+    }
+
+    public void update(String title, String summary, String videoUrl) {
+        this.title = title;
+        this.summary = summary;
+        this.videoUrl = videoUrl;
+    }
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
@@ -60,6 +93,14 @@ public class Highlight {
 
     public LocalDate getHighlightDate() {
         return highlightDate;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public Group getGroup() {
+        return group;
     }
 
     public String getTitle() {
