@@ -2,6 +2,8 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/lib/auth/AuthProvider';
+import { apiRequest } from '@/lib/api/client';
 
 // 멤버 프로필에 입힐 색상 테마 배열
 const THEMES = [
@@ -23,38 +25,54 @@ interface MemberStatus {
 export default function GroupStatusPage() {
   const router = useRouter();
   const params = useParams();
-  const groupId = params.id;
+  const groupId = params.id as string;
+
+  const { accessToken, isLoading: authLoading } = useAuth();
 
   const [members, setMembers] = useState<MemberStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const useFallbackData = () => {
+    console.log("통신 실패 또는 비로그인 상태! 임시 테스트 데이터를 띄웁니다.");
+    setMembers([
+      { id: 1, name: '프로필A', initial: 'A', bg: 'bg-[#EAF9F4]', text: 'text-[#50C2A4]', isCompleted: true },
+      { id: 2, name: '프로필B', initial: 'B', bg: 'bg-[#F3EDFB]', text: 'text-[#9884D2]', isCompleted: true },
+      { id: 3, name: '프로필C', initial: 'C', bg: 'bg-[#FFF3E0]', text: 'text-[#FFB74D]', isCompleted: true },
+      { id: 4, name: '프로필D', initial: 'D', bg: 'bg-[#F0F0F0]', text: 'text-[#A0A0A0]', isCompleted: false },
+    ]);
+  };
+
   useEffect(() => {
+    if (authLoading) return;
+
+    if (!accessToken) {
+      useFallbackData();
+      setIsLoading(false);
+      return;
+    }
+
     const fetchGroupStatus = async () => {
+      if (!accessToken) return;
+
       try {
-        const response = await fetch(`/api/v1/groups/${groupId}/status`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+        const result = await apiRequest<any>(`/groups/${groupId}/status`, {
+          accessToken,
         });
 
-        const result = await response.json();
+        const rawData = result.data || result;
+        const mappedMembers = rawData.map((member: any, index: number) => {
+          const theme = THEMES[index % THEMES.length];
+          return {
+            id: member.memberId || index,
+            name: member.memberName || '알 수 없음',
+            initial: member.memberName ? member.memberName.charAt(0) : '?',
+            bg: theme.bg,
+            text: theme.text,
+            isCompleted: member.isCompleted || false,
+          };
+        });
+        setMembers(mappedMembers);
 
-        if (result.success) {
-          // 백엔드에서 받은 데이터를 화면 UI에 맞게 매핑 (색상 테마 등 부여)
-          const mappedMembers = result.data.map((member: any, index: number) => {
-            const theme = THEMES[index % THEMES.length];
-            return {
-              id: member.memberId || index,
-              name: member.memberName || '알 수 없음',
-              initial: member.memberName ? member.memberName.charAt(0) : '?',
-              bg: theme.bg,
-              text: theme.text,
-              isCompleted: member.isCompleted || false,
-            };
-          });
-          setMembers(mappedMembers);
-        } else {
-          useFallbackData();
-        }
       } catch (error) {
         console.error('그룹 현황 조회 실패:', error);
         useFallbackData(); // 통신 실패 시 가짜 데이터 렌더링
@@ -66,17 +84,7 @@ export default function GroupStatusPage() {
     if (groupId) {
       fetchGroupStatus();
     }
-  }, [groupId]);
-
-  const useFallbackData = () => {
-    console.log("통신 실패! 임시 테스트 데이터를 띄웁니다.");
-    setMembers([
-      { id: 1, name: '프로필A', initial: 'A', bg: 'bg-[#EAF9F4]', text: 'text-[#50C2A4]', isCompleted: true },
-      { id: 2, name: '프로필B', initial: 'B', bg: 'bg-[#F3EDFB]', text: 'text-[#9884D2]', isCompleted: true },
-      { id: 3, name: '프로필C', initial: 'C', bg: 'bg-[#FFF3E0]', text: 'text-[#FFB74D]', isCompleted: true },
-      { id: 4, name: '프로필D', initial: 'D', bg: 'bg-[#F0F0F0]', text: 'text-[#A0A0A0]', isCompleted: false },
-    ]);
-  };
+  }, [groupId, authLoading, accessToken]);
 
   // 완료한 인원수 계산
   const completedCount = members.filter(m => m.isCompleted).length;

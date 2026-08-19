@@ -4,6 +4,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { apiRequest } from "@/lib/api/client";
 
 interface HighlightMemberItem {
   id: number;
@@ -63,24 +64,15 @@ export default function HighlightPage() {
 
     const fetchHighlight = async () => {
       try {
-        const response = await fetch(`/api/v1/groups/${groupId}/highlight`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          },
+        const data = await apiRequest<HighlightPageResponse>(`/groups/${groupId}/highlight`, { 
+          accessToken 
         });
 
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-          setHighlightData({
-            ...result.data,
-            videoUrl: result.data.videoUrl || FALLBACK_HIGHLIGHT.videoUrl
-          });
-        } else {
-          throw new Error('하이라이트 정보를 불러오지 못했습니다.');
-        }
+        // 💡 비디오 URL이 없을 경우 폴백(더미) 주소로 채워줍니다.
+        setHighlightData({
+          ...data,
+          videoUrl: data.videoUrl || FALLBACK_HIGHLIGHT.videoUrl
+        });
       } catch (error) {
         console.error("하이라이트 조회 실패! 임시 데이터를 렌더링합니다:", error);
         setHighlightData(FALLBACK_HIGHLIGHT);
@@ -90,7 +82,7 @@ export default function HighlightPage() {
     };
 
     fetchHighlight();
-  }, [authLoading, accessToken]);
+  }, [authLoading, accessToken, groupId]);
 
   // 비디오 플레이어 조작 핸들러
   const togglePlay = () => {
@@ -293,29 +285,29 @@ export default function HighlightPage() {
             {/* -10초 버튼 */}
             <button 
               onClick={() => skipTime(-10)}
-              className="text-black hover:opacity-70 transition-opacity flex items-center justify-center relative"
+              className="text-black hover:text-[#41C0A1] transition-colors flex items-center justify-center relative w-[44px] h-[44px]"
             >
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M2.5 2v6h6M2.66 15.5c1.1 3.2 4.1 5.5 7.6 5.5 4.5 0 8.2-3.7 8.2-8.2s-3.7-8.2-8.2-8.2c-2.3 0-4.4.9-5.9 2.4L2.5 8" />
               </svg>
-              <span className="absolute text-[8px] font-bold top-[12px]">10</span>
+              <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[9px] font-bold mt-[2px] -ml-[2px]">10</span>
             </button>
             
             {/* 재생/일시정지 버튼 */}
             <button 
               onClick={togglePlay}
-              className="w-[42px] h-[42px] bg-black text-white rounded-full flex items-center justify-center pl-1 hover:bg-gray-800 transition-colors shadow-md"
+              className="w-[48px] h-[48px] bg-[#111111] text-white rounded-full flex items-center justify-center hover:bg-[#333333] transition-colors shadow-md"
             >
               {isPlaying ? (
                 /* 일시정지 아이콘 */
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <rect x="6" y="4" width="4" height="16" />
-                  <rect x="14" y="4" width="4" height="16" />
+                  <rect x="6" y="4" width="4" height="16" rx="1" />
+                  <rect x="14" y="4" width="4" height="16" rx="1" />
                 </svg>
               ) : (
                 /* 재생 아이콘 */
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M6 4l15 8-15 8z" />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="ml-1">
+                  <path d="M5.5 3.5v17l14-8.5z" />
                 </svg>
               )}
             </button>
@@ -323,12 +315,12 @@ export default function HighlightPage() {
             {/* +10초 버튼 */}
             <button 
               onClick={() => skipTime(10)}
-              className="text-black hover:opacity-70 transition-opacity flex items-center justify-center relative"
+              className="text-black hover:text-[#41C0A1] transition-colors flex items-center justify-center relative w-[44px] h-[44px]"
             >
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21.5 2v6h-6M21.34 15.5c-1.1 3.2-4.1 5.5-7.6 5.5-4.5 0-8.2-3.7-8.2-8.2s3.7-8.2 8.2-8.2c2.3 0 4.4.9 5.9 2.4l1.9 1.9" />
               </svg>
-              <span className="absolute text-[8px] font-bold top-[12px]">10</span>
+              <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[9px] font-bold mt-[2px] ml-[2px]">10</span>
             </button>
           </div>
         </div>

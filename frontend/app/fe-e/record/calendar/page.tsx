@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { apiRequest } from "@/lib/api/client";
 
 // 개별 미션 상세 타입
 interface MissionDetail {
@@ -99,17 +100,13 @@ export default function MissionCalendarPage() {
 
     const fetchData = async () => {
       try {
-        const [streakRes, historyRes] = await Promise.all([
-          fetch(`/api/v1/users/${userId}/streak`, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` } }), 
-          fetch(`/api/v1/users/${userId}/missions/history?year=${year}&month=${month}`, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` } })
+        const [streakResult, historyResult] = await Promise.all([
+          apiRequest<StreakResponse>(`/users/${userId}/streak`, { accessToken }),
+          apiRequest<HistoryResponse>(`/users/${userId}/missions/history?year=${year}&month=${month}`, { accessToken })
         ]);
 
-        const streakResult = await streakRes.json();
-        const historyResult = await historyRes.json();
-
-        if (streakRes.ok && streakResult.success) setStreakData(streakResult.data);
-        if (historyRes.ok && historyResult.success) setHistoryData(historyResult.data);
-        else throw new Error('달력 데이터를 불러오지 못했습니다.');
+        setStreakData(streakResult);
+        setHistoryData(historyResult);
 
       } catch (error) {
         console.error("API 연동 실패! 임시 데이터를 렌더링합니다:", error);
@@ -121,7 +118,7 @@ export default function MissionCalendarPage() {
     };
 
     fetchData();
-  }, [authLoading, accessToken, year, month]);
+  }, [authLoading, accessToken, year, month, userId]);
 
   const handlePrevMonth = () => {
     if (month === 1) { setYear(prev => prev - 1); setMonth(12); }

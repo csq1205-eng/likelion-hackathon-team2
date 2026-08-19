@@ -4,69 +4,66 @@
 import { Span } from 'next/dist/trace';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { apiRequest } from "@/lib/api/client";
 
 export default function JoinCheck() {
   const params = useParams();
   const router = useRouter();
-  const groupId = params.id;
+  const groupId = params.id as string;
 
-  const [isLogin, setIsLogin] = useState(true); // 테스트용
+  const { accessToken } = useAuth();
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleJoin = async () => {
-    if (!isLogin) {
+    if (!accessToken) {
       alert("로그인이 필요합니다! 로그인 화면으로 이동합니다.");
       return;
     }
+
+    if (isLoading) return;
     setIsLoading(true);
+
     try {
-      const response = await fetch(`/api/v1/groups/join`, { 
+      await apiRequest(`/groups/join`, { 
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json' 
-        },
+        body: { inviteCode: groupId },
+        accessToken,
       });
 
-      const result = await response.json();
+      alert('그룹에 성공적으로 참여했습니다!');
+      router.push(`/fe-e/group/${groupId}`);
 
-      if (result.success) {
-        alert('그룹에 성공적으로 참여했습니다!');
-        router.push(`/fe-e/group/${groupId}`); // 참여 완료 후 해당 그룹 피드로 이동
-      } else {
-        alert(result.message || '그룹 참여에 실패했습니다.');
-      }
     } catch (error) {
         console.error('그룹 참여 실패:', error);
-        alert('서버와의 통신에 실패했습니다.');
+        alert('그룹 참여에 실패했습니다.');
     } finally {
         setIsLoading(false);
     }
   };
 
   const handleInvite = async (type: string) => {
+    if (!accessToken) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
     if (isLoading) return;
     setIsLoading(true);
 
     try {
-      const response = await fetch(`/api/v1/groups/${groupId}/invite`, { 
+      const data = await apiRequest<any>(`/groups/${groupId}/invite`, { 
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json' 
-        },
+        accessToken,
       });
       
-      const result = await response.json();
+      console.log(`${type} 초대 발급 성공:`, data);
+      alert(`${type.toUpperCase()} 초대 정보가 발급되었습니다!`);
 
-      if (result.success) {
-        // 성공적으로 초대 데이터(링크, QR 이미지 URL 등)를 받아왔을 때
-        console.log(`${type} 초대 발급 성공:`, result.data);
-      } else {
-        alert(result.message || `초대 발급에 실패했습니다.`);
-      }
     } catch (error) {
       console.error('초대 발급 실패:', error);
-      alert('서버와의 통신에 실패했습니다.');
+      alert('초대 발급에 실패했습니다.');
     } finally {
       setIsLoading(false);
     }

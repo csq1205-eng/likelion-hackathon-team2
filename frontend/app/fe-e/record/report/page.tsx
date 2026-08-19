@@ -2,7 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useAuth } from "@/lib/auth/AuthProvider";
+import { useAuth } from '@/lib/auth/AuthProvider';
+import { apiRequest } from "@/lib/api/client";
 
 interface WeeklyReportResponse {
   startDate: string;
@@ -62,21 +63,12 @@ export default function WeeklyReportPage() {
     const fetchReportData = async () => {
       try {
         // 개인별 통합 주간 리포트 API
-        const response = await fetch(`/api/v1/users/me/weekly-report-data`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
+        const data = await apiRequest<WeeklyReportResponse>(`users/me/weekly-report-data`, {
+          accessToken 
         });
-        
-        const result = await response.json();
-        
-        if (response.ok && result.success) {
-          setReportData(result.data);
-        } else {
-          throw new Error('주간 리포트 데이터를 불러오지 못했습니다.');
-        }
-
+        setReportData(data);
       } catch (error) {
-        console.error("리포트 조회 실패! 임시 데이터를 렌더링합니다:", error);
+        console.error("리포트 조회 실패:", error);
         setReportData(FALLBACK_REPORT);
       } finally {
         setIsLoading(false);

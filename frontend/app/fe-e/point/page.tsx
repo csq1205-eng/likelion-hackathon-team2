@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { apiRequest } from "@/lib/api/client";
 
 interface Transaction {
   transactionId: number;
@@ -71,31 +72,13 @@ export default function PointRewardPage() {
 
     const fetchPoints = async () => {
       try {
-        const [pointsRes, streakRes] = await Promise.all([
-          fetch(`/api/v1/users/${userId}/points`, {
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` }
-          }),
-          fetch(`/api/v1/users/${userId}/streak`, {
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` }
-          })
+        const [pointsResult, streakResult] = await Promise.all([
+          apiRequest<PointResponse>(`/users/${userId}/points`, { accessToken }),
+          apiRequest<StreakResponse>(`/users/${userId}/streak`, { accessToken })
         ]);
 
-        const pointsResult = await pointsRes.json();
-        const streakResult = await streakRes.json();
-
-        // 포인트 세팅
-        if (pointsRes.ok && pointsResult.success) {
-          setPointData(pointsResult.data);
-        } else {
-          setPointData(FALLBACK_POINT_DATA);
-        }
-
-        // 연속 기록 세팅
-        if (streakRes.ok && streakResult.success) {
-          setStreakData(streakResult.data);
-        } else {
-          setStreakData(FALLBACK_STREAK_DATA);
-        }
+        setPointData(pointsResult);
+        setStreakData(streakResult);
 
       } catch (error) {
         console.error("데이터 조회 실패! :", error);

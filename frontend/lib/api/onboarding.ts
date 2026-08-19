@@ -14,7 +14,7 @@ export interface OnboardingPayload {
 
 export async function saveOnboarding(payload: OnboardingPayload, accessToken: string) {
   return apiRequest<{ userId: number; onboardingCompleted: boolean }>(
-    "/api/v1/users/onboarding",
+    "/users/onboarding",
     { method: "POST", body: payload, accessToken }
   );
 }

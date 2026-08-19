@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { apiRequest } from "@/lib/api/client";
 
 interface GroupSummaryResponse {
   groupId: string;
@@ -57,24 +58,13 @@ export default function GroupListJoin() {
       return;
     }
 
-    // 정상적인 API 호출 시도
     const fetchMyGroups = async () => {
       try {
-        const response = await fetch('/api/v1/groups', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}` 
-          },
+        const data = await apiRequest<any>('/groups', { 
+          accessToken 
         });
 
-        const result = await response.json();
-
-        if (response.ok) {
-                setMyGroups(result.groups || result.data || []);
-        } else {
-          throw new Error(result.message || '응답이 정상이 아닙니다.');
-        }
+        setMyGroups(data.groups || data || []);
 
       } catch (error) {
         // 통신 실패 시 가짜 데이터 렌더링
