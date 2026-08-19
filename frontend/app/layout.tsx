@@ -14,8 +14,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className="flex items-center justify-center min-h-screen bg-gray-100 font-sans">
-        <div className="w-[289px] h-[514px] bg-[#ffffff] flex flex-col relative shadow-2xl overflow-hidden rounded-[30px]">
+      <body className="min-h-screen bg-gray-100 font-sans">
+        <div className="mx-auto min-h-screen w-full bg-white">
           <AuthProvider>{children}</AuthProvider>
         </div>
       </body>

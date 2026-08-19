@@ -87,8 +87,8 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="flex min-h-screen justify-center bg-[#F4F6F5] px-4 py-8">
-      <div className="flex w-full max-w-sm flex-col rounded-3xl bg-white px-6 py-7 shadow-[0_8px_30px_rgba(31,42,37,0.06)]">
+    <main className="w-full min-h-screen overflow-y-scroll bg-[#F4F6F5] px-4 py-6">
+  <div className="mx-auto flex w-full max-w-sm flex-col rounded-3xl bg-white px-6 py-6 shadow-[0_8px_30px_rgba(31,42,37,0.06)]">
         {/* 진행 표시 */}
         <div className="mb-7">
           <p className="mb-2.5 text-sm text-[#8A9A92]">정보 입력</p>
