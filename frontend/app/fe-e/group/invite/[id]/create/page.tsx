@@ -35,8 +35,8 @@ export default function GroupInviteCreate() {
 
     script.onload = () => {
       if (window.Kakao && !window.Kakao.isInitialized()) {
-        // 본인의 카카오 개발자 센터 JavaScript 키로 변경 필요
-        window.Kakao.init('YOUR_KAKAO_JAVASCRIPT_KEY');
+        // 본인의 카카오 개발자 센터 JavaScript 키로 변경 부분
+        window.Kakao.init('778324986d8643a9a889516bddc37d02');
       }
     };
 
