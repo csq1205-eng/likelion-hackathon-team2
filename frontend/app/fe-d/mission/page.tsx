@@ -16,23 +16,7 @@ const SLOT_LABEL: Record<string, string> = {
 };
 
 function formatMissionDescription(mission: Mission) {
-  const { title, description } = mission;
-
-  // 물 섭취 미션 → 잔
-  if (
-    title.includes("물") &&
-    !description.includes("잔") &&
-    !description.includes("리터")
-  ) {
-    return `${description}잔`;
-  }
-
-  // 수면 미션 → 시간
-  if (title.includes("수면") && !description.includes("시간")) {
-    return `${description}시간`;
-  }
-
-  return description;
+  return mission.description;
 }
 
 export default function MissionPage() {
