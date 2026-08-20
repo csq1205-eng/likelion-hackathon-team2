@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
 import { useAuth } from "@/lib/auth/AuthProvider";
-import { apiRequest, API_B_URL } from "@/lib/api/client";
+import { apiRequest } from "@/lib/api/client";
 
 interface AIResultResponse {
   status: 'REQUESTED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
@@ -36,7 +36,7 @@ function MissionResultInner() {
         const res = await apiRequest<AIResultResponse>(`/clips/${clipId}/result`, {
           method: 'GET',
           accessToken,
-          customBaseUrl: API_B_URL, 
+          customBaseUrl: "/api",
         });
 
         // 아직 판정 중인 경우 : 상태 유지, 다음 폴링 대기

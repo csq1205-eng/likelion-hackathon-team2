@@ -1,5 +1,3 @@
-import { API_B_URL } from "@/lib/api/client";
-
 export interface ClipUploadResponse {
   missionId: number;
   clipId: number;
