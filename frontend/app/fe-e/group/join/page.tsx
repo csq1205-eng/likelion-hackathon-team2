@@ -23,7 +23,7 @@ export default function GroupCodeJoinPage() {
       return;
     }
 
-    router.push(`/fe-e/group/invite`);
+    router.push(`/fe-e/group/join/${inviteCode.trim()}`);
   };
 
   return (
