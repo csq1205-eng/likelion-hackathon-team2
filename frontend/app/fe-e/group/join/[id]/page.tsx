@@ -58,7 +58,7 @@ export default function GroupJoinPage() {
   const handleJoin = async () => {
     if (!accessToken) {
       alert('로그인이 필요한 서비스입니다.');
-      {/* router.push('/fe-d/login'); */}
+      // router.push('/fe-d/login');
       return;
     }
     
