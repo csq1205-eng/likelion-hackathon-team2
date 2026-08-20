@@ -7,6 +7,7 @@ import com.wedit.server.group.domain.GroupMemberStatus;
 import com.wedit.server.group.repository.GroupMemberRepository;
 import com.wedit.server.group.repository.GroupRepository;
 import com.wedit.server.highlight.domain.Highlight;
+import com.wedit.server.highlight.domain.HighlightType;
 import com.wedit.server.highlight.dto.HighlightItemResponse;
 import com.wedit.server.highlight.dto.HighlightListResponse;
 import com.wedit.server.highlight.dto.HighlightSaveRequest;
@@ -73,15 +74,17 @@ public class HighlightService {
         if (user == null && group == null) {
             throw new CustomException(ErrorCode.INVALID_INPUT, "사용자 ID 또는 그룹 ID 중 하나는 필수입니다.");
         }
+        HighlightType highlightType = group == null ? HighlightType.USER : HighlightType.GROUP;
 
         Highlight highlight = findExistingHighlight(user, group, request.highlightDate())
                 .map(existingHighlight -> {
-                    existingHighlight.update(request.title(), request.summary(), request.videoUrl());
+                    existingHighlight.update(highlightType, request.title(), request.summary(), request.videoUrl());
                     return existingHighlight;
                 })
                 .orElseGet(() -> highlightRepository.save(Highlight.create(
                         user,
                         group,
+                        highlightType,
                         request.highlightDate(),
                         request.title(),
                         request.summary(),
@@ -122,6 +125,7 @@ public class HighlightService {
 
     private HighlightItemResponse toHighlightItemResponse(Highlight highlight) {
         return new HighlightItemResponse(
+                highlight.getGroup() == null ? null : highlight.getGroup().getId(),
                 highlight.getId(),
                 highlight.getHighlightDate(),
                 highlight.getTitle(),

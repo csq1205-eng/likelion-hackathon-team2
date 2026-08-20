@@ -11,6 +11,8 @@ import com.wedit.server.group.domain.GroupMember;
 import com.wedit.server.group.repository.GroupMemberRepository;
 import com.wedit.server.group.repository.GroupRepository;
 import com.wedit.server.highlight.domain.Highlight;
+import com.wedit.server.highlight.domain.HighlightType;
+import com.wedit.server.highlight.dto.HighlightItemResponse;
 import com.wedit.server.highlight.dto.AiHighlightGenerateRequest;
 import com.wedit.server.highlight.dto.AiHighlightGenerateResponse;
 import com.wedit.server.highlight.repository.HighlightRepository;
@@ -52,6 +54,9 @@ class HighlightGenerationTriggerServiceTest {
 
     @Autowired
     private HighlightRepository highlightRepository;
+
+    @Autowired
+    private HighlightService highlightService;
 
     @MockitoBean
     private HighlightGenerationClient highlightGenerationClient;
@@ -110,7 +115,11 @@ class HighlightGenerationTriggerServiceTest {
         assertThat(request.clips()).extracting("clipId").containsExactly(200L, 201L);
 
         Highlight highlight = highlightRepository.findFirstByGroupAndHighlightDateOrderByIdDesc(group, today).orElseThrow();
+        assertThat(highlight.getHighlightType()).isEqualTo(HighlightType.GROUP);
         assertThat(highlight.getVideoUrl()).isEqualTo("http://localhost:8001/generated/highlights/highlight.mp4");
+
+        HighlightItemResponse response = highlightService.getGroupHighlight(owner.getId(), group.getId(), today);
+        assertThat(response.groupId()).isEqualTo(group.getId());
     }
 
     private User saveUser(String providerUserId) {
