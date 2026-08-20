@@ -92,11 +92,15 @@ public class MissionService {
     public TodayMissionResponse getTodayMissions(Long userId) {
         User user = findUser(userId);
         LocalDate today = LocalDate.now();
-        List<TodayMissionItemResponse> missions = missionRepository.findAllByUserAndMissionDateOrderByIdAsc(
+        Group missionGroup = findDefaultMissionGroup(user);
+        Long missionGroupId = missionGroup == null ? null : missionGroup.getId();
+        List<TodayMissionItemResponse> missions = missionRepository.findAllByUserAndMissionDateAndGroupIdOrderByIdAsc(
                         user,
-                        today
+                        today,
+                        missionGroupId
                 )
                 .stream()
+                .limit(MAX_DAILY_MISSION_COUNT)
                 .map(this::toTodayMissionItemResponse)
                 .toList();
 
@@ -175,15 +179,15 @@ public class MissionService {
             return List.of(group);
         }
 
-        List<Group> groups = groupMemberRepository.findAllByUserAndStatus(user, GroupMemberStatus.ACTIVE)
+        return Collections.singletonList(findDefaultMissionGroup(user));
+    }
+
+    private Group findDefaultMissionGroup(User user) {
+        return groupMemberRepository.findAllByUserAndStatusOrderByIdAsc(user, GroupMemberStatus.ACTIVE)
                 .stream()
                 .map(GroupMember::getGroup)
-                .toList();
-        if (groups.isEmpty()) {
-            return Collections.singletonList(null);
-        }
-
-        return groups;
+                .findFirst()
+                .orElse(null);
     }
 
     private MissionGenerationResponse saveGeneratedMissions(

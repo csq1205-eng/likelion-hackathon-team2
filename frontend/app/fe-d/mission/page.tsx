@@ -16,23 +16,7 @@ const SLOT_LABEL: Record<string, string> = {
 };
 
 function formatMissionDescription(mission: Mission) {
-  const { title, description } = mission;
-
-  // 물 섭취 미션 → 잔
-  if (
-    title.includes("물") &&
-    !description.includes("잔") &&
-    !description.includes("리터")
-  ) {
-    return `${description}잔`;
-  }
-
-  // 수면 미션 → 시간
-  if (title.includes("수면") && !description.includes("시간")) {
-    return `${description}시간`;
-  }
-
-  return description;
+  return mission.description;
 }
 
 export default function MissionPage() {
@@ -57,23 +41,27 @@ export default function MissionPage() {
     try {
       let res = await getTodayMissions(accessToken);
       
+if (!res.missions || res.missions.length === 0) {
+  console.log("생성된 미션이 없어 자동 생성을 요청합니다...");
 
-      if (!res.missions || res.missions.length === 0) {
-        console.log("생성된 미션이 없어 자동 생성을 요청합니다...");
-        try {
-          const currentGroupId = localStorage.getItem('myGroupId') || '1';
+  try {
+    const currentGroupId =
+      localStorage.getItem("myGroupId") || "1";
 
-          await apiRequest('/missions/today/generate', {
-            method: 'POST',
-            accessToken,
-            body: {},
-          });
+    await apiRequest("/missions/today/generate", {
+      method: "POST",
+      accessToken,
+      body: {
+        groupId: Number(currentGroupId),
+      },
+    });
 
-          res = await getTodayMissions(accessToken);
-        } catch (genErr) {
-          console.error("미션 자동 생성 실패:", genErr);
-        }
-      }
+    res = await getTodayMissions(accessToken);
+  } catch (genErr) {
+    console.error("미션 자동 생성 실패:", genErr);
+  }
+}
+        
 
       setMissions(res.missions || []);
       setError(null);

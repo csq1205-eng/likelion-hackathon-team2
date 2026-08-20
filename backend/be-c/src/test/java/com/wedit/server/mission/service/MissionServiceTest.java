@@ -2,6 +2,10 @@ package com.wedit.server.mission.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.wedit.server.group.domain.Group;
+import com.wedit.server.group.domain.GroupMember;
+import com.wedit.server.group.repository.GroupMemberRepository;
+import com.wedit.server.group.repository.GroupRepository;
 import com.wedit.server.mission.domain.Mission;
 import com.wedit.server.mission.domain.MissionStatus;
 import com.wedit.server.mission.dto.MissionResultCreateRequest;
@@ -28,6 +32,12 @@ class MissionServiceTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private GroupRepository groupRepository;
+
+    @Autowired
+    private GroupMemberRepository groupMemberRepository;
 
     @Autowired
     private MissionRepository missionRepository;
@@ -68,6 +78,35 @@ class MissionServiceTest {
         assertThat(response.missions().get(0).verificationCriteria()).isEqualTo("사용자가 물을 마시는 장면이 확인되어야 합니다.");
         assertThat(response.missions().get(0).status()).isEqualTo("PENDING");
         assertThat(response.missions().get(0).reason()).isEqualTo("최근 수분 섭취량이 낮게 입력되어 추천되었습니다.");
+    }
+
+    @Test
+    @DisplayName("활성 그룹이 있으면 오늘 미션 조회는 해당 그룹 미션을 하루 최대 3개만 반환한다")
+    void getTodayMissionsReturnsDefaultGroupMissionsUpToThree() {
+        User user = userRepository.save(User.create(
+                SocialProvider.KAKAO,
+                "kakao-mission-group-user",
+                "mission-group@example.com",
+                "효림",
+                null
+        ));
+        Group group = groupRepository.save(Group.create(user, "아침 루틴 챌린지", "21일 W 정원 완성", 21));
+        groupMemberRepository.save(GroupMember.createOwner(group, user));
+        LocalDate today = LocalDate.now();
+        saveMission(user, null, today, "개인 미션 1");
+        saveMission(user, null, today, "개인 미션 2");
+        saveMission(user, null, today, "개인 미션 3");
+        saveMission(user, group, today, "그룹 미션 1");
+        saveMission(user, group, today, "그룹 미션 2");
+        saveMission(user, group, today, "그룹 미션 3");
+        saveMission(user, group, today, "그룹 미션 4");
+
+        TodayMissionResponse response = missionService.getTodayMissions(user.getId());
+
+        assertThat(response.missions()).hasSize(3);
+        assertThat(response.missions())
+                .extracting("title")
+                .containsExactly("그룹 미션 1", "그룹 미션 2", "그룹 미션 3");
     }
 
     @Test
@@ -153,5 +192,18 @@ class MissionServiceTest {
         assertThat(response.totalEarned()).isEqualTo(100);
         assertThat(response.recentTransactions()).hasSize(1);
         assertThat(response.recentTransactions().get(0).transactionType()).isEqualTo("EARN");
+    }
+
+    private void saveMission(User user, Group group, LocalDate missionDate, String title) {
+        missionRepository.save(Mission.create(
+                user,
+                group,
+                missionDate,
+                "MORNING",
+                title,
+                title + " 설명",
+                "HYDRATION",
+                "사용자가 미션을 수행하는 장면이 확인되어야 합니다."
+        ));
     }
 }
