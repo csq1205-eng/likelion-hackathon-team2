@@ -88,7 +88,8 @@ export default function GroupListJoin() {
       );
     }
 
-    const firstGroupId = myGroups.length > 0 ? myGroups[0].groupId : '1';
+    const savedGroupId = typeof window !== 'undefined' ? localStorage.getItem('myGroupId') : null;
+    const firstGroupId = (myGroups.length > 0 ? String(myGroups[0].groupId) : savedGroupId) || '1';
 
     return (
       <div className="flex flex-col w-full h-[100dvh] relative bg-white overflow-hidden">
