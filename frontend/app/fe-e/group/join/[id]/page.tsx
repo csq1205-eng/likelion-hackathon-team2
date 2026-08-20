@@ -22,7 +22,7 @@ export default function GroupJoinPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const useFallbackData = () => {
+  const applyFallbackData = () => {
     console.log("통신 실패! 임시 테스트 데이터를 띄웁니다.");
     setGroupData({
       name: '내 친구들',
@@ -44,7 +44,7 @@ export default function GroupJoinPage() {
         setGroupData(data);
       } catch (error) {
         console.error('그룹 정보 불러오기 실패:', error);
-        useFallbackData(); // 통신 실패 시 임시 데이터 사용
+        applyFallbackData(); // 통신 실패 시 임시 데이터 사용
       } finally {
         setIsLoading(false);
       }

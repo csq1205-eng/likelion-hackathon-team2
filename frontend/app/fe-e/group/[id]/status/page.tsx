@@ -5,6 +5,12 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { apiRequest } from '@/lib/api/client';
 
+interface StatusMemberDTO {
+  memberId: number;
+  memberName: string;
+  isCompleted: boolean;
+}
+
 // 멤버 프로필에 입힐 색상 테마 배열
 const THEMES = [
   { bg: 'bg-[#EAF9F4]', text: 'text-[#50C2A4]' },
@@ -25,14 +31,14 @@ interface MemberStatus {
 export default function GroupStatusPage() {
   const router = useRouter();
   const params = useParams();
-  const groupId = params.id as string;
+  const groupId = params.id as string || (typeof window !== 'undefined' ? localStorage.getItem('myGroupId') : '1');
 
   const { accessToken, isLoading: authLoading } = useAuth();
 
   const [members, setMembers] = useState<MemberStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const useFallbackData = () => {
+  const applyFallbackData = () => {
     console.log("통신 실패 또는 비로그인 상태! 임시 테스트 데이터를 띄웁니다.");
     setMembers([
       { id: 1, name: '프로필A', initial: 'A', bg: 'bg-[#EAF9F4]', text: 'text-[#50C2A4]', isCompleted: true },
@@ -46,26 +52,27 @@ export default function GroupStatusPage() {
     if (authLoading) return;
 
     if (!accessToken) {
-      useFallbackData();
+      applyFallbackData();
       setIsLoading(false);
       return;
     }
 
     const fetchGroupStatus = async () => {
-      if (!accessToken) return;
-
       try {
-        const result = await apiRequest<any>(`/groups/${groupId}/status`, {
+        const result = await apiRequest<StatusMemberDTO[]>(`/groups/${groupId}/status`, {
           accessToken,
         });
 
-        const rawData = result.data || result;
-        const mappedMembers = rawData.map((member: any, index: number) => {
+        const rawData = Array.isArray(result) ? result : (result as any).data || result;
+        
+        const mappedMembers = rawData.map((member: StatusMemberDTO, index: number) => {
           const theme = THEMES[index % THEMES.length];
+          const memberName = member.memberName || '알 수 없음';
+          
           return {
             id: member.memberId || index,
-            name: member.memberName || '알 수 없음',
-            initial: member.memberName ? member.memberName.charAt(0) : '?',
+            name: memberName,
+            initial: memberName.charAt(0),
             bg: theme.bg,
             text: theme.text,
             isCompleted: member.isCompleted || false,
@@ -75,7 +82,7 @@ export default function GroupStatusPage() {
 
       } catch (error) {
         console.error('그룹 현황 조회 실패:', error);
-        useFallbackData(); // 통신 실패 시 가짜 데이터 렌더링
+        applyFallbackData();
       } finally {
         setIsLoading(false);
       }
@@ -87,7 +94,9 @@ export default function GroupStatusPage() {
   }, [groupId, authLoading, accessToken]);
 
   // 완료한 인원수 계산
+  const totalCount = members.length || 1;
   const completedCount = members.filter(m => m.isCompleted).length;
+  const progressPercent = Math.round((completedCount / totalCount) * 100);
 
   return (
     <div className="relative w-full h-[100dvh] bg-white flex flex-col overflow-hidden px-5 py-6">
@@ -142,8 +151,9 @@ export default function GroupStatusPage() {
 
                 <div className="shrink-0 pr-2">
                   {member.isCompleted ? (
+                    <div className="flex items-center justify-center w-8 h-8 bg-[#222222] rounded-full shadow-sm">
                     <svg 
-                      className="w-8 h-8 text-[#222222]" 
+                      className="w-6 h-6 text-[#ffffff]" 
                       fill="none" 
                       stroke="currentColor" 
                       strokeWidth="3.5" 
@@ -153,6 +163,7 @@ export default function GroupStatusPage() {
                     >
                       <path d="M5 12l4 4L19 7" />
                     </svg>
+                  </div>
                   ) : (
                     <span className="text-[13px] text-[#B0B0B0] font-semibold pr-1">
                       미완료
