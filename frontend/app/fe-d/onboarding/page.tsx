@@ -45,7 +45,7 @@ export default function OnboardingPage() {
   const [mainConcern, setMainConcern] = useState<string>("");
   const [causeCandidates, setCauseCandidates] = useState<string[]>([]);
   const [sleepHours, setSleepHours] = useState(7);
-  const [waterIntake, setWaterIntake] = useState(1.0);
+  const [waterIntake, setWaterIntake] = useState(1);
   const [wakeUpTime, setWakeUpTime] = useState("07:00");
   const [sleepTime, setSleepTime] = useState("00:00");
   const [ownedProducts, setOwnedProducts] = useState<Record<string, boolean>>(
@@ -209,37 +209,53 @@ export default function OnboardingPage() {
             </h1>
 
             <div className="space-y-5">
+              {/* 평균 수면시간 */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-[#2B3A33]">
                   평균 수면시간
                 </label>
 
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  placeholder="숫자 선택"
-                  value={sleepHours}
-                  onChange={(e) => setSleepHours(Number(e.target.value))}
-                  className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#A7FBE7] focus:bg-white"
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="숫자 선택"
+                    value={sleepHours}
+                    onChange={(e) => setSleepHours(Number(e.target.value))}
+                    className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 pr-14 text-sm text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#A7FBE7] focus:bg-white"
+                  />
+
+                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#8A968F]">
+                    시간
+                  </span>
+                </div>
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-[#2B3A33]">
-                  물 섭취량
-                </label>
+              {/* 물 섭취량 */}
+<div>
+  <label className="mb-2 block text-sm font-semibold text-[#2B3A33]">
+    물 섭취량
+  </label>
 
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  step="0.1"
-                  placeholder="입력"
-                  value={waterIntake}
-                  onChange={(e) => setWaterIntake(Number(e.target.value))}
-                  className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#A7FBE7] focus:bg-white"
-                />
-              </div>
+  <div className="relative">
+    <input
+      type="number"
+      inputMode="numeric"
+      step="1"
+      min="0"
+      placeholder="입력"
+      value={waterIntake}
+      onChange={(e) => setWaterIntake(Number(e.target.value))}
+      className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 pr-12 text-sm text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#A7FBE7] focus:bg-white"
+    />
 
+    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#8A968F]">
+      잔
+    </span>
+  </div>
+</div>
+
+              {/* 기상 시간 */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-[#2B3A33]">
                   기상 시간
@@ -253,6 +269,7 @@ export default function OnboardingPage() {
                 />
               </div>
 
+              {/* 취침 시간 */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-[#2B3A33]">
                   취침 시간
