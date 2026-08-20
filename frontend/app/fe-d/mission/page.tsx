@@ -8,7 +8,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const SLOT_LABEL: Record<string, string> = {
   MORNING: "아침",
-  AFTERNOON: "낮",
+  NOON: "낮",
   EVENING: "저녁",
 };
 
@@ -86,7 +86,7 @@ export default function MissionPage() {
           <button
             key={m.missionId}
             onClick={() => router.push(`/fe-d/mission/camera?missionId=${m.missionId}`)}
-            disabled={m.status === "PASS"}
+            disabled={m.status === "PASSED"}
             className="w-full text-left bg-white rounded-2xl p-5 shadow-sm disabled:opacity-50"
           >
             <span className="inline-block text-xs font-bold text-[#1F6F5C] bg-[#C9EDE0] px-2 py-1 rounded-full mb-2">
@@ -95,7 +95,7 @@ export default function MissionPage() {
             <p className="font-bold mb-1">{m.title}</p>
             <p className="text-sm text-[#666] mb-2">{m.description}</p>
             <p className="text-xs text-[#999]">{m.reason}</p>
-            {m.status === "PASS" && (
+            {m.status === "PASSED" && (
               <p className="text-xs text-[#1F6F5C] font-bold mt-2">✓ 완료됨</p>
             )}
           </button>

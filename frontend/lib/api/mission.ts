@@ -2,11 +2,11 @@ import { apiRequest } from "./client";
 
 export interface Mission {
   missionId: number;
-  slot: "MORNING" | "AFTERNOON" | "EVENING";
+  slot: "MORNING" | "NOON" | "EVENING";
   title: string;
   description: string;
   missionType: string;
-  status: "PENDING" | "PASS" | "FAIL" | "HOLD";
+  status: "PENDING" | "SUBMITTED" | "PASSED" | "FAILED" | "SKIPPED";
   reason: string;
 }
 

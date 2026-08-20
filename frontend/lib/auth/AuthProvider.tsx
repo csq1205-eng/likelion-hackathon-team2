@@ -54,15 +54,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading: false, 
         error: null,
       });
-    } catch (error) {
-      // 백엔드 서버가 응답하지 않을 때 : 가짜 데이터 렌더링
-      console.warn("백엔드 서버가 응답하지 않아 임시 데이터로 자동 전환합니다.", error);
-      saveCachedAuth(MOCK_FALLBACK_AUTH);
-      setAuthState({ 
-        ...MOCK_FALLBACK_AUTH, 
-        isLoading: false, 
-        error: null 
-      });
+      } catch (error) {
+      console.error("로그인 실패:", error);
+      setAuthState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: "로그인에 실패했어요. 잠시 후 다시 시도해주세요.",
+      }));
     }
   }
 
@@ -75,12 +73,21 @@ export function useAuth() {
   return context;
 }
 
-function readCachedAuth(): Omit<AuthContextValue, "isLoading" | "error"> | null {
-  if (typeof window === "undefined") return null;
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return null;
-  try { return JSON.parse(raw); } catch { return null; }
-}
+  function readCachedAuth(): Omit<AuthContextValue, "isLoading" | "error"> | null {
+    if (typeof window === "undefined") return null;
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed.accessToken !== "string" || !parsed.accessToken.startsWith("temporary-token-")) {
+        return null; // mock이나 이상한 토큰은 무시하고 재로그인
+      }
+      return parsed;
+    } catch {
+      return null;
+    }
+  }
+
 
 function saveCachedAuth(result: any) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({

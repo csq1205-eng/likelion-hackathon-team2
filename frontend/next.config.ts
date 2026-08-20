@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const BE_C_URL = process.env.BACKEND_INTERNAL_URL ?? "http://localhost:8080";
-const BE_B_URL = process.env.BACKEND_CLIP_URL ?? "http://localhost:8000";
+const BE_B_URL = process.env.BACKEND_CLIP_URL ?? "http://localhost:8002";
 
 const nextConfig: NextConfig = {
   async rewrites() {
