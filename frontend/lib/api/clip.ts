@@ -24,7 +24,7 @@ export async function uploadClip(
   shared: boolean,
   accessToken: string,
   missionTitle: string,
-  criteria: string
+  criteria?: string
 ): Promise<ClipUploadResponse> {
   const formData = new FormData();
 
