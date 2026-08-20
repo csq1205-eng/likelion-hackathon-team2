@@ -4,6 +4,8 @@ import com.wedit.server.group.domain.Group;
 import com.wedit.server.user.domain.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,6 +36,10 @@ public class Highlight {
     @Column(name = "highlight_date", nullable = false)
     private LocalDate highlightDate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "highlight_type", nullable = false, length = 20)
+    private HighlightType highlightType;
+
     @Column(nullable = false, length = 100)
     private String title;
 
@@ -52,6 +58,7 @@ public class Highlight {
     private Highlight(
             User user,
             Group group,
+            HighlightType highlightType,
             LocalDate highlightDate,
             String title,
             String summary,
@@ -59,6 +66,7 @@ public class Highlight {
     ) {
         this.user = user;
         this.group = group;
+        this.highlightType = highlightType;
         this.highlightDate = highlightDate;
         this.title = title;
         this.summary = summary;
@@ -68,15 +76,17 @@ public class Highlight {
     public static Highlight create(
             User user,
             Group group,
+            HighlightType highlightType,
             LocalDate highlightDate,
             String title,
             String summary,
             String videoUrl
     ) {
-        return new Highlight(user, group, highlightDate, title, summary, videoUrl);
+        return new Highlight(user, group, highlightType, highlightDate, title, summary, videoUrl);
     }
 
-    public void update(String title, String summary, String videoUrl) {
+    public void update(HighlightType highlightType, String title, String summary, String videoUrl) {
+        this.highlightType = highlightType;
         this.title = title;
         this.summary = summary;
         this.videoUrl = videoUrl;
@@ -101,6 +111,10 @@ public class Highlight {
 
     public Group getGroup() {
         return group;
+    }
+
+    public HighlightType getHighlightType() {
+        return highlightType;
     }
 
     public String getTitle() {

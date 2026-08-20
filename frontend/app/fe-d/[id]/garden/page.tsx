@@ -91,7 +91,7 @@ export default function GardenPage() {
   const percent = Math.round(data.progressRate);
 
   const completedMissionCount = missions.filter(
-    (mission) => mission.status === "PASS"
+    (mission) => mission.status === "PASSED"
   ).length;
 
   return (
@@ -251,7 +251,7 @@ export default function GardenPage() {
 
                     <span
                       className={
-                        mission.status === "PASS"
+                        mission.status === "PASSED"
                           ? "text-lg text-[#3BB985]"
                           : "text-lg text-[#DDD]"
                       }
