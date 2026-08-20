@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "../lib/auth/AuthProvider";
+import { DemoAccountSwitcher } from "@/components/DemoAccountSwitcher";
 
 export const metadata: Metadata = {
   title: "WEDIT",
@@ -18,6 +19,8 @@ export default function RootLayout({
         <div className="mx-auto min-h-screen w-full bg-white">
           <AuthProvider>{children}</AuthProvider>
         </div>
+        
+        <DemoAccountSwitcher />
       </body>
     </html>
   );
