@@ -1,3 +1,5 @@
+import { API_B_URL } from "@/lib/api/client";
+
 export interface ClipUploadResponse {
   missionId: number;
   clipId: number;
@@ -25,14 +27,12 @@ export async function uploadClip(
   const formData = new FormData();
   formData.append("missionId", String(missionId));
   formData.append("shared", String(shared));
-  // 서버는 mp4/mov만 받는다고 명시되어 있어서 파일명에 확장자를 붙여줌
   formData.append("clip", clip, "clip.mp4");
 
-  const response = await fetch("/api/clips/upload", {
+  const response = await fetch(`${API_B_URL}/clips/upload`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
-      // Content-Type은 FormData 사용 시 브라우저가 자동으로 boundary까지 설정하므로 직접 넣지 않음
     },
     body: formData,
   });

@@ -63,7 +63,7 @@ export default function WeeklyReportPage() {
     const fetchReportData = async () => {
       try {
         // 개인별 통합 주간 리포트 API
-        const data = await apiRequest<WeeklyReportResponse>(`users/me/weekly-report-data`, {
+        const data = await apiRequest<WeeklyReportResponse>(`/users/me/weekly-report-data`, {
           accessToken 
         });
         setReportData(data);

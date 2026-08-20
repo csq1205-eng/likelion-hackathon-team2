@@ -6,9 +6,9 @@ import { useAuth } from "@/lib/auth/AuthProvider";
 import { apiRequest, API_B_URL } from "@/lib/api/client";
 
 interface AIResultResponse {
-  status: 'PROCESSING' | 'SUCCESS' | 'FAIL';
-  isPassed?: boolean;
-  remainRetryCount?: number;
+  status: 'REQUESTED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  result?: 'PASS' | 'FAIL' | 'HOLD' | 'ERROR';
+  reason?: string;
 }
 
 function MissionResultInner() {
@@ -16,11 +16,14 @@ function MissionResultInner() {
   const searchParams = useSearchParams();
   const clipId = searchParams.get('clipId') || '1';
 
+  const retryCountParam = searchParams.get('retryCount');
+  const retryCount = retryCountParam ? parseInt(retryCountParam, 10) : 2;
+
   const { accessToken } = useAuth();
 
   const [isSuccess, setIsSuccess] = useState(false); 
-  const [retryCount, setRetryCount] = useState(2);
   const [isLoading, setIsLoading] = useState(true);
+  const [failReason, setFailReason] = useState<string | null>(null);
 
   useEffect(() => {
     if (!accessToken) return;
@@ -29,45 +32,44 @@ function MissionResultInner() {
 
     const fetchResult = async () => {
       try {
-        const result = await apiRequest<AIResultResponse>(`/clips/${clipId}/result`, {
+        const res = await apiRequest<AIResultResponse>(`/clips/${clipId}/result`, {
           method: 'GET',
           accessToken,
           customBaseUrl: API_B_URL, 
         });
 
         // PROCESSING : 상태 유지, 다음 폴링 기다림
-        if (result.status === 'PROCESSING') {
+        if (res.status === 'REQUESTED' || res.status === 'PROCESSING') {
           console.log('AI가 아직 판정 중입니다...');
           return; 
         }
 
-        // SUCCESS or FAIL : 폴링 멈춤
+        // COMPLETED 또는 FAILED : 폴링 멈춤
         clearInterval(pollingInterval);
         setIsLoading(false);
 
         // 결과에 따라 상태 업데이트
-        if (result.isPassed) {
+        if (res.result === 'PASS') {
           setIsSuccess(true);
         } else {
           setIsSuccess(false);
-          setRetryCount(result.remainRetryCount ?? 2);
+          // 실패 사유가 있다면 저장
+          if (res.reason) {
+            setFailReason(res.reason);
+          }
         }
       } catch (error) {
         console.error('판정 결과 조회 실패:', error);
-        // 에러 발생 시 임시로 폴링을 중단하고 실패 화면(또는 에러 화면) 표시
         clearInterval(pollingInterval);
         setIsLoading(false);
         setIsSuccess(false);
+        setFailReason("서버와의 연결에 실패했습니다.");
       }
     };
 
-    // 컴포넌트 마운트 시 최초 1회 실행
     fetchResult();
-
-    // 이후 2초(2000ms)마다 주기적으로 API 재요청 (폴링 기준)
     pollingInterval = setInterval(fetchResult, 2000);
 
-    // 컴포넌트 언마운트 시 인터벌 정리 (메모리 누수 방지)
     return () => clearInterval(pollingInterval);
   }, [clipId, accessToken]);
 

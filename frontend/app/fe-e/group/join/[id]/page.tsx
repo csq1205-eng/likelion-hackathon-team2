@@ -37,7 +37,7 @@ export default function GroupJoinPage() {
   useEffect(() => {
     const fetchGroupPreview = async () => {
       try {
-        const data = await apiRequest<any>(`/groups/invite/${groupId}/preview`, {
+        const data = await apiRequest<any>(`/groups/invite/preview?inviteCode=${groupId}`, {
           method: 'GET',
         });
 
@@ -58,10 +58,10 @@ export default function GroupJoinPage() {
   const handleJoin = async () => {
     if (!accessToken) {
       alert('로그인이 필요한 서비스입니다.');
-      router.push('/fe-d/login'); // 로그인 페이지로 유도
+      {/* router.push('/fe-d/login'); */}
       return;
     }
-
+    
     if (isSubmitting) return;
     setIsSubmitting(true);
 
@@ -162,7 +162,6 @@ export default function GroupJoinPage() {
           </button>
           <button
             onClick={handleLoginAndJoin}
-            disabled={isLoading || isSubmitting}
             className="w-full py-[14px] rounded-[12px] bg-[#F7F8F8] text-[#9CA3AF] font-semibold text-[16px] hover:bg-[#E8E8E8] transition-colors disabled:opacity-50"
           >
             로그인 후 참여할게요

@@ -301,8 +301,7 @@ export default function MissionCalendarPage() {
               filteredMissions.map((mission) => (
                 <div 
                   key={mission.id} 
-                  onClick={() => router.push(`/fe-e/record/detail/${mission.id}`)}
-                  className="flex items-center justify-between py-2 cursor-pointer group"
+                  className="flex items-center justify-between py-2 group"
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-[32px] h-[32px] rounded-full flex items-center justify-center text-[#222222] ${mission.completed ? (mission.isGroup ? 'bg-[#F3EDFF]' : 'bg-[#E5F7F1]') : 'bg-gray-200 text-gray-500'}`}>

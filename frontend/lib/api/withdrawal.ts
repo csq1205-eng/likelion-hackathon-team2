@@ -11,7 +11,7 @@ export async function withdrawUser(
   reason: string,
   accessToken: string
 ) {
-  return apiRequest<WithdrawalResponse>(`/api/v1/users/${userId}`, {
+  return apiRequest<WithdrawalResponse>(`/users/${userId}`, {
     method: "DELETE",
     body: { reason },
     accessToken,
