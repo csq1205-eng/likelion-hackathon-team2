@@ -1,6 +1,7 @@
 package com.wedit.server.mission.repository;
 
 import com.wedit.server.group.domain.Group;
+import com.wedit.server.highlight.dto.HighlightMemberMissionRow;
 import com.wedit.server.highlight.dto.HighlightMissionClipRow;
 import com.wedit.server.mission.domain.MissionResult;
 import com.wedit.server.mission.domain.MissionResultType;
@@ -72,6 +73,25 @@ public interface MissionResultRepository extends JpaRepository<MissionResult, Lo
             order by missionResult.judgedAt asc, missionResult.id asc
             """)
     List<HighlightMissionClipRow> findHighlightMissionClipRows(
+            @Param("group") Group group,
+            @Param("missionDate") LocalDate missionDate,
+            @Param("result") MissionResultType result
+    );
+
+    @Query("""
+            select new com.wedit.server.highlight.dto.HighlightMemberMissionRow(
+                missionResult.user.id,
+                missionResult.user.nickname,
+                missionResult.mission.title,
+                missionResult.judgedAt
+            )
+            from MissionResult missionResult
+            where missionResult.mission.group = :group
+              and missionResult.mission.missionDate = :missionDate
+              and missionResult.result = :result
+            order by missionResult.user.id asc, missionResult.judgedAt asc, missionResult.id asc
+            """)
+    List<HighlightMemberMissionRow> findHighlightMemberMissionRows(
             @Param("group") Group group,
             @Param("missionDate") LocalDate missionDate,
             @Param("result") MissionResultType result

@@ -120,6 +120,12 @@ class HighlightGenerationTriggerServiceTest {
 
         HighlightItemResponse response = highlightService.getGroupHighlight(owner.getId(), group.getId(), today);
         assertThat(response.groupId()).isEqualTo(group.getId());
+        assertThat(response.members()).hasSize(2);
+        assertThat(response.members()).extracting("type").containsOnly("card");
+        assertThat(response.members()).extracting("itemType").containsOnly("CARD");
+        assertThat(response.members()).extracting("content")
+                .containsExactly("아침 물 한 잔 마시기", "선크림 바르기");
+        assertThat(response.members()).extracting("completed").containsOnly(true);
     }
 
     private User saveUser(String providerUserId) {

@@ -1,6 +1,7 @@
 package com.wedit.server.highlight.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public record HighlightItemResponse(
         Long groupId,
@@ -8,6 +9,7 @@ public record HighlightItemResponse(
         LocalDate highlightDate,
         String title,
         String summary,
-        String videoUrl
+        String videoUrl,
+        List<HighlightMemberResponse> members
 ) {
 }
