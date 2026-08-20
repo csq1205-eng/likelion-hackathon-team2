@@ -1,10 +1,16 @@
 // src/app/fe-e/group/invite/[id]/create/page.tsx
 'use client';
 
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { apiRequest } from "@/lib/api/client";
+
+interface InviteResponseDTO {
+  inviteLink: string;
+  qrImageUrl: string;
+}
 
 declare global {
   interface Window {
@@ -35,7 +41,7 @@ export default function GroupInviteCreate() {
 
     script.onload = () => {
       if (window.Kakao && !window.Kakao.isInitialized()) {
-        // 본인의 카카오 개발자 센터 JavaScript 키로 변경 부분
+        // 본인의 카카오 개발자 센터 JavaScript 키 변경 부분 (완료)
         window.Kakao.init('778324986d8643a9a889516bddc37d02');
       }
     };
@@ -53,7 +59,7 @@ export default function GroupInviteCreate() {
     const generateInvite = async () => {
       if (!accessToken) return;
       try {
-        const data = await apiRequest<any>(`/groups/${groupId}/invite`, { 
+        const data = await apiRequest<InviteResponseDTO>(`/groups/${groupId}/invite`, { 
           method: 'GET',
           accessToken, 
         });
@@ -161,10 +167,13 @@ export default function GroupInviteCreate() {
             {/* QR 코드 박스 */}
             <div className="w-[140px] h-[140px] bg-[#F7F7F7] rounded-[20px] flex items-center justify-center mb-[20px] shrink-0 shadow-2xs">
               <div className="bg-white p-2 rounded-[14px] shadow-sm w-[124px] h-[124px] flex items-center justify-center">
-                <img 
-                  src={inviteInfo.qrImage} 
+                <Image 
+                  src={inviteInfo.qrImage || "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://wedit.app"} 
                   alt="그룹 초대 QR 코드" 
+                  width={124}
+                  height={124}
                   className="w-full h-full object-contain"
+                  unoptimized
                 />
               </div>
             </div>

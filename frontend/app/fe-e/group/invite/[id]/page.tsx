@@ -1,7 +1,7 @@
 // src/app/fe-e/group/invite/[id]/page.tsx
 'use client';
 
-import { Span } from 'next/dist/trace';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useAuth } from "@/lib/auth/AuthProvider";
@@ -13,7 +13,6 @@ export default function JoinCheck() {
   const groupId = params.id as string;
 
   const { accessToken } = useAuth();
-  const [showInviteModal, setShowInviteModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleJoin = async () => {
@@ -54,7 +53,7 @@ export default function JoinCheck() {
     setIsLoading(true);
 
     try {
-      const data = await apiRequest<any>(`/groups/${groupId}/invite`, { 
+      const data = await apiRequest<unknown>(`/groups/${groupId}/invite`, { 
         method: 'GET',
         accessToken,
       });
@@ -87,14 +86,26 @@ export default function JoinCheck() {
           onClick={() => router.push(`/fe-e/group/invite/${groupId}/create`)}
           className="flex flex-col items-center justify-center bg-[#F7F8F8] text-[#000000] px-[10px] py-[20px] w-[120px] h-[96px] rounded-[10px] text-[15px] font-semibold"
         >
-          <img src="/Icon_Plus.svg" alt="그룹 아이콘" className="w-[40px] h-[40px] mb-2 object-contain" />
+          <Image 
+            src="/Icon_Plus.svg" 
+            alt="그룹 아이콘" 
+            width={40} 
+            height={40} 
+            className="mb-2 object-contain" 
+          />
           <span className="text-[14px] font-semibold">그룹 만들기</span>
         </button>
         <button
           onClick={() => router.push(`/fe-e/group/join/${groupId}`)}
           className="flex flex-col items-center justify-center bg-[#F7F8F8] text-[#000000] px-[10px] py-[20px] w-[120px] h-[96px] rounded-[10px] text-[15px] font-semibold"
         >
-          <img src="/Icon_Link.svg" alt="초대코드 아이콘" className="w-[30px] h-[30px] mt-[5px] mb-[10px] object-contain" />
+          <Image 
+            src="/Icon_Link.svg" 
+            alt="초대코드 아이콘" 
+            width={30} 
+            height={30} 
+            className="mt-[5px] mb-[10px] object-contain" 
+          />
           <span className="text-[14px] font-semibold mt-[2px]">초대코드로 참여</span>
         </button>
       </div>

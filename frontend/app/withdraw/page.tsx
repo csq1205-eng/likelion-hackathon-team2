@@ -42,7 +42,7 @@ export default function WithdrawPage() {
         <h1 className="text-lg font-bold mb-2">정말 탈퇴하시겠어요?</h1>
         <p className="text-sm text-[#888] mb-6">
           계정과 개인 데이터가 삭제돼요. 그룹 활동 기록은 통계상 유지되지만
-          "알 수 없음"으로 표시돼요.
+          &quot;알 수 없음&quot;으로 표시돼요.
         </p>
 
         <p className="text-sm font-medium mb-3">탈퇴 이유를 알려주세요</p>
