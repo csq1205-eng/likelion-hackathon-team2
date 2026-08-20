@@ -108,7 +108,6 @@ export default function OnboardingPage() {
   }
 
   function handleNext() {
-    // 필수 항목이 선택되지 않았다면 다음 단계로 넘어가지 않음
     if (!isStepValid) return;
 
     if (step < 3) {
@@ -130,7 +129,7 @@ export default function OnboardingPage() {
               <span
                 key={i}
                 className={`h-1.5 flex-1 rounded-full transition-colors ${
-                  i <= step ? "bg-[#7BD4B0]" : "bg-[#E6E9E8]"
+                  i <= step ? "bg-[#A7FBE7]" : "bg-[#E6E9E8]"
                 }`}
               />
             ))}
@@ -164,7 +163,7 @@ export default function OnboardingPage() {
                     onClick={() => setMainConcern(c.code)}
                     className={`w-full rounded-[10px] px-4 py-3 text-center text-sm font-medium transition-colors ${
                       selected
-                        ? "border border-[#86D9B5] bg-[#EAF8F1] text-[#2E9C74]"
+                        ? "border border-[#A7FBE7] bg-[#A7FBE7] text-[#2E6657]"
                         : "border border-transparent bg-[#F1F3F2] text-[#4B5851]"
                     }`}
                   >
@@ -190,7 +189,7 @@ export default function OnboardingPage() {
                     onClick={() => toggleCause(c.code)}
                     className={`w-full rounded-[10px] px-4 py-3 text-center text-sm font-medium transition-colors ${
                       selected
-                        ? "border border-[#86D9B5] bg-[#EAF8F1] text-[#2E9C74]"
+                        ? "border border-[#A7FBE7] bg-[#A7FBE7] text-[#2E6657]"
                         : "border border-transparent bg-[#F1F3F2] text-[#4B5851]"
                     }`}
                   >
@@ -221,7 +220,7 @@ export default function OnboardingPage() {
                   placeholder="숫자 선택"
                   value={sleepHours}
                   onChange={(e) => setSleepHours(Number(e.target.value))}
-                  className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#86D9B5] focus:bg-white"
+                  className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#A7FBE7] focus:bg-white"
                 />
               </div>
 
@@ -237,7 +236,7 @@ export default function OnboardingPage() {
                   placeholder="입력"
                   value={waterIntake}
                   onChange={(e) => setWaterIntake(Number(e.target.value))}
-                  className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#86D9B5] focus:bg-white"
+                  className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#A7FBE7] focus:bg-white"
                 />
               </div>
 
@@ -250,7 +249,7 @@ export default function OnboardingPage() {
                   type="time"
                   value={wakeUpTime}
                   onChange={(e) => setWakeUpTime(e.target.value)}
-                  className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors focus:border-[#86D9B5] focus:bg-white"
+                  className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors focus:border-[#A7FBE7] focus:bg-white"
                 />
               </div>
 
@@ -263,7 +262,7 @@ export default function OnboardingPage() {
                   type="time"
                   value={sleepTime}
                   onChange={(e) => setSleepTime(e.target.value)}
-                  className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors focus:border-[#86D9B5] focus:bg-white"
+                  className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors focus:border-[#A7FBE7] focus:bg-white"
                 />
               </div>
             </div>
@@ -306,7 +305,7 @@ export default function OnboardingPage() {
                         }
                         className={`rounded-full px-6 py-1.5 text-sm font-medium transition-colors ${
                           owned === true
-                            ? "bg-[#CDEEDF] text-[#2E9C74]"
+                            ? "bg-[#A7FBE7] text-[#2E6657]"
                             : "border border-[#E6E9E8] bg-white text-[#8A968F]"
                         }`}
                       >
@@ -324,7 +323,7 @@ export default function OnboardingPage() {
                         }
                         className={`rounded-full px-6 py-1.5 text-sm font-medium transition-colors ${
                           owned === false
-                            ? "bg-[#CDEEDF] text-[#2E9C74]"
+                            ? "bg-[#A7FBE7] text-[#2E6657]"
                             : "border border-[#E6E9E8] bg-white text-[#8A968F]"
                         }`}
                       >
@@ -345,7 +344,7 @@ export default function OnboardingPage() {
           disabled={!isStepValid || submitting}
           className={`mt-8 w-full rounded-full py-4 text-base font-semibold transition-colors ${
             isStepValid && !submitting
-              ? "bg-[#7BD4B0] text-white"
+              ? "bg-[#A7FBE7] text-[#2E6657]"
               : "bg-[#DCE5E1] text-[#AAB5AF]"
           }`}
         >
