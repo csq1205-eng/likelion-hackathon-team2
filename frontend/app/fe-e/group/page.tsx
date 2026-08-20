@@ -89,7 +89,6 @@ export default function GroupListJoin() {
     }
 
     const firstGroupId = myGroups.length > 0 ? myGroups[0].groupId : '1';
-    const groupId = "new";
 
     return (
       <div className="flex flex-col w-full h-[100dvh] relative bg-white overflow-hidden">
@@ -164,7 +163,7 @@ export default function GroupListJoin() {
               )}
 
           <button
-            onClick={() => router.push(`/fe-e/group/invite/${groupId}`)}
+            onClick={() => router.push(`/fe-e/group/invite/${firstGroupId}`)}
             className="w-full py-3 mt-2 rounded-[12px] text-[#8B9A95] font-semibold text-[14px] border-dashed border-[1.2px] border-[#8B9A95] hover:bg-gray-50 transition-colors flex justify-center items-center"
           >
             + 새 그룹 만들기 / 참여하기
