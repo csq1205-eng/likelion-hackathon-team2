@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, Suspense } from 'react';
 import { useAuth } from "@/lib/auth/AuthProvider";
-import { apiRequest, API_B_URL } from "@/lib/api/client"; 
+import { apiRequest } from "@/lib/api/client";
 
 function MissionShareInner() {
   const router = useRouter();
@@ -31,7 +31,7 @@ function MissionShareInner() {
         method: 'PATCH',
         body: { shared: isShared },
         accessToken,
-        customBaseUrl: API_B_URL,
+        customBaseUrl: "/api",
       });
 
       alert(isShared ? '그룹에 클립이 공유되었습니다!' : '비공개 처리되었습니다.');

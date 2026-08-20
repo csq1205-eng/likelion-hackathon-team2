@@ -1,5 +1,3 @@
-import { API_B_URL } from "@/lib/api/client";
-
 export interface ClipUploadResponse {
   missionId: number;
   clipId: number;
@@ -24,14 +22,14 @@ export async function uploadClip(
   shared: boolean,
   accessToken: string,
   missionTitle: string,
-  criteria: string
+  criteria?: string
 ): Promise<ClipUploadResponse> {
   const formData = new FormData();
 
   formData.append("missionId", String(missionId));
   formData.append("shared", String(shared));
-  formData.append("missionTitle", missionTitle);
-  formData.append("criteria", criteria);
+  if (missionTitle) formData.append("missionTitle", missionTitle);
+  if (criteria) formData.append("criteria", criteria);
   formData.append("clip", clip, "clip.mp4");
 
   const response = await fetch(`/api/clips/upload`, {
