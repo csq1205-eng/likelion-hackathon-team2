@@ -118,7 +118,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="w-full min-h-screen overflow-y-scroll bg-[#F4F6F5] px-4 py-6">
+    <main className="w-full min-h-screen overflow-y-scroll bg-[#F7F8F8] px-4 py-6">
       <div className="mx-auto flex w-full max-w-sm flex-col rounded-3xl bg-white px-6 py-6 shadow-[0_8px_30px_rgba(31,42,37,0.06)]">
         {/* 진행 표시 */}
         <div className="mb-7">
@@ -129,7 +129,7 @@ export default function OnboardingPage() {
               <span
                 key={i}
                 className={`h-1.5 flex-1 rounded-full transition-colors ${
-                  i <= step ? "bg-[#A7FBE7]" : "bg-[#E6E9E8]"
+                  i <= step ? "bg-[#A7FBE7]" : "bg-[#F7F8F8]"
                 }`}
               />
             ))}
@@ -163,8 +163,8 @@ export default function OnboardingPage() {
                     onClick={() => setMainConcern(c.code)}
                     className={`w-full rounded-[10px] px-4 py-3 text-center text-sm font-medium transition-colors ${
                       selected
-                        ? "border border-[#A7FBE7] bg-[#A7FBE7] text-[#2E6657]"
-                        : "border border-transparent bg-[#F1F3F2] text-[#4B5851]"
+                        ? "border border-[#A7FBE7] bg-[#A7FBE7] text-[#222222]"
+                        : "border border-transparent bg-[#F7F8F8] text-[#4B5851]"
                     }`}
                   >
                     {c.label}
@@ -189,8 +189,8 @@ export default function OnboardingPage() {
                     onClick={() => toggleCause(c.code)}
                     className={`w-full rounded-[10px] px-4 py-3 text-center text-sm font-medium transition-colors ${
                       selected
-                        ? "border border-[#A7FBE7] bg-[#A7FBE7] text-[#2E6657]"
-                        : "border border-transparent bg-[#F1F3F2] text-[#4B5851]"
+                        ? "border border-[#A7FBE7] bg-[#A7FBE7] text-[#222222]"
+                        : "border border-transparent bg-[#F7F8F8] text-[#4B5851]"
                     }`}
                   >
                     {c.label}
@@ -222,7 +222,7 @@ export default function OnboardingPage() {
                     placeholder="숫자 선택"
                     value={sleepHours}
                     onChange={(e) => setSleepHours(Number(e.target.value))}
-                    className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 pr-14 text-sm text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#A7FBE7] focus:bg-white"
+                    className="w-full rounded-[10px] border border-transparent bg-[#F7F8F8] px-4 py-3.5 pr-14 text-sm text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#A7FBE7] focus:bg-white"
                   />
 
                   <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#8A968F]">
@@ -246,7 +246,7 @@ export default function OnboardingPage() {
       placeholder="입력"
       value={waterIntake}
       onChange={(e) => setWaterIntake(Number(e.target.value))}
-      className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 pr-12 text-sm text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#A7FBE7] focus:bg-white"
+      className="w-full rounded-[10px] border border-transparent bg-[#F7F8F8] px-4 py-3.5 pr-12 text-sm text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#A7FBE7] focus:bg-white"
     />
 
     <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#8A968F]">
@@ -265,7 +265,7 @@ export default function OnboardingPage() {
                   type="time"
                   value={wakeUpTime}
                   onChange={(e) => setWakeUpTime(e.target.value)}
-                  className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors focus:border-[#A7FBE7] focus:bg-white"
+                  className="w-full rounded-[10px] border border-transparent bg-[#F7F8F8] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors focus:border-[#A7FBE7] focus:bg-white"
                 />
               </div>
 
@@ -279,7 +279,7 @@ export default function OnboardingPage() {
                   type="time"
                   value={sleepTime}
                   onChange={(e) => setSleepTime(e.target.value)}
-                  className="w-full rounded-[10px] border border-transparent bg-[#F2F4F3] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors focus:border-[#A7FBE7] focus:bg-white"
+                  className="w-full rounded-[10px] border border-transparent bg-[#F7F8F8] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors focus:border-[#A7FBE7] focus:bg-white"
                 />
               </div>
             </div>
@@ -300,7 +300,7 @@ export default function OnboardingPage() {
                 return (
                   <div
                     key={cat.code}
-                    className="rounded-2xl bg-[#F2F4F3] px-4 py-4"
+                    className="rounded-2xl bg-[#F7F8F8] px-4 py-4"
                   >
                     <p className="text-sm font-bold text-[#2B3A33]">
                       {cat.label}
@@ -322,7 +322,7 @@ export default function OnboardingPage() {
                         }
                         className={`rounded-full px-6 py-1.5 text-sm font-medium transition-colors ${
                           owned === true
-                            ? "bg-[#A7FBE7] text-[#2E6657]"
+                            ? "bg-[#A7FBE7] text-[#222222]"
                             : "border border-[#E6E9E8] bg-white text-[#8A968F]"
                         }`}
                       >
@@ -340,7 +340,7 @@ export default function OnboardingPage() {
                         }
                         className={`rounded-full px-6 py-1.5 text-sm font-medium transition-colors ${
                           owned === false
-                            ? "bg-[#A7FBE7] text-[#2E6657]"
+                            ? "bg-[#A7FBE7] text-[#222222]"
                             : "border border-[#E6E9E8] bg-white text-[#8A968F]"
                         }`}
                       >
@@ -361,8 +361,8 @@ export default function OnboardingPage() {
           disabled={!isStepValid || submitting}
           className={`mt-8 w-full rounded-full py-4 text-base font-semibold transition-colors ${
             isStepValid && !submitting
-              ? "bg-[#A7FBE7] text-[#2E6657]"
-              : "bg-[#DCE5E1] text-[#AAB5AF]"
+              ? "bg-[#A7FBE7] text-[#222222]"
+              : "bg-[#F7F8F8] text-[#AAB5AF]"
           }`}
         >
           {step === 3 && submitting ? "저장 중..." : "다음"}

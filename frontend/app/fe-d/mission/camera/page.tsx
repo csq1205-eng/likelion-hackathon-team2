@@ -30,6 +30,8 @@ function CameraPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const missionId = Number(searchParams.get("missionId"));
+const missionTitle = searchParams.get("title") ?? "";
+const criteria = searchParams.get("criteria") ?? "";
   const { accessToken } = useAuth();
 
   const { videoRef, stream, status, requestCamera } = useCamera();
@@ -89,24 +91,17 @@ function CameraPageInner() {
     setUploadError(null);
 
     try {
-      const res = await uploadClip(
-        missionId,
-        recordedBlob,
-        false,
-        accessToken,
-        mission.title,
-        mission.verificationCriteria
-      );
+      const res = await uploadClip(missionId, recordedBlob, false, accessToken, missionTitle, criteria);
 
-      router.push(
-        `/fe-e/mission/result?clipId=${res.clipId}&retryCount=${
-          res.remainingRetryCount ?? 0
-        }`
-      );
+     router.push(
+  `/fe-e/mission/result?clipId=${res.clipId}&retryCount=${res.remainingRetryCount ?? 0}`
+);
     } catch (err: any) {
       console.error("클립 업로드 상세 에러:", err);
-      
-      const displayMessage = err?.message || "업로드에 실패했어요. 다시 시도해주세요.";
+
+      const displayMessage =
+        err?.message || "업로드에 실패했어요. 다시 시도해주세요.";
+
       setUploadError(displayMessage);
       setUploading(false);
     }
@@ -245,7 +240,10 @@ function CameraPageInner() {
                 </Button>
 
                 <button
-                  onClick={reset}
+                  onClick={() => {
+                    reset();
+                    requestCamera();
+                  }}
                   disabled={uploading}
                   className="w-full py-3 text-sm text-[#999]"
                 >
