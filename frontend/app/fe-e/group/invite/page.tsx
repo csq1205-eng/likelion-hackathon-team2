@@ -70,73 +70,77 @@ export default function JoinCheck() {
   };
 
   return (
-    <div className="flex flex-col w-full h-full relative bg-white px-5 py-6 overflow-y-auto">
-      <button 
-          onClick={() => router.back()} 
-          className="mb-2 text-[#A0A0A0] w-fit hover:opacity-70 transition-opacity"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 18l-6-6 6-6"/>
-          </svg>
-        </button>
-      <h1 className="text-[15px] text-[#000000] font-semibold mt-4 mb-4">
-        함께할 그룹을 정해주세요
-      </h1>
+    <main className="w-full min-h-[100dvh] sm:h-[100dvh] bg-[#F7F8F8] sm:px-4 sm:py-6 flex items-center justify-center sm:overflow-hidden">
+      <div className="mx-auto flex w-full min-h-[100dvh] sm:min-h-0 sm:h-[740px] max-w-none sm:max-w-sm flex-col sm:rounded-3xl bg-white px-6 py-6 sm:shadow-[0_8px_30px_rgba(31,42,37,0.06)] overflow-hidden">
+        
+        <button 
+            onClick={() => router.back()} 
+            className="mb-2 text-[#A0A0A0] w-fit hover:opacity-70 transition-opacity"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+        <h1 className="text-[15px] text-[#000000] font-semibold mt-4 mb-4">
+          함께할 그룹을 정해주세요
+        </h1>
 
-      <div className="flex flex-row items-center w-full gap-[10px] mb-10">
-        <button
-          onClick={() => router.push(`/fe-e/group/create`)}
-          className="flex flex-col items-center justify-center bg-[#F7F8F8] text-[#000000] px-[10px] py-[20px] w-[120px] h-[96px] rounded-[10px] text-[15px] font-semibold"
-        >
-          <Image 
-            src="/Icon_Plus.svg" 
-            alt="그룹 아이콘" 
-            width={40} 
-            height={40} 
-            className="mb-2 object-contain" 
-          />
-          <span className="text-[14px] font-semibold">그룹 만들기</span>
-        </button>
-        <button
-          onClick={() => router.push(`/fe-e/group/join`)}
-          className="flex flex-col items-center justify-center bg-[#F7F8F8] text-[#000000] px-[10px] py-[20px] w-[120px] h-[96px] rounded-[10px] text-[15px] font-semibold"
-        >
-          <Image 
-            src="/Icon_Link.svg" 
-            alt="초대코드 아이콘" 
-            width={30} 
-            height={30} 
-            className="mt-[5px] mb-[10px] object-contain" 
-          />
-          <span className="text-[14px] font-semibold mt-[2px]">초대코드로 참여</span>
-        </button>
-      </div>
+        <div className="flex flex-row items-center w-full gap-3 mb-10">
+          <button
+            onClick={() => router.push(`/fe-e/group/create`)}
+            className="flex-1 flex flex-col items-center justify-center bg-[#F7F8F8] text-[#000000] px-3 py-5 h-[96px] rounded-[14px] text-[15px] font-semibold hover:bg-[#EFEFEF] transition-colors"
+          >
+            <Image 
+              src="/Icon_Plus.svg" 
+              alt="그룹 아이콘" 
+              width={36} 
+              height={36} 
+              className="mb-2 object-contain" 
+            />
+            <span className="text-[13px] font-semibold">그룹 만들기</span>
+          </button>
 
-      <h1 className="text-[15px] text-[#000000] font-semibold mt-4 mb-4">
-          그룹 초대하기   
-      </h1>
-      
-      <div className="flex flex-row items-center w-full gap-2">
-        <button
-          onClick={() => handleInvite('kakao')}
-          className="bg-[#F7F8F8] text-[#000000] w-[80px] h-[37px] rounded-[10px] text-[14px] font-semibold"
-        >
-          카카오톡
-        </button>
-        <button
-          onClick={() => handleInvite('url')}
-          className="bg-[#F7F8F8] text-[#000000] w-[80px] h-[37px] rounded-[10px] text-[14px] font-semibold"
-        >
-          URL
-        </button>
-        <button
-          onClick={() => handleInvite('qr')}
-          className="bg-[#F7F8F8] text-[#000000] w-[80px] h-[37px] rounded-[10px] text-[14px] font-semibold"
-        >
-          QR
-        </button>
+          <button
+            onClick={() => router.push(`/fe-e/group/join`)}
+            className="flex-1 flex flex-col items-center justify-center bg-[#F7F8F8] text-[#000000] px-3 py-5 h-[96px] rounded-[14px] text-[15px] font-semibold hover:bg-[#EFEFEF] transition-colors"
+          >
+            <Image 
+              src="/Icon_Link.svg" 
+              alt="초대코드 아이콘" 
+              width={28} 
+              height={28} 
+              className="mt-[2px] mb-[8px] object-contain" 
+            />
+            <span className="text-[13px] font-semibold">초대코드로 참여</span>
+          </button>
+        </div>
+        
+        <h1 className="text-[15px] text-[#000000] font-semibold mt-4 mb-4">
+            그룹 초대하기   
+        </h1>
+        
+        <div className="flex flex-row items-center w-full gap-2">
+          <button
+            onClick={() => handleInvite('kakao')}
+            className="flex-1 bg-[#F7F8F8] text-[#000000] h-[42px] rounded-[10px] text-[14px] font-semibold hover:bg-[#EFEFEF] transition-colors"
+          >
+            카카오톡
+          </button>
+          <button
+            onClick={() => handleInvite('url')}
+            className="flex-1 bg-[#F7F8F8] text-[#000000] h-[42px] rounded-[10px] text-[14px] font-semibold hover:bg-[#EFEFEF] transition-colors"
+          >
+            URL
+          </button>
+          <button
+            onClick={() => handleInvite('qr')}
+            className="flex-1 bg-[#F7F8F8] text-[#000000] h-[42px] rounded-[10px] text-[14px] font-semibold hover:bg-[#EFEFEF] transition-colors"
+          >
+            QR
+          </button>
+        </div>
       </div>
-    </div>
+    </main>
 
   );     
 }

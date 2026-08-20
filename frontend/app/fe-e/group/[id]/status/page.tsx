@@ -99,93 +99,94 @@ export default function GroupStatusPage() {
   const progressPercent = Math.round((completedCount / totalCount) * 100);
 
   return (
-    <div className="relative w-full h-[100dvh] bg-white flex flex-col overflow-hidden px-5 py-6">
-      
-      {/* 헤더 영역 (고정) */}
-      <div className="flex items-center mb-8 mt-2 shrink-0">
-        <button 
-          onClick={() => router.back()} 
-          className="text-[20px] font-bold text-[#A0A0A0] mr-3"
-        >
-          ←
-        </button>
-        <h1 className="text-[22px] font-bold text-[#000000]">
-          그룹 완료 현황
-        </h1>
-      </div>
-
-      {isLoading ? (
-        // 로딩 화면
-        <div className="flex flex-col items-center justify-center flex-1">
-          <div className="w-10 h-10 border-4 border-[#A7FBE7] border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p className="text-[#666666] font-semibold text-[14px]">현황을 불러오는 중입니다...</p>
+    <main className="w-full min-h-[100dvh] sm:h-[100dvh] bg-[#F7F8F8] sm:px-4 sm:py-6 flex items-center justify-center sm:overflow-hidden">
+      <div className="mx-auto flex w-full min-h-[100dvh] sm:min-h-0 sm:h-[740px] max-w-none sm:max-w-sm flex-col sm:rounded-3xl bg-white px-6 py-6 sm:shadow-[0_8px_30px_rgba(31,42,37,0.06)] overflow-hidden">
+        {/* 헤더 영역 (고정) */}
+        <div className="flex items-center mb-8 mt-2 shrink-0">
+          <button 
+            onClick={() => router.back()} 
+            className="text-[20px] font-bold text-[#A0A0A0] mr-3"
+          >
+            ←
+          </button>
+          <h1 className="text-[22px] font-bold text-[#000000]">
+            그룹 완료 현황
+          </h1>
         </div>
-      ) : (
-        <>
-          {/* 요약 텍스트 영역 */}
-          <div className="flex items-center justify-between mb-4 px-1 shrink-0">
-            <span className="text-[14px] text-[#666666] font-medium">오늘의 미션 현황</span>
-            <span className="text-[14px] font-bold text-[#41C0A1]">
-              {completedCount} / {members.length}명 완료
-            </span>
+
+        {isLoading ? (
+          // 로딩 화면
+          <div className="flex flex-col items-center justify-center flex-1">
+            <div className="w-10 h-10 border-4 border-[#A7FBE7] border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-[#666666] font-semibold text-[14px]">현황을 불러오는 중입니다...</p>
           </div>
+        ) : (
+          <>
+            {/* 요약 텍스트 영역 */}
+            <div className="flex items-center justify-between mb-4 px-1 shrink-0">
+              <span className="text-[14px] text-[#666666] font-medium">오늘의 미션 현황</span>
+              <span className="text-[14px] font-bold text-[#41C0A1]">
+                {completedCount} / {members.length}명 완료
+              </span>
+            </div>
 
-          {/* 멤버 리스트 영역 */}
-          <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex flex-col gap-3 w-full pb-4">
-            {members.map((member) => (
-              <div 
-                key={member.id} 
-                className="w-full bg-[#F7F7F7] p-[10px] rounded-[20px] flex items-center justify-between shrink-0"
-              >
+            {/* 멤버 리스트 영역 */}
+            <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex flex-col gap-3 w-full pb-4">
+              {members.map((member) => (
+                <div 
+                  key={member.id} 
+                  className="w-full bg-[#F7F7F7] p-[10px] rounded-[20px] flex items-center justify-between shrink-0"
+                >
 
-                <div className="flex items-center gap-4">
-                  <div className={`w-[48px] h-[48px] rounded-full flex items-center justify-center shrink-0 ${member.bg}`}>
-                    <span className={`text-[18px] font-bold ${member.text}`}>
-                      {member.initial}
+                  <div className="flex items-center gap-4">
+                    <div className={`w-[48px] h-[48px] rounded-full flex items-center justify-center shrink-0 ${member.bg}`}>
+                      <span className={`text-[18px] font-bold ${member.text}`}>
+                        {member.initial}
+                      </span>
+                    </div>
+                    <span className="text-[16px] font-bold text-[#222222]">
+                      {member.name}
                     </span>
                   </div>
-                  <span className="text-[16px] font-bold text-[#222222]">
-                    {member.name}
-                  </span>
-                </div>
 
-                <div className="shrink-0 pr-2">
-                  {member.isCompleted ? (
-                    <div className="flex items-center justify-center w-8 h-8 bg-[#222222] rounded-full shadow-sm">
-                    <svg 
-                      className="w-6 h-6 text-[#ffffff]" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="3.5" 
-                      viewBox="0 0 24 24" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                    >
-                      <path d="M5 12l4 4L19 7" />
-                    </svg>
+                  <div className="shrink-0 pr-2">
+                    {member.isCompleted ? (
+                      <div className="flex items-center justify-center w-8 h-8 bg-[#222222] rounded-full shadow-sm">
+                      <svg 
+                        className="w-6 h-6 text-[#ffffff]" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="3.5" 
+                        viewBox="0 0 24 24" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      >
+                        <path d="M5 12l4 4L19 7" />
+                      </svg>
+                    </div>
+                    ) : (
+                      <span className="text-[13px] text-[#B0B0B0] font-semibold pr-1">
+                        미완료
+                      </span>
+                    )}
                   </div>
-                  ) : (
-                    <span className="text-[13px] text-[#B0B0B0] font-semibold pr-1">
-                      미완료
-                    </span>
-                  )}
                 </div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+              ))}
+            </div>
+          </>
+        )}
 
-      {/* 하단 버튼 영역 */}
-      <div className="w-full mt-auto shrink-0 pt-4 border-t border-transparent">
-        <button
-          onClick={() => router.push(`/fe-e/group/${groupId}`)}
-          className="w-full py-[14px] rounded-[16px] font-semibold text-[16px] text-black bg-[#A7FBE7] hover:bg-[#92edd8] transition-colors"
-        >
-          완료
-        </button>
+        {/* 하단 버튼 영역 */}
+        <div className="w-full mt-auto shrink-0 pt-4 border-t border-transparent">
+          <button
+            onClick={() => router.push(`/fe-e/group/${groupId}`)}
+            className="w-full py-[14px] rounded-[16px] font-semibold text-[16px] text-black bg-[#A7FBE7] hover:bg-[#92edd8] transition-colors"
+          >
+            완료
+          </button>
+        </div>
+
       </div>
-
-    </div>
+    </main>
   );
 }

@@ -79,21 +79,24 @@ export default function GroupListJoin() {
 
   }, [authLoading, accessToken]);
 
-    if (loading) {
-      return (
-        <div className="flex flex-col w-full h-[100dvh] items-center justify-center bg-white">
+  if (loading) {
+    return (
+      <main className="w-full min-h-[100dvh] sm:h-[100dvh] bg-white sm:px-4 sm:py-6 flex items-center justify-center sm:overflow-hidden">
+        <div className="mx-auto flex w-full min-h-[100dvh] sm:min-h-0 sm:h-[740px] max-w-none sm:max-w-sm flex-col sm:rounded-3xl bg-white px-6 py-6 sm:shadow-[0_8px_30px_rgba(31,42,37,0.06)] items-center justify-center">
           <div className="w-8 h-8 border-4 border-[#A7FBE7] border-t-transparent rounded-full animate-spin mb-3"></div>
           <p className="text-sm text-[#999]">그룹을 불러오는 중...</p>
         </div>
-      );
-    }
+      </main>
+    );
+  }
 
-    const savedGroupId = typeof window !== 'undefined' ? localStorage.getItem('myGroupId') : null;
-    const firstGroupId = (myGroups.length > 0 ? String(myGroups[0].groupId) : savedGroupId) || '1';
+  const savedGroupId = typeof window !== 'undefined' ? localStorage.getItem('myGroupId') : null;
+  const firstGroupId = (myGroups.length > 0 ? String(myGroups[0].groupId) : savedGroupId) || '1';
 
-    return (
-      <div className="flex flex-col w-full h-[100dvh] relative bg-white overflow-hidden">
-              
+  return (
+    <main className="w-full min-h-[100dvh] sm:h-[100dvh] bg-[#F7F8F8] sm:px-4 sm:py-6 flex items-center justify-center sm:overflow-hidden">
+      <div className="mx-auto flex w-full min-h-[100dvh] sm:min-h-0 sm:h-[740px] max-w-none sm:max-w-sm flex-col sm:rounded-3xl bg-white sm:shadow-[0_8px_30px_rgba(31,42,37,0.06)] overflow-hidden relative"> 
+            
         <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-5 pt-6 pb-[90px]">
           <h3 className="text-[15px] text-[#666666] font-semibold">
             내 그룹
@@ -107,104 +110,104 @@ export default function GroupListJoin() {
             {myGroups.map((group, index) => {
               const theme = GROUP_THEMES[index % GROUP_THEMES.length];
 
-                return (
+              return (
+                <div
+                  key={group.groupId}
+                  onClick={() => {
+                    localStorage.setItem('myGroupId', String(group.groupId));
+                    router.push(`/fe-e/group/${group.groupId}`);
+                  }}
+                  className="bg-[#F7F8F8] p-4 rounded-[20px] flex items-center cursor-pointer hover:bg-gray-50 transition-colors"
+                >
                   <div
-                    key={group.groupId}
-                    onClick={() => {
-                      localStorage.setItem('myGroupId', String(group.groupId));
-                      router.push(`/fe-e/group/${group.groupId}`);
-                    }}
-                    className="bg-[#F7F8F8] p-4 rounded-[20px] flex items-center cursor-pointer hover:bg-gray-50 transition-colors"
+                    className={`w-[38px] h-[38px] rounded-full flex items-center justify-center font-bold text-[18px] shrink-0 ${theme.bg} ${theme.text}`}
                   >
-                    <div
-                      className={`w-[38px] h-[38px] rounded-full flex items-center justify-center font-bold text-[18px] shrink-0 ${theme.bg} ${theme.text}`}
-                    >
-                      {group.name.charAt(0)}
-                    </div>
+                    {group.name.charAt(0)}
+                  </div>
 
-                    <div className="flex-1 ml-[12px] flex flex-col justify-center">
-                      <h2 className="text-[15px] font-bold text-gray-900 leading-tight">
-                        {group.name}
-                      </h2>
+                  <div className="flex-1 ml-[12px] flex flex-col justify-center">
+                    <h2 className="text-[15px] font-bold text-gray-900 leading-tight">
+                      {group.name}
+                    </h2>
 
-                      <p className="text-[11px] text-[#666666] font-semibold mt-[2px] mb-[2px]">
-                        오늘 {group.todayCompletedCount}/{group.todayTotalCount}명 완료
-                      </p>
+                    <p className="text-[11px] text-[#666666] font-semibold mt-[2px] mb-[2px]">
+                      오늘 {group.todayCompletedCount}/{group.todayTotalCount}명 완료
+                    </p>
 
-                      <div className="w-[70%] bg-gray-200 rounded-full h-1.5 mt-[1px]">
-                        <div
-                          className={`h-full ${theme.bg} rounded-full transition-all duration-500`}
-                          style={{
-                            width: `${group.progressRate}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="text-gray-400 shrink-0 ml-2">
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
+                    <div className="w-[70%] bg-gray-200 rounded-full h-1.5 mt-[1px]">
+                      <div
+                        className={`h-full ${theme.bg} rounded-full transition-all duration-500`}
+                        style={{
+                          width: `${group.progressRate}%`,
+                        }}
+                      />
                     </div>
                   </div>
-                );
-              })}
 
-              {myGroups.length === 0 && (
-                <p className="text-center text-sm text-[#999] py-10">
-                  참여 중인 그룹이 없어요.
-                </p>
-              )}
+                  <div className="text-gray-400 shrink-0 ml-2">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              );
+            })}
 
-          <button
-            onClick={() => router.push(`/fe-e/group/invite`)}
-            className="w-full py-3 mt-2 rounded-[12px] text-[#8B9A95] font-semibold text-[14px] border-dashed border-[1.2px] border-[#8B9A95] hover:bg-gray-50 transition-colors flex justify-center items-center"
-          >
-            + 새 그룹 만들기 / 참여하기
-          </button>
+            {myGroups.length === 0 && (
+              <p className="text-center text-sm text-[#999] py-10">
+                참여 중인 그룹이 없어요.
+              </p>
+            )}
+
+            <button
+              onClick={() => router.push(`/fe-e/group/invite`)}
+              className="w-full py-3 mt-2 rounded-[12px] text-[#8B9A95] font-semibold text-[14px] border-dashed border-[1.2px] border-[#8B9A95] hover:bg-gray-50 transition-colors flex justify-center items-center"
+            >
+              + 새 그룹 만들기 / 참여하기
+            </button>
+          </div>
         </div>
+
+        {/* 하단 탭바 */}
+        <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 flex justify-between items-center px-5 pt-4 pb-5 z-50">
+          <TabIcon
+            icon="users"
+            label="그룹"
+            isActive
+            onClick={() => router.push('/fe-e/group')}
+          />
+
+          <TabIcon
+            icon="check"
+            label="미션"
+            onClick={() => router.push('/fe-d/mission')}
+          />
+
+          <TabIcon
+            icon="leaf"
+            label="W 정원"
+            onClick={() => router.push(`/fe-d/${firstGroupId}/garden`)}
+          />
+
+          <TabIcon
+            icon="bar-chart"
+            label="기록"
+            onClick={() => router.push('/fe-e/record/report')}
+          />
+        </div>
+
       </div>
-
-      
-
-      {/* 하단 탭바 */}
-      <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 flex justify-between items-center px-5 pt-4 pb-5 z-50">
-        <TabIcon
-          icon="users"
-          label="그룹"
-          isActive
-          onClick={() => router.push('/fe-e/group')}
-        />
-
-        <TabIcon
-          icon="check"
-          label="미션"
-          onClick={() => router.push('/fe-d/mission')}
-        />
-
-        <TabIcon
-          icon="leaf"
-          label="W 정원"
-          onClick={() => router.push(`/fe-d/${firstGroupId}/garden`)}
-        />
-
-        <TabIcon
-          icon="bar-chart"
-          label="기록"
-          onClick={() => router.push('/fe-e/record/report')}
-        />
-      </div>
-    </div>
+    </main>
   );
 }
 

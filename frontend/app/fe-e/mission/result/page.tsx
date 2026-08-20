@@ -87,158 +87,164 @@ function MissionResultInner() {
   // 로딩(판정 중) 화면
   if (screenMode === 'LOADING') {
     return (
-      <div className="relative w-full h-[100dvh] bg-white flex flex-col items-center justify-center overflow-hidden px-5 py-6">
-        <div className="w-12 h-12 border-4 border-[#A7FBE7] border-t-transparent rounded-full animate-spin mb-4"></div>
-        <h1 className="text-[18px] font-bold text-[#000000] mb-2">
-          AI가 판정 중이에요
-        </h1>
-        <p className="text-[14px] text-[#666666] font-medium text-center">
-          잠시만 기다려주세요...
-        </p>
-      </div>
+      <main className="w-full min-h-[100dvh] sm:h-[100dvh] bg-white sm:px-4 sm:py-6 flex items-center justify-center sm:overflow-hidden">
+        <div className="mx-auto flex w-full min-h-[100dvh] sm:min-h-0 sm:h-[740px] max-w-none sm:max-w-sm flex-col sm:rounded-3xl bg-white px-5 py-6 sm:shadow-[0_8px_30px_rgba(31,42,37,0.06)] items-center justify-center overflow-hidden">
+          <div className="w-12 h-12 border-4 border-[#A7FBE7] border-t-transparent rounded-full animate-spin mb-4"></div>
+          <h1 className="text-[18px] font-bold text-[#000000] mb-2">
+            AI가 판정 중이에요
+          </h1>
+          <p className="text-[14px] text-[#666666] font-medium text-center">
+            잠시만 기다려주세요...
+          </p>
+        </div>
+      </main>
     );
   }
   
   return (
-    <div className="flex flex-col w-full h-[100dvh] relative bg-white px-5 py-6 overflow-hidden">
+    <main className="w-full min-h-[100dvh] sm:h-[100dvh] bg-[#F7F8F8] sm:px-4 sm:py-6 flex items-center justify-center sm:overflow-hidden">
+      <div className="mx-auto flex w-full min-h-[100dvh] sm:min-h-0 sm:h-[740px] max-w-none sm:max-w-sm flex-col sm:rounded-3xl bg-white px-5 py-6 sm:shadow-[0_8px_30px_rgba(31,42,37,0.06)] overflow-hidden relative">
 
-      <div className="flex flex-col items-center justify-center flex-1 w-full pb-[40px]">
-        
-        {/* 성공 (PASS) 화면 */}
-        {screenMode === 'SUCCESS' && (
-          <>
-            <div className="w-[60px] h-[60px] rounded-full bg-[#EAF9F4] flex items-center justify-center text-[#41C0A1] mb-5 shadow-inner">
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 6L9 17l-5-5"/>
-              </svg>
-            </div>
-            <h1 className="text-[24px] font-bold text-[#000000] mb-3 text-center">
-              미션 완료!
-            </h1>
-            <p className="text-[15px] text-[#666666] font-medium text-center">
-              미션 수행이 확인됐어요
-            </p>
-          </>
-        )}
-
-        {/* 미션 수행 실패 (FAIL) 화면 */}
-        {screenMode === 'FAIL' && (
-          <>
-            <div className="w-[60px] h-[60px] rounded-full bg-[#FFF3F3] flex items-center justify-center text-[#FF5C5C] mb-5 shadow-inner">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                <line x1="12" y1="9" x2="12" y2="13"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
-            </div>
-            <h1 className="text-[24px] font-bold text-[#000000] mb-3 text-center">
-              다시 촬영해주세요
-            </h1>
-            <p className="text-[15px] text-[#666666] font-medium text-center leading-relaxed">
-              미션과 관련된 장면이 확인되지 않았어요<br />
-              (재시도 {retryCount}회 남음)
-            </p>
-            {failReason && (
-              <div className="w-[280px] bg-[#FFF5F5] border border-[#FFE3E3] rounded-xl p-3 text-center mt-[16px]">
-                <p className="text-[13px] text-[#FF5C5C] font-medium">
-                  {failReason}
-                </p>
+        <div className="flex flex-col items-center justify-center flex-1 w-full pb-[40px]">
+          
+          {/* 성공 (PASS) 화면 */}
+          {screenMode === 'SUCCESS' && (
+            <>
+              <div className="w-[60px] h-[60px] rounded-full bg-[#EAF9F4] flex items-center justify-center text-[#41C0A1] mb-5 shadow-inner">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 6L9 17l-5-5"/>
+                </svg>
               </div>
-            )}
-          </>
-        )}
+              <h1 className="text-[24px] font-bold text-[#000000] mb-3 text-center">
+                미션 완료!
+              </h1>
+              <p className="text-[15px] text-[#666666] font-medium text-center">
+                미션 수행이 확인됐어요
+              </p>
+            </>
+          )}
 
-        {/* 판정 애매 (HOLD) 화면 */}
-        {screenMode === 'HOLD' && (
-          <>
-            <div className="w-[60px] h-[60px] rounded-full bg-[#FFFBEB] flex items-center justify-center text-[#F59E0B] mb-5 shadow-inner">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-            </div>
-            <h1 className="text-[24px] font-bold text-[#000000] mb-3 text-center">
-              조금 더 명확하게 보여주세요
-            </h1>
-            <p className="text-[15px] text-[#666666] font-medium text-center leading-relaxed">
-              판정이 애매하여 정확한 확인이 어려워요<br />
-              (재시도 {retryCount}회 남음)
-            </p>
-            {failReason && (
-              <div className="w-[280px] bg-[#FEFCE8] border border-[#FEF08A] rounded-xl p-3 text-center mt-[16px]">
-                <p className="text-[13px] text-[#D97706] font-medium">
-                  {failReason}
-                </p>
+          {/* 미션 수행 실패 (FAIL) 화면 */}
+          {screenMode === 'FAIL' && (
+            <>
+              <div className="w-[60px] h-[60px] rounded-full bg-[#FFF3F3] flex items-center justify-center text-[#FF5C5C] mb-5 shadow-inner">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
               </div>
-            )}
-          </>
-        )}
+              <h1 className="text-[24px] font-bold text-[#000000] mb-3 text-center">
+                다시 촬영해주세요
+              </h1>
+              <p className="text-[15px] text-[#666666] font-medium text-center leading-relaxed">
+                미션과 관련된 장면이 확인되지 않았어요<br />
+                (재시도 {retryCount}회 남음)
+              </p>
+              {failReason && (
+                <div className="w-[280px] bg-[#FFF5F5] border border-[#FFE3E3] rounded-xl p-3 text-center mt-[16px]">
+                  <p className="text-[13px] text-[#FF5C5C] font-medium">
+                    {failReason}
+                  </p>
+                </div>
+              )}
+            </>
+          )}
 
-        {/* AI 시스템 오류 (ERROR) 화면 */}
-        {screenMode === 'ERROR' && (
-          <>
-            <div className="w-[60px] h-[60px] rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#4B5563] mb-5 shadow-inner">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
-                <path d="M21 3v5h-5"/>
-              </svg>
-            </div>
-            <h1 className="text-[24px] font-bold text-[#000000] mb-3 text-center">
-              일시적인 오류가 발생했어요
-            </h1>
-            <p className="text-[15px] text-[#666666] font-medium text-center leading-relaxed">
-              AI 판정 시스템에 문제가 생겼습니다.<br />
-              잠시 후 다시 시도해주세요.
-            </p>
-            {failReason && (
-              <div className="w-[280px] bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl p-3 text-center mt-[16px]">
-                <p className="text-[13px] text-[#4B5563] font-medium">
-                  {failReason}
-                </p>
+          {/* 판정 애매 (HOLD) 화면 */}
+          {screenMode === 'HOLD' && (
+            <>
+              <div className="w-[60px] h-[60px] rounded-full bg-[#FFFBEB] flex items-center justify-center text-[#F59E0B] mb-5 shadow-inner">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
               </div>
-            )}
-          </>
-        )}
+              <h1 className="text-[24px] font-bold text-[#000000] mb-3 text-center">
+                조금 더 명확하게 보여주세요
+              </h1>
+              <p className="text-[15px] text-[#666666] font-medium text-center leading-relaxed">
+                판정이 애매하여 정확한 확인이 어려워요<br />
+                (재시도 {retryCount}회 남음)
+              </p>
+              {failReason && (
+                <div className="w-[280px] bg-[#FEFCE8] border border-[#FEF08A] rounded-xl p-3 text-center mt-[16px]">
+                  <p className="text-[13px] text-[#D97706] font-medium">
+                    {failReason}
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* AI 시스템 오류 (ERROR) 화면 */}
+          {screenMode === 'ERROR' && (
+            <>
+              <div className="w-[60px] h-[60px] rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#4B5563] mb-5 shadow-inner">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+                  <path d="M21 3v5h-5"/>
+                </svg>
+              </div>
+              <h1 className="text-[24px] font-bold text-[#000000] mb-3 text-center">
+                일시적인 오류가 발생했어요
+              </h1>
+              <p className="text-[15px] text-[#666666] font-medium text-center leading-relaxed">
+                AI 판정 시스템에 문제가 생겼습니다.<br />
+                잠시 후 다시 시도해주세요.
+              </p>
+              {failReason && (
+                <div className="w-[280px] bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl p-3 text-center mt-[16px]">
+                  <p className="text-[13px] text-[#4B5563] font-medium">
+                    {failReason}
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+
+        </div>
+
+        {/* 하단 버튼 영역 */}
+        <div className="w-full mt-auto shrink-0 pb-2 pt-4">
+          {screenMode === 'SUCCESS' ? (
+            <button
+              onClick={() => router.push(`/fe-e/mission/share?clipId=${clipId}`)}
+              className="w-full py-[16px] rounded-[16px] bg-[#A7FBE7] text-[#000000] font-bold text-[16px] hover:bg-[#92edd8] transition-colors"
+            >
+              확인
+            </button>
+          ) : screenMode === 'ERROR' ? (
+            <button
+              onClick={() => router.push('/fe-e/mission')}
+              className="w-full py-[16px] rounded-[16px] bg-[#E5E7EB] text-[#1F2937] font-bold text-[16px] hover:bg-[#D1D5DB] transition-colors"
+            >
+              미션 목록으로 돌아가기
+            </button>
+          ) : (
+            <button
+              onClick={() => router.back()}
+              className="w-full py-[16px] rounded-[16px] bg-[#A7FBE7] text-[#000000] font-bold text-[16px] hover:bg-[#92edd8] transition-colors"
+            >
+              재촬영하기
+            </button>
+          )}
+        </div>
 
       </div>
-
-      {/* 하단 버튼 영역 */}
-      <div className="w-full mt-auto shrink-0 pb-2 pt-4">
-        {screenMode === 'SUCCESS' ? (
-          <button
-            onClick={() => router.push(`/fe-e/mission/share?clipId=${clipId}`)}
-            className="w-full py-[16px] rounded-[16px] bg-[#A7FBE7] text-[#000000] font-bold text-[16px] hover:bg-[#92edd8] transition-colors"
-          >
-            확인
-          </button>
-        ) : screenMode === 'ERROR' ? (
-          <button
-            onClick={() => router.push('/fe-e/mission')} // 미션 목록이나 홈으로 이동
-            className="w-full py-[16px] rounded-[16px] bg-[#E5E7EB] text-[#1F2937] font-bold text-[16px] hover:bg-[#D1D5DB] transition-colors"
-          >
-            미션 목록으로 돌아가기
-          </button>
-        ) : (
-          <button
-            onClick={() => router.back()}
-            className="w-full py-[16px] rounded-[16px] bg-[#A7FBE7] text-[#000000] font-bold text-[16px] hover:bg-[#92edd8] transition-colors"
-          >
-            재촬영하기
-          </button>
-        )}
-      </div>
-
-    </div>
+    </main>
   );
 }
 
 export default function MissionResultPage() {
   return (
     <Suspense fallback={
-      <div className="flex flex-col w-full h-[100dvh] items-center justify-center bg-white">
-        <div className="w-8 h-8 border-4 border-[#A7FBE7] border-t-transparent rounded-full animate-spin"></div>
-      </div>
+      <main className="w-full min-h-[100dvh] sm:h-[100dvh] bg-white sm:px-4 sm:py-6 flex items-center justify-center sm:overflow-hidden">
+        <div className="mx-auto flex w-full min-h-[100dvh] sm:min-h-0 sm:h-[740px] max-w-none sm:max-w-sm flex-col sm:rounded-3xl bg-white px-5 py-6 sm:shadow-[0_8px_30px_rgba(31,42,37,0.06)] items-center justify-center">
+          <div className="w-8 h-8 border-4 border-[#A7FBE7] border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </main>
     }>
       <MissionResultInner />
     </Suspense>

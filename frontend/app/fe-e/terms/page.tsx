@@ -48,7 +48,7 @@ export default function PagePersonalInfoConsent() {
           mockContent = '제1조 (목적)\n본 약관은 WEDIT(이하 "회사")이 제공하는 AI 기반 웰니스 미션 서비스(이하 "서비스")의 이용 조건과 절차를 규정합니다.\n\n제2조 (서비스 내용)\n회사는 이용자의 생활 패턴을 분석하여 개인별 미션을 추천하고, 이용자가 촬영한 클립을 AI가 검증하여 미션 수행 여부를 판정합니다.\n\n제3조 (이용자의 의무)\n이용자는 실제 본인이 미션을 수행하는 모습을 촬영해야 하며, 조작된 자료를 제출하거나 미션 수행 시간을 허위로 기재하는 등 부정한 방법으로 인증해서는 안 됩니다. 타인의 사생활을 침해하는 촬영을 해서는 안 됩니다. 반복적인 부정 인증 시도가 확인될 경우 서비스 이용이 제한될 수 있습니다.\n\n제4조 (AI 판정에 대한 안내)\n미션 판정은 AI 모델에 의해 자동으로 이루어지며, 판정 결과에 이견이 있을 경우 재촬영을 통해 재판정을 요청할 수 있습니다. AI 판정은 참고용 검증 결과이며, 100% 정확도를 보장하지 않습니다.\n\n제5조 (서비스 이용 제한)\n1일 AI 판정 요청 횟수에는 제한이 있을 수 있으며, 이는 안정적인 서비스 운영을 위한 조치입니다.\n\n제6조 (책임의 한계)\n회사는 이용자가 제공한 정보의 정확성에 대해 책임지지 않으며, 미션 수행으로 인해 발생하는 개인의 신체적·정신적 영향에 대해 책임지지 않습니다.';
           break;
         case 'privacy':
-          mockContent = '1. 수집하는 개인정보 항목\n- 필수: 이메일 또는 소셜 로그인 식별정보(카카오·구글), 피부\n타입, 생활 패턴 정보, 그룹 공동 목표\n미션 인증 시: 촬영된 클립(영상)\n선택: 학습용 데이터 활용 동의 시 판정 프레임의 임베딩 벡터\n2. 수집 목적\n회원 식별 및 로그인\n개인 맞춤 미션 생성 및 AI 판정\n그룹 기능(진행 현황, 하이라이트, 리포트) 제공\n(선택 동의 시) AI 모델 개선을 위한 학습 자료 활용\n\n3. 보유 및 이용 기간\n촬영된 클립(원본): 판정 및 당일 하이라이트 생성 완료 후 24시간 이내 파기 (단, 이용자가 직접 "공유"를 선택한 클립은 \n이용자가 삭제하기 전까지 보관)\n학습용 데이터 활용에 동의한 경우: 얼굴 등 식별정보를 제외한 벡터 형태로 별도 보관하며, 동의 철회 시 즉시 파기\n회원 탈퇴 시 모든 개인정보는 지체 없이 파기됩니다.\n\n4. 제3자 제공 및 처리위탁\n미션 판정 및 미션 생성을 위해 AI 모델 제공사(비전 분석 API)에 이미지 데이터가 전송될 수 있으며, 이는 판정 목적 외에는 \n사용되지 않습니다.\n\n5. 이용자의 권리\n이용자는 언제든지 본인의 개인정보 조회, 정정, 삭제를 요청할 수 있으며, 학습용 데이터 활용 동의는 설정 화면에서 언제든 철회할 수 있습니다.\n\n6. 카메라 권한\n미션 인증용 클립 촬영을 위해 카메라 접근 권한이 필요하며, 권한 미허용 시 클립 촬영 기능 이용이 제한됩니다.';
+          mockContent = '1. 수집하는 개인정보 항목\n- 필수: 이메일 또는 소셜 로그인 식별정보(카카오·구글), 피부 타입, 생활 패턴 정보, 그룹 공동 목표\n미션 인증 시: 촬영된 클립(영상)\n선택: 학습용 데이터 활용 동의 시 판정 프레임의 임베딩 벡터\n2. 수집 목적\n회원 식별 및 로그인\n개인 맞춤 미션 생성 및 AI 판정\n그룹 기능(진행 현황, 하이라이트, 리포트) 제공\n(선택 동의 시) AI 모델 개선을 위한 학습 자료 활용\n\n3. 보유 및 이용 기간\n촬영된 클립(원본): 판정 및 당일 하이라이트 생성 완료 후 24시간 이내 파기 (단, 이용자가 직접 "공유"를 선택한 클립은 이용자가 삭제하기 전까지 보관)\n학습용 데이터 활용에 동의한 경우: 얼굴 등 식별정보를 제외한 벡터 형태로 별도 보관하며, 동의 철회 시 즉시 파기\n회원 탈퇴 시 모든 개인정보는 지체 없이 파기됩니다.\n\n4. 제3자 제공 및 처리위탁\n미션 판정 및 미션 생성을 위해 AI 모델 제공사(비전 분석 API)에 이미지 데이터가 전송될 수 있으며, 이는 판정 목적 외에는 사용되지 않습니다.\n\n5. 이용자의 권리\n이용자는 언제든지 본인의 개인정보 조회, 정정, 삭제를 요청할 수 있으며, 학습용 데이터 활용 동의는 설정 화면에서 언제든 철회할 수 있습니다.\n\n6. 카메라 권한\n미션 인증용 클립 촬영을 위해 카메라 접근 권한이 필요하며, 권한 미허용 시 클립 촬영 기능 이용이 제한됩니다.';
           break;
         case 'camera':
           mockContent = 'WEDIT은 5초 클립 챌린지 인증을 위해 카메라 접근 권한이 필수적으로 필요합니다.\n\n- 이용 목적: 미션 수행 영상 촬영\n- 카메라 권한을 허용하지 않을 경우 챌린지 참여가 불가능합니다.';
@@ -120,7 +120,6 @@ export default function PagePersonalInfoConsent() {
         console.warn("백엔드 약관 저장 실패 (테스트를 위해 우회합니다):", backendError);
       }
 
-      // API 모두 정상 처리 : 온보딩 페이지로 이동
       router.push('/fe-d/onboarding');
       
     } catch (error) {
@@ -132,7 +131,9 @@ export default function PagePersonalInfoConsent() {
   };
 
   return (
-    <div className="flex flex-col w-full h-full relative">  
+    <main className="w-full min-h-[100dvh] sm:h-[100dvh] bg-[#F7F8F8] sm:px-4 sm:py-6 flex items-center justify-center sm:overflow-hidden">
+      <div className="mx-auto flex w-full min-h-[100dvh] sm:min-h-0 sm:h-[740px] max-w-none sm:max-w-sm flex-col sm:rounded-3xl bg-white sm:shadow-[0_8px_30px_rgba(31,42,37,0.06)] overflow-hidden relative"> 
+      
         {detailPage.isOpen && (
           <div className="absolute inset-0 z-50 flex flex-col bg-white animate-fade-in">
             <div className="flex items-center px-4 py-3 border-b border-gray-100">
@@ -167,68 +168,70 @@ export default function PagePersonalInfoConsent() {
         )}
 
         {/* 메인 약관 동의 화면 */}
-        <div className="bg-white flex-1 rounded-t-[32px] px-5 py-6 flex flex-col shadow-sm overflow-y-auto">
-        <h3 className="text-[15px] text-[#666666] font-semibold">
-          개인정보 동의
-        </h3>
-        
-        <h1 className="text-[18px] text-[#000000] font-semibold mt-4 mb-4">
-          안전하게 시작할게요
-        </h1>
+        <div className="bg-white flex-1 px-6 py-6 flex flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <h3 className="text-[15px] text-[#666666] font-semibold">
+            개인정보 동의
+          </h3>
+          
+          <h1 className="text-[18px] text-[#000000] font-semibold mt-4 mb-4">
+            안전하게 시작할게요
+          </h1>
 
-        <div className="space-y-3">
-          <CheckboxCard 
-            id="terms" 
-            label="이용약관 동의 (필수)" 
-            checked={agreements.terms} 
-            onChange={() => handleCheck('terms')}
-            onView={() => openDetailPage('terms', '이용약관 동의')} 
-          />
-          <CheckboxCard 
-            id="privacy" 
-            label="개인정보 수집 · 이용 동의 (필수)" 
-            checked={agreements.privacy} 
-            onChange={() => handleCheck('privacy')}
-            onView={() => openDetailPage('privacy', '개인정보 수집 · 이용 동의')} 
-          />
-          <CheckboxCard 
-            id="camera" 
-            label="카메라 접근 허용 (필수)"
-            subLabel="클립 촬영을 위해 필요해요" 
-            checked={agreements.camera} 
-            onChange={() => handleCheck('camera')}
-            onView={() => openDetailPage('camera', '카메라 접근 권한 허용')} 
-          />
-          <CheckboxCard 
-            id="studydata" 
-            label="학습용 데이터 활용 (선택)"
-            subLabel="얼굴 미포함 · 벡터 형태로만 보관"
-            checked={agreements.studydata} 
-            onChange={() => handleCheck('studydata')}
-            onView={() => openDetailPage('studydata', '학습용 데이터 활용 동의')} 
-          />
-          <CheckboxCard 
-            id="marketing" 
-            label="마케팅 정보 수신 동의 (선택)" 
-            checked={agreements.marketing} 
-            onChange={() => handleCheck('marketing')}
-            onView={() => openDetailPage('marketing', '마케팅 정보 수신 동의')} 
-          />
+          <div className="space-y-3">
+            <CheckboxCard 
+              id="terms" 
+              label="이용약관 동의 (필수)" 
+              checked={agreements.terms} 
+              onChange={() => handleCheck('terms')}
+              onView={() => openDetailPage('terms', '이용약관 동의')} 
+            />
+            <CheckboxCard 
+              id="privacy" 
+              label="개인정보 수집 · 이용 동의 (필수)" 
+              checked={agreements.privacy} 
+              onChange={() => handleCheck('privacy')}
+              onView={() => openDetailPage('privacy', '개인정보 수집 · 이용 동의')} 
+            />
+            <CheckboxCard 
+              id="camera" 
+              label="카메라 접근 허용 (필수)"
+              subLabel="클립 촬영을 위해 필요해요" 
+              checked={agreements.camera} 
+              onChange={() => handleCheck('camera')}
+              onView={() => openDetailPage('camera', '카메라 접근 권한 허용')} 
+            />
+            <CheckboxCard 
+              id="studydata" 
+              label="학습용 데이터 활용 (선택)"
+              subLabel="얼굴 미포함 · 벡터 형태로만 보관"
+              checked={agreements.studydata} 
+              onChange={() => handleCheck('studydata')}
+              onView={() => openDetailPage('studydata', '학습용 데이터 활용 동의')} 
+            />
+            <CheckboxCard 
+              id="marketing" 
+              label="마케팅 정보 수신 동의 (선택)" 
+              checked={agreements.marketing} 
+              onChange={() => handleCheck('marketing')}
+              onView={() => openDetailPage('marketing', '마케팅 정보 수신 동의')} 
+            />
+          </div>
+
+          <button
+            onClick={onSubmit}
+            disabled={!allRequiredChecked || isSubmitting}
+            className={`mt-auto w-full py-3 rounded-[12px] font-semibold text-[14px] transition-colors shrink-0 ${
+              allRequiredChecked && !isSubmitting
+                ? 'bg-[#A7FBE7] hover:bg-[#92edd8]' 
+                : 'bg-[#F7F8F8] text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            {isSubmitting ? '처리 중...' : '동의하고 시작하기'}
+          </button>
         </div>
 
-        <button
-          onClick={onSubmit}
-          disabled={!allRequiredChecked || isSubmitting}
-          className={`mt-auto w-full py-3 rounded-[12px] font-semibold text-[14px] transition-colors shrink-0 ${
-            allRequiredChecked && !isSubmitting
-              ? 'bg-[#A7FBE7] hover:bg-[#92edd8]' 
-              : 'bg-[#F7F8F8] text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          {isSubmitting ? '처리 중...' : '동의하고 시작하기'}
-        </button>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -248,7 +251,7 @@ function CheckboxCard({
   onView: () => void; 
 }) {
   return (
-    <div className="flex items-center justify-between p-3 bg-[#F7F8F8] rounded-[12px] hover:bg-[#f0f0f0] transition-colors">
+    <div className="flex items-center justify-between w-full bg-[#F7F8F8] px-4 py-3.5 rounded-2xl">
       <label htmlFor={id} className="flex items-center flex-1 cursor-pointer overflow-hidden">
         <input
           id={id}
@@ -259,24 +262,25 @@ function CheckboxCard({
         />
         
         <div className={`w-6 h-6 rounded-[8px] flex items-center justify-center mr-[12px] transition-colors shrink-0 ${
-          checked ? 'bg-[#A7FBE7]' : 'bg-white shadow-sm'
+          checked ? 'bg-[#A7FBE7] text-white' : 'bg-white shadow-sm'
         }`}>
           {checked && (
-            <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
             </svg>
           )}
         </div>
 
         <div className="flex flex-col truncate pr-2">
-          <span className="text-[11px] text-[#000000] font-semibold truncate">{label}</span>
+          <span className="text-[13px] text-[#222222] font-semibold truncate">{label}</span>
           {subLabel && (
-            <span className="text-[9px] text-[#666666] font-semibold mt-0.5 truncate">{subLabel}</span>
+            <span className="text-[11px] text-[#666666] font-medium mt-0.5 truncate">{subLabel}</span>
           )}
         </div>
       </label>
 
       <button
+        type="button"
         onClick={onView}
         className="p-1 text-gray-400 hover:text-gray-600 shrink-0"
         aria-label="약관 보기"

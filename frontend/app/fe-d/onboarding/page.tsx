@@ -118,8 +118,8 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="w-full min-h-screen overflow-y-scroll bg-[#F7F8F8] px-4 py-6">
-      <div className="mx-auto flex w-full max-w-sm flex-col rounded-3xl bg-white px-6 py-6 shadow-[0_8px_30px_rgba(31,42,37,0.06)]">
+    <main className="w-full h-[100dvh] bg-[#F7F8F8] px-4 py-6 flex items-center justify-center overflow-hidden">
+  <div className="mx-auto flex w-full max-w-sm h-[740px] flex-col rounded-3xl bg-white px-6 py-6 shadow-[0_8px_30px_rgba(31,42,37,0.06)] overflow-hidden">
         {/* 진행 표시 */}
         <div className="mb-7">
           <p className="mb-2.5 text-sm text-[#8A9A92]">정보 입력</p>
@@ -359,7 +359,7 @@ export default function OnboardingPage() {
           type="button"
           onClick={handleNext}
           disabled={!isStepValid || submitting}
-          className={`mt-8 w-full rounded-full py-4 text-base font-semibold transition-colors ${
+          className={`w-full mt-auto shrink-0 pt-4 border-t border-transparent w-full py-[14px] rounded-[16px] font-semibold text-[16px] text-black transition-colors ${
             isStepValid && !submitting
               ? "bg-[#A7FBE7] text-[#222222]"
               : "bg-[#F7F8F8] text-[#AAB5AF]"

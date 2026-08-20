@@ -62,7 +62,7 @@ export default function GroupMainFeedPage() {
           ...groupData
         }));
 
-        // 오늘의 미션 목록을 조회하여 실제 missionId가 포함된 미션 객체 획득
+        // 2. 오늘의 미션 목록을 조회하여 실제 missionId가 포함된 미션 객체 획득
         const missionRes = await getTodayMissions(accessToken);
         if (missionRes && missionRes.missions && missionRes.missions.length > 0) {
           // 첫 번째 미션을 오늘의 미션으로 매칭하거나 타이틀이 일치하는 미션 탐색
@@ -95,74 +95,80 @@ export default function GroupMainFeedPage() {
 
   if (isLoading || !groupDetail) {
     return (
-      <div className="flex flex-col w-full h-[100dvh] items-center justify-center bg-[#F9F9F9]">
-        <div className="w-8 h-8 border-4 border-[#A7FBE7] border-t-transparent rounded-full animate-spin mb-3"></div>
-        <p className="text-sm text-[#999]">그룹 정보를 불러오는 중...</p>
-      </div>
+      <main className="w-full min-h-[100dvh] sm:h-[100dvh] bg-[#F9F9F9] sm:px-4 sm:py-6 flex items-center justify-center sm:overflow-hidden">
+        <div className="mx-auto flex w-full min-h-[100dvh] sm:min-h-0 sm:h-[740px] max-w-none sm:max-w-sm flex-col sm:rounded-3xl bg-[#F9F9F9] sm:bg-white px-6 py-6 sm:shadow-[0_8px_30px_rgba(31,42,37,0.06)] items-center justify-center">
+          <div className="w-8 h-8 border-4 border-[#A7FBE7] border-t-transparent rounded-full animate-spin mb-3"></div>
+          <p className="text-sm text-[#999]">그룹 정보를 불러오는 중...</p>
+        </div>
+      </main>
     );
   }
 
   return (
-    <div className="flex flex-col w-full h-[100dvh] relative bg-[#F9F9F9] overflow-hidden">
-      
-      {/* 상단 헤더 */}
-      <div className="bg-white px-5 py-4 flex items-center shrink-0 z-10 shadow-sm">
-        <button onClick={() => router.back()} 
-            className="absolute top-[21px] text-[22px] font-bold text-[#A0A0A0]">
+    <main className="w-full min-h-[100dvh] sm:h-[100dvh] bg-[#F9F9F9] sm:px-4 sm:py-6 flex items-center justify-center sm:overflow-hidden">
+      <div className="mx-auto flex w-full min-h-[100dvh] sm:min-h-0 sm:h-[740px] max-w-none sm:max-w-sm flex-col sm:rounded-3xl bg-white sm:shadow-[0_8px_30px_rgba(31,42,37,0.06)] overflow-hidden relative">
+        
+        {/* 상단 헤더 */}
+        <div className="bg-white px-5 py-6 flex items-center shrink-0 z-10 border-b border-gray-100 sm:border-none">
+          <button onClick={() => router.back()} 
+              className="text-[22px] font-bold text-[#A0A0A0] mr-3">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6"/>
             </svg>
-        </button>
-        <h1 className="text-[18px] font-bold text-[#000000] ml-[32px] mt-[4px]">
-          {groupDetail.name || "그룹 피드"}
-        </h1>
-        <button 
-          onClick={() => router.push(`/fe-e/group/${groupId}/status`)}
-          className="ml-auto text-[13px] font-bold text-[#41C0A1] bg-[#EAF9F4] px-3 py-1.5 rounded-full hover:bg-[#d4f2e9] transition-colors"
-        >
-          현황 보기
-        </button>
-      </div>
-
-      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-5 py-6 flex flex-col gap-6">
-         
-        {/* 오늘의 미션 영역 */}
-        <div className="bg-white rounded-[20px] p-5 shadow-sm">
-          <h2 className="text-[13px] text-[#41C0A1] font-bold mb-1">오늘의 미션</h2>
-          <p className="text-[18px] font-bold text-[#222222] mb-5">
-            {todayMissionObj?.title || groupDetail.todayMission || "오늘의 미션이 등록되지 않았습니다."}
-          </p>
+          </button>
+          <h1 className="text-[18px] font-bold text-[#000000]">
+            {groupDetail.name || "그룹 피드"}
+          </h1>
           <button 
-            onClick={handleMissionAuth}
-            className="w-full py-3 bg-[#222222] text-white font-bold rounded-[12px] text-[15px] hover:bg-black transition-colors"
+            onClick={() => router.push(`/fe-e/group/${groupId}/status`)}
+            className="ml-auto text-[13px] font-bold text-[#41C0A1] bg-[#EAF9F4] px-3 py-1.5 rounded-full hover:bg-[#d4f2e9] transition-colors"
           >
-            미션 인증하기
+            현황 보기
           </button>
         </div>
 
-        {/* 멤버들의 클립 피드 및 하이라이트 영역 */}
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-[16px] font-bold text-[#222222]">{groupDetail.title}</h3>
-            <span className="text-[12px] text-[#888] font-medium">{groupDetail.highlightDate}</span>
+        {/* 내부 스크롤 콘텐츠 영역 */}
+        <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-5 py-6 flex flex-col gap-6">
+           
+          {/* 오늘의 미션 영역 */}
+          <div className="bg-[#F9F9F9] sm:bg-white rounded-[20px] p-5 shadow-sm border border-gray-100 sm:border-none">
+            <h2 className="text-[13px] text-[#41C0A1] font-bold mb-1">오늘의 미션</h2>
+            <p className="text-[18px] font-bold text-[#222222] mb-5">
+              {todayMissionObj?.title || groupDetail.todayMission || "오늘의 미션이 등록되지 않았습니다."}
+            </p>
+            <button 
+              onClick={handleMissionAuth}
+              className="w-full py-3 bg-[#222222] text-white font-bold rounded-[12px] text-[15px] hover:bg-black transition-colors"
+            >
+              미션 인증하기
+            </button>
           </div>
 
-          <div className="w-full h-[220px] bg-gray-200 rounded-[16px] flex items-center justify-center relative overflow-hidden shadow-sm">
-            {groupDetail.videoUrl ? (
-              <video src={groupDetail.videoUrl} controls className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-gray-400 font-medium">생성된 하이라이트 영상이 없어요</span>
-            )}
-            
-            <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/70 via-black/40 to-transparent z-10">
-              <p className="text-white font-semibold text-[14px] leading-snug drop-shadow-sm">
-                {groupDetail.summary}
-              </p>
+          {/* 멤버들의 클립 피드 및 하이라이트 영역 */}
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-[16px] font-bold text-[#222222]">{groupDetail.title}</h3>
+              <span className="text-[12px] text-[#888] font-medium">{groupDetail.highlightDate}</span>
+            </div>
+
+            <div className="w-full h-[220px] bg-gray-200 rounded-[16px] flex items-center justify-center relative overflow-hidden shadow-sm">
+              {groupDetail.videoUrl ? (
+                <video src={groupDetail.videoUrl} controls className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-gray-400 font-medium">생성된 하이라이트 영상이 없어요</span>
+              )}
+              
+              <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/70 via-black/40 to-transparent z-10">
+                <p className="text-white font-semibold text-[14px] leading-snug drop-shadow-sm">
+                  {groupDetail.summary}
+                </p>
+              </div>
             </div>
           </div>
+
         </div>
 
       </div>
-    </div>
+    </main>
   );
 }

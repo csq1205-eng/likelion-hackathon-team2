@@ -5,253 +5,219 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { apiRequest } from "@/lib/api/client";
 
-interface WeeklyReportResponse {
-  startDate: string;
-  endDate: string;
-  totalCompleted: number;
-  achievementRate: number;
-  completedCount: number;
-  totalCount: number;
-  failedCount?: number;
-  unsubmittedCount?: number;
-  bestHabit: { name: string; successDays: number };
-  aiSummary: string;
-  weeklyData: { day: string; count: number }[];
-  currentStreakDays: number;
-  longestStreakDays: number;
+interface HighlightItem {
+  id: number;
+  date: string;
+  current: number;
+  total: number;
+  time: string;
+  theme: string;
 }
 
-// 더미 데이터
-const FALLBACK_REPORT: WeeklyReportResponse = {
-  startDate: "8. 6",
-  endDate: "8. 12",
-  totalCompleted: 18,
-  achievementRate: 86,
-  completedCount: 18,
-  totalCount: 21,
-  bestHabit: { name: "물 2L 마시기", successDays: 5 },
-  aiSummary: "규칙적인 수면과 수분 섭취 습관이 이번 주 성과의 비결이에요! 주말에도 꾸준했던 점이 아주 훌륭합니다.",
-  weeklyData: [
-    { day: '목', count: 1 },
-    { day: '금', count: 2 },
-    { day: '토', count: 4 },
-    { day: '일', count: 3 },
-    { day: '월', count: 2 },
-    { day: '화', count: 4 },
-    { day: '수', count: 2 },
-  ],
-  currentStreakDays: 7,
-  longestStreakDays: 14,
+interface HighlightArchiveResponse {
+  year: number;
+  month: number;
+  highlights: HighlightItem[];
+}
+
+const FALLBACK_HIGHLIGHTS: HighlightArchiveResponse = {
+  year: 2026,
+  month: 8,
+  highlights: [
+    { id: 1, date: '8월 12일 (수)', current: 9, total: 21, time: '00:30', theme: 'mountain' },
+    { id: 2, date: '8월 11일 (화)', current: 7, total: 21, time: '00:30', theme: 'bunting' },
+    { id: 3, date: '8월 10일 (월)', current: 11, total: 21, time: '00:30', theme: 'leaf' },
+    { id: 4, date: '8월 9일 (일)', current: 6, total: 21, time: '00:30', theme: 'balloon' },
+    { id: 5, date: '8월 8일 (토)', current: 10, total: 21, time: '00:30', theme: 'star' },
+  ]
 };
 
-export default function WeeklyReportPage() {
+export default function HighlightArchivePage() {
   const router = useRouter();
-  const { accessToken, isLoading: authLoading } = useAuth();
-
-  const [reportData, setReportData] = useState<WeeklyReportResponse | null>(null);
+  const { accessToken, userId, isLoading: authLoading } = useAuth();
+  
+  const [archiveData, setArchiveData] = useState<HighlightArchiveResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (authLoading) return;
 
     if (!accessToken) {
-      setReportData(FALLBACK_REPORT);
+      setArchiveData(FALLBACK_HIGHLIGHTS);
       setIsLoading(false);
       return;
     }
 
-    const fetchReportData = async () => {
+    const fetchHighlights = async () => {
       try {
-        // 개인별 통합 주간 리포트 API
-        const data = await apiRequest<WeeklyReportResponse>(`/users/me/weekly-report-data`, {
-          accessToken 
-        });
-        setReportData(data);
+        const data = await apiRequest<HighlightArchiveResponse>(
+          `/users/${userId}/highlights?year=2026&month=8`, 
+          { accessToken }
+        );
+        
+        // 💡 백엔드 응답이 배열이거나 highlights가 없을 경우를 대비한 안전 장치
+        const safeData = {
+          year: data?.year || 2026,
+          month: data?.month || 8,
+          highlights: Array.isArray(data?.highlights) ? data.highlights : (Array.isArray(data) ? data : FALLBACK_HIGHLIGHTS.highlights)
+        };
+
+        setArchiveData(safeData);
       } catch (error) {
-        console.error("리포트 조회 실패:", error);
-        setReportData(FALLBACK_REPORT);
+        console.error("하이라이트 조회 실패! 임시 데이터를 렌더링합니다:", error);
+        setArchiveData(FALLBACK_HIGHLIGHTS);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchReportData();
-  }, [authLoading, accessToken]);
+    fetchHighlights();
+  }, [authLoading, accessToken, userId]);
 
   const handleGardenClick = () => {
     const savedGroupId = typeof window !== 'undefined' ? localStorage.getItem('myGroupId') || '1' : '1';
     router.push(`/fe-d/${savedGroupId}/garden`);
   };
 
-  if (isLoading || !reportData) {
+  if (isLoading || !archiveData) {
     return (
-      <div className="flex flex-col w-full h-[100dvh] items-center justify-center bg-white">
-        <div className="w-8 h-8 border-4 border-[#41C0A1] border-t-transparent rounded-full animate-spin mb-3"></div>
-        <p className="text-sm text-[#999]">이번 주 리포트를 불러오는 중...</p>
-      </div>
+      <main className="w-full min-h-[100dvh] sm:h-[100dvh] bg-white sm:px-4 sm:py-6 flex items-center justify-center sm:overflow-hidden">
+        <div className="mx-auto flex w-full min-h-[100dvh] sm:min-h-0 sm:h-[740px] max-w-none sm:max-w-sm flex-col sm:rounded-3xl bg-white px-5 py-6 sm:shadow-[0_8px_30px_rgba(31,42,37,0.06)] items-center justify-center">
+          <div className="w-8 h-8 border-4 border-[#41C0A1] border-t-transparent rounded-full animate-spin mb-3"></div>
+          <p className="text-sm text-[#999]">하이라이트를 불러오는 중...</p>
+        </div>
+      </main>
     );
   }
 
-  const maxCount = reportData.weeklyData?.length > 0 
-    ? Math.max(...reportData.weeklyData.map(d => d.count)) 
-    : 1;
+  // 💡 안전하게 배열을 가져오도록 보장
+  const highlightsList = Array.isArray(archiveData.highlights) ? archiveData.highlights : [];
 
   return (
-    <div className="relative w-full h-[100dvh] bg-[#F9F9F9] flex flex-col overflow-hidden">
-      
-      {/* 상단 헤더 */}
-      <div className="flex items-center justify-center relative bg-white pt-6 pb-4 shrink-0 shadow-sm z-10">
-        <button onClick={() => router.back()} className="absolute left-5 text-[22px] font-bold text-[#A0A0A0] hover:opacity-70 transition-opacity">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 18l-6-6 6-6"/>
-          </svg>
-        </button>
-        <div className="flex flex-col items-center">
-          <h1 className="text-[18px] font-extrabold text-[#000000]">이번 주 리포트</h1>
-          <p className="text-[12px] text-[#888888] font-medium mt-0.5">{reportData.startDate} - {reportData.endDate}</p>
-        </div>
-      </div>
-
-      {/* 본문 스크롤 영역 */}
-      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-5 pt-5 pb-[100px] flex flex-col gap-4">
+    <main className="w-full min-h-[100dvh] sm:h-[100dvh] bg-[#F7F8F8] sm:px-4 sm:py-6 flex items-center justify-center sm:overflow-hidden">
+      <div className="mx-auto flex w-full min-h-[100dvh] sm:min-h-0 sm:h-[740px] max-w-none sm:max-w-sm flex-col sm:rounded-3xl bg-white sm:shadow-[0_8px_30px_rgba(31,42,37,0.06)] overflow-hidden relative">
         
-        {/* 주간 요약 & 차트 */}
-        <div className="bg-white rounded-[24px] p-[20px] shadow-[0_2px_16px_rgba(0,0,0,0.03)] border border-gray-50 flex flex-col shrink-0">
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex flex-col">
-              <span className="text-[14px] font-bold text-[#666666]">이번 주 완료 미션</span>
-              <div className="flex items-baseline gap-1 mt-1">
-                <span className="text-[36px] font-extrabold text-[#41C0A1] tracking-tight leading-none">{reportData.totalCompleted}</span>
-                <span className="text-[20px] font-bold text-[#222222]">개</span>
-              </div>
-            </div>
-            <div className="w-[52px] h-[52px] bg-[#E5F7F1] rounded-full flex items-center justify-center text-[#41C0A1]">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-7 h-7">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-              </svg>
-            </div>
-          </div>
-
-          {/* 막대 차트 */}
-          <div className="flex justify-between items-end h-[110px]">
-            {reportData.weeklyData?.map((data, index) => {
-              const isMax = data.count === maxCount && data.count > 0;
-              const heightPercentage = data.count === 0 ? 0 : (data.count / maxCount) * 100;
-              
-              return (
-                <div key={index} className="flex flex-col items-center gap-2 flex-1">
-                  <span className={`text-[12px] font-bold transition-colors ${isMax ? 'text-[#41C0A1]' : 'text-[#A0A0A0]'}`}>
-                    {data.count > 0 ? data.count : ''}
-                  </span>
-                  <div className="w-full h-[70px] flex items-end justify-center">
-                    {data.count > 0 ? (
-                      <div 
-                        className={`w-[14px] rounded-full transition-all duration-500 ease-out ${isMax ? 'bg-[#41C0A1] shadow-sm' : 'bg-[#E5F7F1]'}`} 
-                        style={{ height: `${heightPercentage}%` }} 
-                      />
-                    ) : (
-                      <div className="w-[14px] h-[4px] rounded-full bg-[#F0F0F0]" />
-                    )}
-                  </div>
-                  <span className={`text-[12px] font-bold ${isMax ? 'text-[#222222]' : 'text-[#888888]'}`}>{data.day}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* AI 한줄 리포트 */}
-        <div className="bg-gradient-to-r from-[#F0FCF9] to-[#F4FBF9] rounded-[24px] p-5 border border-[#E2F7F2] shadow-sm shrink-0 flex flex-col gap-2">
-          <div className="flex items-center gap-1.5">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#41C0A1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+        {/* 상단 헤더 */}
+        <div className="bg-white px-5 py-4 flex items-center justify-center shrink-0 shadow-sm z-10 relative">
+          <button onClick={() => router.back()} className="absolute left-5 text-[22px] font-bold text-[#A0A0A0]">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6"/>
             </svg>
-            <span className="text-[14px] font-extrabold text-[#41C0A1]">AI 리포트</span>
-          </div>
-          <p className="text-[11.5px] text-[#555555] font-medium leading-relaxed">
-            {reportData.aiSummary}
-          </p>
-        </div>
-
-        {/* 2단 그리드 카드 (달성률 & 최고 습관) */}
-        <div className="grid grid-cols-2 gap-3 shrink-0">
-          
-          {/* 달성률 */}
-          <div className="bg-white rounded-[24px] p-5 shadow-[0_2px_16px_rgba(0,0,0,0.03)] border border-gray-50 flex flex-col items-center">
-            <span className="text-[14px] font-bold text-[#666666] w-full mb-3">달성률</span>
-            
-            <div className="relative w-[85px] h-[85px] flex items-center justify-center">
-              <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90 overflow-visible">
-                <path className="text-[#F0F0F0]" strokeWidth="4.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                <path className="text-[#41C0A1]" strokeWidth="4.5" strokeLinecap="round" strokeDasharray={`${reportData.achievementRate}, 100`} stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              </svg>
-              <div className="absolute flex flex-col items-center justify-center mt-1">
-                <span className="text-[20px] font-extrabold text-[#222222] leading-none">{reportData.achievementRate}<span className="text-[12px] font-bold ml-[1px]">%</span></span>
-              </div>
-            </div>
-            <span className="text-[14px] text-center font-bold text-[#A0A0A0] mt-3 bg-[#F5F5F5] px-[10px] py-1 rounded-[12px]">
-              {reportData.completedCount} / {reportData.totalCount} 완료
-            </span>
-          </div>
-
-          {/* 최고 기록 및 연속 달성 병합 카드 */}
-          <div className="flex flex-col gap-3">
-            {/* 베스트 습관 */}
-            <div className="bg-white rounded-[20px] p-4 shadow-[0_2px_16px_rgba(0,0,0,0.03)] border border-gray-50 flex flex-col flex-1 justify-center">
-              <span className="text-[13px] font-bold text-[#666666] mb-1">베스트 습관</span>
-              <span className="text-[15px] font-extrabold text-[#222222] truncate">{reportData.bestHabit?.name || '정보 없음'}</span>
-              <span className="text-[13px] font-bold text-[#41C0A1] mt-1">{reportData.bestHabit?.successDays || 0}일 성공</span>
-            </div>
-            
-            {/* 연속 달성 */}
-            <div className="bg-white rounded-[20px] p-4 shadow-[0_2px_16px_rgba(0,0,0,0.03)] border border-gray-50 flex flex-col flex-1 justify-center relative overflow-hidden">
-              <span className="text-[13px] font-bold text-[#666666] mb-1 z-10">연속 달성</span>
-              <div className="flex items-baseline gap-1 z-10">
-                <span className="text-[24px] font-extrabold text-[#41C0A1] leading-none">{reportData.currentStreakDays}</span>
-                <span className="text-[14px] font-bold text-[#222222]">일째</span>
-              </div>
-              <span className="text-[11px] text-[#A0A0A0] font-medium mt-1 z-10">최고기록 {reportData.longestStreakDays}일</span>
-              
-              <div className="absolute right-[-15px] bottom-[-15px] text-[#F9F9F9]">
-                <svg width="70" height="70" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15 8H21L16.5 12.5L18 19L12 15.5L6 19L7.5 12.5L3 8H9L12 2Z"/></svg>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        {/* 하단 배너 및 버튼 */}
-        <div className="shrink-0">
-          <div className="bg-[#F3EDFF] rounded-[20px] p-[16px] flex flex-row items-center gap-4 shadow-sm border border-[#EADDFF]">
-            <div className="w-[44px] h-[44px] shrink-0 bg-white rounded-[14px] flex items-center justify-center shadow-sm">
-              <svg className="w-6 h-6 text-[#7E6CD3]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-              </svg>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[12px] font-bold text-[#7E6CD3]">계속해서 기록이 쌓이고 있어요!</span>
-              <span className="text-[11px] text-[#666666] font-medium mt-0.5 leading-snug">꾸준한 행동 기록은 맞춤 케어의 비결이에요.</span>
-            </div>
-          </div>
-
-          <button 
-            onClick={() => router.push('/fe-e/record/calendar')}
-            className="w-full py-4 mt-[14px] rounded-[15px] border-[1.5px] border-[#41C0A1] text-[#41C0A1] font-extrabold text-[15px] bg-[#F7F7F7] hover:bg-[#F0FDF8] transition-colors shadow-sm"
-          >
-            지난 미션 보기
+          </button>
+          <h1 className="text-[18px] font-extrabold text-[#000000]">하이라이트</h1>
+          <button className="absolute right-5 text-black">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 16v-4"/>
+              <path d="M12 8h.01"/>
+            </svg>
           </button>
         </div>
 
-      </div>
+        {/* 본문 스크롤 영역 */}
+        <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-5 py-6 pb-[90px] flex flex-col gap-[10px]">
+          
+          {/* 월 이동 네비게이션 */}
+          <div className="flex items-center justify-between px-2 bg-white py-3 rounded-[20px] shadow-sm">
+            <button className="p-1 text-gray-400 hover:text-black"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>
+            <span className="text-[15px] font-extrabold text-[#222222]">{archiveData.year || 2026}년 {archiveData.month || 8}월</span>
+            <button className="p-1 text-gray-400 hover:text-black"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 18l6-6-6-6"/></svg></button>
+          </div>
 
-      {/* 하단 탭바 */}
-      <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 flex justify-between items-center px-5 pt-4 pb-5 z-50">
-        <TabIcon icon="users" label="그룹" onClick={() => router.push('/fe-e/group')} />
-        <TabIcon icon="check" label="미션" onClick={() => router.push('/fe-d/mission')} />
-        <TabIcon icon="leaf" label="W 정원" onClick={handleGardenClick} />
-        <TabIcon icon="bar-chart" label="기록" isActive onClick={() => router.push('/fe-e/record/report')} />
+          {/* 필터 탭 */}
+          <div className="flex bg-white rounded-full p-1 shadow-sm border border-gray-100">
+            <button className="flex-1 py-[10px] bg-[#41C0A1] text-white rounded-full text-[13px] font-extrabold shadow-sm">전체</button>
+            <button className="flex-1 py-[10px] text-[13px] font-bold text-[#666666] hover:text-black">이번 주</button>
+            <button className="flex-1 py-[10px] text-[13px] font-bold text-[#666666] hover:text-black">완주</button>
+          </div>
+
+          {/* 이번 주 대표 카드 */}
+          <div className="bg-gradient-to-r from-[#F0FCF9] to-[#E2F7F2] rounded-[24px] p-5 flex flex-row items-center justify-between shadow-sm border border-[#D1F2E8]">
+            <div className="flex flex-col">
+              <h2 className="text-[16px] font-extrabold text-[#222222]">이번 주 우리의 하루</h2>
+              <p className="text-[12px] text-[#555555] font-medium mt-0.5 mb-3">8. 6 - 8. 12</p>
+              
+              <div className="flex items-center gap-1.5 text-[#41C0A1] font-bold text-[13px] mb-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M10 8l6 4-6 4V8z" fill="currentColor"/>
+                </svg>
+                00:30
+              </div>
+
+              <div className="flex gap-2">
+                <div className="bg-white/80 text-[#41C0A1] text-[11px] font-bold px-2.5 py-1 rounded-md shadow-2xs">
+                  공유 클립 6
+                </div>
+                <div className="bg-white/80 text-[#8B6DF8] text-[11px] font-bold px-2.5 py-1 rounded-md shadow-2xs">
+                  완료 카드 9
+                </div>
+              </div>
+            </div>
+
+            <div className="w-[110px] h-[85px] bg-[#A5E3D0]/30 rounded-[16px] relative overflow-hidden shrink-0 flex items-center justify-center border border-white/50 shadow-inner">
+               <span className="text-[12px] font-bold text-[#41C0A1]">대표 영상</span>
+            </div>
+          </div>
+
+          {/* 날짜별 하이라이트 리스트 */}
+          <div className="flex flex-col">
+            <h3 className="text-[16px] font-extrabold text-[#222222] mt-[14px] mb-3">날짜별 하이라이트</h3>
+            
+            <div className="grid grid-cols-2 gap-3">
+              {highlightsList.map((item) => (
+                <div key={item.id} className="bg-white rounded-[20px] p-3 shadow-sm border border-gray-100 flex flex-col gap-2">
+                  <div className="w-full aspect-[16/10] bg-[#F4FBF9] rounded-[14px] relative flex items-center justify-center overflow-hidden">
+                    <svg className="absolute top-2.5 left-2.5 w-4 h-4 text-[#41C0A1]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-xs text-gray-400 font-medium">썸네일</span>
+                  </div>
+                  
+                  <div className="flex flex-col px-1">
+                    <span className="text-[13px] font-bold text-[#222222]">{item.date}</span>
+                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-500 mt-0.5">
+                      <span className="text-[#41C0A1] font-bold">{item.current} / {item.total}</span>
+                      <span>•</span>
+                      <span>{item.time}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* 잠긴 하이라이트 아이템 */}
+              <div className="bg-white rounded-[20px] p-3 shadow-sm border border-dashed border-gray-200 flex flex-col items-center justify-center gap-1 aspect-[16/11]">
+                <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
+                  🔒
+                </div>
+                <span className="text-[11px] text-[#666666] font-bold text-center leading-snug mt-1">
+                  미션 완료 후<br/>하이라이트가 생겨요
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 하단 안내 배너 */}
+          <div className="bg-white rounded-[20px] p-4 flex items-center gap-3 shadow-sm border border-gray-100">
+            <div className="w-9 h-9 rounded-full bg-[#EAF9F4] flex items-center justify-center text-[#41C0A1] shrink-0 font-bold">
+              i
+            </div>
+            <p className="text-[12px] text-[#666666] font-medium leading-relaxed">
+              공유 멤버의 클립만 영상에 담고,<br />비공유 멤버는 완료 카드로 보여요.
+            </p>
+          </div>
+
+        </div>
+
+        {/* 하단 탭 바 (4개 탭 통일) */}
+        <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 flex justify-between items-center px-6 pt-3 pb-5 z-50">
+          <TabIcon icon="users" label="그룹" onClick={() => router.push('/fe-e/group')} />
+          <TabIcon icon="check" label="미션" onClick={() => router.push('/fe-d/mission')} />
+          <TabIcon icon="leaf" label="W 정원" onClick={handleGardenClick} />
+          <TabIcon icon="bar-chart" label="기록" isActive onClick={() => router.push('/fe-e/record/report')} />
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
 

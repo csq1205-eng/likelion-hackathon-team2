@@ -54,37 +54,39 @@ function MissionShareInner() {
   };
 
   return (
-    <div className="relative w-full h-[100dvh] bg-white flex flex-col overflow-hidden px-5 py-6">
-      
-      <div className="flex flex-col mt-10 w-full text-left flex-1 min-h-0">
-        <h1 className="text-[23px] font-bold text-[#000000] leading-snug shrink-0">
-          이 클립을 그룹에<br />
-          공유할까요?
-        </h1>
-        <p className="text-[12px] text-[#666666] font-medium mt-[6px] shrink-0">
-          공유하지 않아도 완료 여부는 그룹에 표시돼요
-        </p>
-      </div>
+    <main className="w-full min-h-[100dvh] sm:h-[100dvh] bg-[#F7F8F8] sm:px-4 sm:py-6 flex items-center justify-center sm:overflow-hidden">
+      <div className="mx-auto flex w-full min-h-[100dvh] sm:min-h-0 sm:h-[740px] max-w-none sm:max-w-sm flex-col sm:rounded-3xl bg-white px-5 py-6 sm:shadow-[0_8px_30px_rgba(31,42,37,0.06)] overflow-hidden relative">
+         
+        <div className="flex flex-col mt-10 w-full text-left flex-1 min-h-0">
+          <h1 className="text-[23px] font-bold text-[#000000] leading-snug shrink-0">
+            이 클립을 그룹에<br />
+            공유할까요?
+          </h1>
+          <p className="text-[12px] text-[#666666] font-medium mt-[6px] shrink-0">
+            공유하지 않아도 완료 여부는 그룹에 표시돼요
+          </p>
+        </div>
 
-      <div className="flex flex-col w-full gap-[12px] mt-auto shrink-0 pb-2">
-        <button
-          onClick={handleShare}
-          disabled={isSubmitting}
-          className="w-full py-[16px] rounded-[16px] bg-[#A7FBE7] text-[#000000] font-bold text-[16px] hover:bg-[#92edd8] transition-colors disabled:opacity-50"
-        >
-          {isSubmitting ? '공유 중...' : '공유하기'}
-        </button>
-        
-        <button
-          onClick={handlePrivate}
-          disabled={isSubmitting}
-          className="w-full py-[16px] rounded-[16px] bg-[#F7F8F8] text-[#000000] font-bold text-[16px] hover:bg-[#E8E8E8] transition-colors disabled:opacity-50"
-        >
-          {isSubmitting ? '비공개 중...' : '비공개로 두기'}
-        </button>
-      </div>
+        <div className="flex flex-col w-full gap-[12px] mt-auto shrink-0 pb-2">
+          <button
+            onClick={handleShare}
+            disabled={isSubmitting}
+            className="w-full py-[16px] rounded-[16px] bg-[#A7FBE7] text-[#000000] font-bold text-[16px] hover:bg-[#92edd8] transition-colors disabled:opacity-50"
+          >
+            {isSubmitting ? '공유 중...' : '공유하기'}
+          </button>
+          
+          <button
+            onClick={handlePrivate}
+            disabled={isSubmitting}
+            className="w-full py-[16px] rounded-[16px] bg-[#F7F8F8] text-[#000000] font-bold text-[16px] hover:bg-[#E8E8E8] transition-colors disabled:opacity-50"
+          >
+            {isSubmitting ? '비공개 중...' : '비공개로 두기'}
+          </button>
+        </div>
 
-    </div>
+      </div>
+    </main>
   );
 }
 

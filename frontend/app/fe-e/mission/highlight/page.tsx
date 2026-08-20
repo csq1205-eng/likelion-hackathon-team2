@@ -126,10 +126,12 @@ export default function HighlightPage() {
 
   if (isLoading || !highlightData) {
     return (
-      <div className="flex flex-col w-full h-[100dvh] items-center justify-center bg-white">
-        <div className="w-8 h-8 border-4 border-[#41C0A1] border-t-transparent rounded-full animate-spin mb-3"></div>
-        <p className="text-sm text-[#999]">하이라이트를 불러오는 중...</p>
-      </div>
+      <main className="w-full min-h-[100dvh] sm:h-[100dvh] bg-white sm:px-4 sm:py-6 flex items-center justify-center sm:overflow-hidden">
+        <div className="mx-auto flex w-full min-h-[100dvh] sm:min-h-0 sm:h-[740px] max-w-none sm:max-w-sm flex-col sm:rounded-3xl bg-white px-6 py-6 sm:shadow-[0_8px_30px_rgba(31,42,37,0.06)] items-center justify-center">
+          <div className="w-8 h-8 border-4 border-[#41C0A1] border-t-transparent rounded-full animate-spin mb-3"></div>
+          <p className="text-sm text-[#999]">하이라이트를 불러오는 중...</p>
+        </div>
+      </main>
     );
   }
 
@@ -137,232 +139,234 @@ export default function HighlightPage() {
   const membersList = highlightData.members || [];
 
   return (
-    <div className="relative w-full h-[100dvh] bg-white flex flex-col overflow-hidden">
-      
-      {/* 비디오 태그 소스 */}
-      <video
-        ref={videoRef}
-        src={highlightData.videoUrl}
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
-        onEnded={() => setIsPlaying(false)}
-        playsInline
-        className="hidden" // 화면 구성상 아래 썸네일/카드와 연동되므로 오디오/비디오 엔진으로만 활용
-      />
+    <main className="w-full min-h-[100dvh] sm:h-[100dvh] bg-[#F7F8F8] sm:px-4 sm:py-6 flex items-center justify-center sm:overflow-hidden">
+      <div className="mx-auto flex w-full min-h-[100dvh] sm:min-h-0 sm:h-[740px] max-w-none sm:max-w-sm flex-col sm:rounded-3xl bg-white sm:shadow-[0_8px_30px_rgba(31,42,37,0.06)] overflow-hidden relative">
 
-      {/* 본문 스크롤 */}
-      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-[100px] flex flex-col relative bg-gradient-to-b from-[#EAF7F7] from-[15%] to-white">
+        {/* 비디오 태그 소스 */}
+        <video
+          ref={videoRef}
+          src={highlightData.videoUrl}
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
+          onEnded={() => setIsPlaying(false)}
+          playsInline
+          className="hidden" // 화면 구성상 아래 썸네일/카드와 연동되므로 오디오/비디오 엔진으로만 활용
+        />
 
-        {/* 배경 별 */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[5%] left-[-10%] w-[60%] h-[400px] bg-gradient-to-br from-[#E2F7F2] to-transparent rounded-full blur-[80px] -z-10 opacity-70 pointer-events-none"></div>
-        <div className="absolute top-[10%] right-[-10%] w-[50%] h-[300px] bg-gradient-to-bl from-[#F3EDFF] to-transparent rounded-full blur-[80px] -z-10 opacity-70 pointer-events-none"></div>
-        <div className="absolute top-[100px] left-[12%] text-[#83E2C4] opacity-50 text-[16px] pointer-events-none z-0">✦</div>
-        <div className="absolute top-[85px] left-[35%] text-[#A7FBE7] opacity-80 text-[24px] pointer-events-none z-0 drop-shadow-sm">✦</div>
-        <div className="absolute top-[95px] right-[10%] text-[#B39DDB] opacity-70 text-[22px] pointer-events-none z-0 drop-shadow-sm">✦</div>
-        <div className="absolute top-[425px] right-[78%] text-[#83E2C4] opacity-60 text-[18px] pointer-events-none z-0">✦</div>
-        <div className="absolute top-[490px] left-[33%] text-[#EADDFF] opacity-60 text-[20px] pointer-events-none z-0">✦</div>
-        <div className="absolute top-[480px] right-[10%] text-[#A7FBE7] opacity-50 text-[14px] pointer-events-none z-0">✦</div>
-      </div>
+        {/* 본문 스크롤 */}
+        <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-[100px] flex flex-col relative bg-gradient-to-b from-[#EAF7F7] from-[15%] to-white">
 
-        {/* 상단 배경 꾸밈 요소 */}
-        <div className="sticky top-0 z-50 flex flex-col items-center justify-center pt-6 pb-4 shrink-0 bg-white border-b border-[#EAF7F7]/50 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-          <button onClick={() => router.back()} 
-            className="absolute left-5 top-7 text-[22px] font-bold text-[#A0A0A0] hover:opacity-70 transition-opacity">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 18l-6-6 6-6"/>
-            </svg>
-          </button>
-          <h1 className="text-[17px] font-extrabold text-[#000000]">{highlightData.title}</h1>
-<p className="text-[12px] text-[#666666] font-medium mt-0.5">{highlightData.highlightDate}</p>
-</div>
+          {/* 배경 별 */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+            <div className="absolute top-[5%] left-[-10%] w-[60%] h-[400px] bg-gradient-to-br from-[#E2F7F2] to-transparent rounded-full blur-[80px] -z-10 opacity-70 pointer-events-none"></div>
+            <div className="absolute top-[10%] right-[-10%] w-[50%] h-[300px] bg-gradient-to-bl from-[#F3EDFF] to-transparent rounded-full blur-[80px] -z-10 opacity-70 pointer-events-none"></div>
+            <div className="absolute top-[100px] left-[12%] text-[#83E2C4] opacity-50 text-[16px] pointer-events-none z-0">✦</div>
+            <div className="absolute top-[85px] left-[35%] text-[#A7FBE7] opacity-80 text-[24px] pointer-events-none z-0 drop-shadow-sm">✦</div>
+            <div className="absolute top-[95px] right-[10%] text-[#B39DDB] opacity-70 text-[22px] pointer-events-none z-0 drop-shadow-sm">✦</div>
+            <div className="absolute top-[425px] right-[78%] text-[#83E2C4] opacity-60 text-[18px] pointer-events-none z-0">✦</div>
+            <div className="absolute top-[490px] left-[33%] text-[#EADDFF] opacity-60 text-[20px] pointer-events-none z-0">✦</div>
+            <div className="absolute top-[480px] right-[10%] text-[#A7FBE7] opacity-50 text-[14px] pointer-events-none z-0">✦</div>
+          </div>
 
-        {/* 중앙 3단 세로 카드 영역 */}
-        <div className="flex flex-row justify-center gap-2.5 w-full px-5 mt-[30px] z-10">
-  {membersList.map((member) => (
-    <div key={member.id} className="flex flex-col items-center w-1/3">
-              
-              {member.itemType === 'CLIP' ? (
-                <div className="relative w-full aspect-[4/9] rounded-[16px] overflow-hidden shadow-sl bg-white transform transition-transform hover:-translate-y-1">
-                  <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${member.mediaUrl}')` }}></div>
-                  
-                  {/* 상단 밀착 라벨 */}
-                  <div className="absolute top-0 left-0 w-full z-10">
-                    <div className="bg-[#41C0A1] text-white text-[10px] font-semibold py-[4px] text-center rounded-b-[0px] rounded-t-none shadow-sm">
-                      {member.name} · 클립
-                    </div>
-                  </div>
+          {/* 상단 배경 꾸밈 요소 */}
+          <div className="sticky top-0 z-50 flex flex-col items-center justify-center pt-6 pb-4 shrink-0 bg-white border-b border-[#EAF7F7]/50 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+            <button onClick={() => router.back()} 
+              className="absolute left-5 top-7 text-[22px] font-bold text-[#A0A0A0] hover:opacity-70 transition-opacity">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+            </button>
+            <h1 className="text-[17px] font-extrabold text-[#000000]">{highlightData.title}</h1>
+            <p className="text-[12px] text-[#666666] font-medium mt-0.5">{highlightData.highlightDate}</p>
+          </div>
 
-                  <div className="absolute bottom-0 w-full pt-8 pb-3 bg-gradient-to-t from-black/80 to-transparent">
-                    <p className="text-white text-[10px] font-semibold text-center italic">{member.content}</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="relative w-full aspect-[4/9] rounded-[16px] overflow-hidden shadow-sm flex flex-col items-center transform transition-transform hover:-translate-y-1">
-                  <div className="absolute inset-0 z-0">
-                    <Image 
-                      src="/highlight_longCard.png"
-                      alt="비공유 롱카드 배경"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-
-                  <div className="absolute top-0 left-0 w-full z-10">
-                    <div className="bg-[#B39DDB] text-white text-[10px] font-semibold py-[4px] text-center rounded-b-[0px] rounded-t-none shadow-sm">
-                      비공유 · 완료
-                    </div>
-                  </div>
-
-                  <div className="mt-auto mb-[2px] flex flex-col items-center w-full px-[4px] z-10">
-                    <span className="text-[13px] font-extrabold text-[#222222]">{member.name}</span>
+          {/* 중앙 3단 세로 카드 영역 */}
+          <div className="flex flex-row justify-center gap-2.5 w-full px-5 mt-[20px] z-10">
+            {membersList.map((member) => (
+              <div key={member.id} className="flex flex-col items-center w-1/3">
+                
+                {member.itemType === 'CLIP' ? (
+                  <div className="relative w-full aspect-[4/9] rounded-[16px] overflow-hidden shadow-sl bg-white transform transition-transform hover:-translate-y-1">
+                    <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${member.mediaUrl}')` }}></div>
                     
-                    <div className="bg-white/80 rounded-[8px] px-[2px] py-1.5 flex items-center justify-center mt-[3px] w-full shadow-sm">
-                      <span className="text-[10px] text-[#5B3BC4] font-bold truncate tracking-tight">{member.content}</span>
+                    {/* 상단 밀착 라벨 */}
+                    <div className="absolute top-0 left-0 w-full z-10">
+                      <div className="bg-[#41C0A1] text-white text-[10px] font-semibold py-[4px] text-center rounded-b-[0px] rounded-t-none shadow-sm">
+                        {member.name} · 클립
+                      </div>
                     </div>
-                    <span className="text-[9px] text-[#888888] font-medium mt-[5px] mb-[11px]">{member.time}</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
 
-        {/* 썸네일 & 타임라인 플레이어 카드 */}
-        <div className="px-[16px] mt-[20px]">
-          <div className="bg-white rounded-[24px] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.04)] w-full border border-gray-50 flex flex-col">
-            <div className="flex gap-2 justify-between">
-              {membersList.map((m, idx) => (
-                <div key={m.id} className="relative w-1/3 aspect-[4/3] rounded-[12px] overflow-hidden shadow-sm bg-gray-100 flex items-center justify-center">
-                  {m.mediaUrl ? (
-                    <div className="absolute inset-0 bg-cover bg-center opacity-80" style={{ backgroundImage: `url('${m.mediaUrl}')` }}></div>
-                  ) : (
+                    <div className="absolute bottom-0 w-full pt-8 pb-3 bg-gradient-to-t from-black/80 to-transparent">
+                      <p className="text-white text-[10px] font-semibold text-center italic">{member.content}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative w-full aspect-[4/9] rounded-[16px] overflow-hidden shadow-sm flex flex-col items-center transform transition-transform hover:-translate-y-1">
                     <div className="absolute inset-0 z-0">
-                    <Image 
-                      src="/highlight_shortCard.png"
-                      alt="비공유 숏카드 배경"
-                      fill
-                      className="object-cover"
-                    />
+                      <Image 
+                        src="/highlight_longCard.png"
+                        alt="비공유 롱카드 배경"
+                        fill
+                        className="object-cover"
+                      />
                     </div>
-                  )}
-                  <div className="absolute top-1 w-full flex justify-center">
-                    <span className={`${m.itemType === 'CLIP' ? 'bg-[#41C0A1]' : 'bg-[#B39DDB]'} text-white text-[7px] font-bold px-1.5 py-[2px] rounded-full`}>
-                      {m.itemType === 'CLIP' ? '클립' : '완료 카드'}
-                    </span>
-                  </div>
-                  <div className="absolute bottom-1.5 left-1.5 w-[18px] h-[18px] bg-black/60 rounded-full text-white text-[8px] flex items-center justify-center font-bold">
-                    0{idx + 1}
-                  </div>
-                </div>
-              ))}
-            </div>
 
-            {/* 실제 조작 가능한 프로그레스 바 (Range Input) */}
-            <div className="relative w-full h-[6px] bg-[#EAEAEA] rounded-full mt-4 flex items-center">
-              <input
-                type="range"
-                min={0}
-                max={duration || 100}
-                value={currentTime}
-                onChange={handleSeek}
-                className="absolute inset-0 w-full opacity-0 cursor-pointer z-20"
-              />
-              <div className="absolute top-0 left-0 h-full bg-[#41C0A1] rounded-full pointer-events-none" style={{ width: `${progressPercent}%` }}></div>
-              <div 
-                className="absolute top-1/2 transform -translate-y-1/2 w-[14px] h-[14px] bg-white border-[3.5px] border-[#B39DDB] rounded-full shadow-sm pointer-events-none z-10"
-                style={{ left: `calc(${progressPercent}% - 7px)` }}
-              ></div>
+                    <div className="absolute top-0 left-0 w-full z-10">
+                      <div className="bg-[#B39DDB] text-white text-[10px] font-semibold py-[4px] text-center rounded-b-[0px] rounded-t-none shadow-sm">
+                        비공유 · 완료
+                      </div>
+                    </div>
+
+                    <div className="mt-auto mb-[2px] flex flex-col items-center w-full px-[4px] z-10">
+                      <span className="text-[13px] font-extrabold text-[#222222]">{member.name}</span>
+                      
+                      <div className="bg-white/80 rounded-[8px] px-[2px] py-1.5 flex items-center justify-center mt-[3px] w-full shadow-sm">
+                        <span className="text-[10px] text-[#5B3BC4] font-bold truncate tracking-tight">{member.content}</span>
+                      </div>
+                      <span className="text-[9px] text-[#888888] font-medium mt-[5px] mb-[11px]">{member.time}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* 썸네일 & 타임라인 플레이어 카드 */}
+          <div className="px-[16px] mt-[20px]">
+            <div className="bg-white rounded-[24px] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.04)] w-full border border-gray-50 flex flex-col">
+              <div className="flex gap-2 justify-between">
+                {membersList.map((m, idx) => (
+                  <div key={m.id} className="relative w-1/3 aspect-[4/3] rounded-[12px] overflow-hidden shadow-sm bg-gray-100 flex items-center justify-center">
+                    {m.mediaUrl ? (
+                      <div className="absolute inset-0 bg-cover bg-center opacity-80" style={{ backgroundImage: `url('${m.mediaUrl}')` }}></div>
+                    ) : (
+                      <div className="absolute inset-0 z-0">
+                      <Image 
+                        src="/highlight_shortCard.png"
+                        alt="비공유 숏카드 배경"
+                        fill
+                        className="object-cover"
+                      />
+                      </div>
+                    )}
+                    <div className="absolute top-1 w-full flex justify-center">
+                      <span className={`${m.itemType === 'CLIP' ? 'bg-[#41C0A1]' : 'bg-[#B39DDB]'} text-white text-[7px] font-bold px-1.5 py-[2px] rounded-full`}>
+                        {m.itemType === 'CLIP' ? '클립' : '완료 카드'}
+                      </span>
+                    </div>
+                    <div className="absolute bottom-1.5 left-1.5 w-[18px] h-[18px] bg-black/60 rounded-full text-white text-[8px] flex items-center justify-center font-bold">
+                      0{idx + 1}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 실제 조작 가능한 프로그레스 바 (Range Input) */}
+              <div className="relative w-full h-[6px] bg-[#EAEAEA] rounded-full mt-4 flex items-center">
+                <input
+                  type="range"
+                  min={0}
+                  max={duration || 100}
+                  value={currentTime}
+                  onChange={handleSeek}
+                  className="absolute inset-0 w-full opacity-0 cursor-pointer z-20"
+                />
+                <div className="absolute top-0 left-0 h-full bg-[#41C0A1] rounded-full pointer-events-none" style={{ width: `${progressPercent}%` }}></div>
+                <div 
+                  className="absolute top-1/2 transform -translate-y-1/2 w-[14px] h-[14px] bg-white border-[3.5px] border-[#B39DDB] rounded-full shadow-sm pointer-events-none z-10"
+                  style={{ left: `calc(${progressPercent}% - 7px)` }}
+                ></div>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* 재생 컨트롤 영역 (실제 함수 연결) */}
-        <div className="flex flex-col items-center mt-5">
-          <span className="text-[12px] font-bold text-[#555555]">
-            {formatTime(currentTime)} / {formatTime(duration || 30)}
-          </span>
-          
-          <div className="flex items-center gap-10 mt-3">
-            {/* -10초 버튼 */}
-            <button 
-              onClick={() => skipTime(-10)}
-              className="text-black hover:text-[#41C0A1] transition-colors flex items-center justify-center relative w-[44px] h-[44px]"
-            >
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M2.5 2v6h6M2.66 15.5c1.1 3.2 4.1 5.5 7.6 5.5 4.5 0 8.2-3.7 8.2-8.2s-3.7-8.2-8.2-8.2c-2.3 0-4.4.9-5.9 2.4L2.5 8" />
-              </svg>
-              <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[9px] font-bold mt-[2px] -ml-[2px]">10</span>
-            </button>
+          {/* 재생 컨트롤 영역 (실제 함수 연결) */}
+          <div className="flex flex-col items-center mt-5">
+            <span className="text-[12px] font-bold text-[#555555]">
+              {formatTime(currentTime)} / {formatTime(duration || 30)}
+            </span>
             
-            {/* 재생/일시정지 버튼 */}
-            <button 
-              onClick={togglePlay}
-              className="w-[48px] h-[48px] bg-[#111111] text-white rounded-full flex items-center justify-center hover:bg-[#333333] transition-colors shadow-md"
-            >
-              {isPlaying ? (
-                /* 일시정지 아이콘 */
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <rect x="6" y="4" width="4" height="16" rx="1" />
-                  <rect x="14" y="4" width="4" height="16" rx="1" />
+            <div className="flex items-center gap-10 mt-3">
+              {/* -10초 버튼 */}
+              <button 
+                onClick={() => skipTime(-10)}
+                className="text-black hover:text-[#41C0A1] transition-colors flex items-center justify-center relative w-[44px] h-[44px]"
+              >
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2.5 2v6h6M2.66 15.5c1.1 3.2 4.1 5.5 7.6 5.5 4.5 0 8.2-3.7 8.2-8.2s-3.7-8.2-8.2-8.2c-2.3 0-4.4.9-5.9 2.4L2.5 8" />
                 </svg>
-              ) : (
-                /* 재생 아이콘 */
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="ml-1">
-                  <path d="M5.5 3.5v17l14-8.5z" />
-                </svg>
-              )}
-            </button>
+                <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[9px] font-bold mt-[2px] -ml-[2px]">10</span>
+              </button>
+              
+              {/* 재생/일시정지 버튼 */}
+              <button 
+                onClick={togglePlay}
+                className="w-[48px] h-[48px] bg-[#111111] text-white rounded-full flex items-center justify-center hover:bg-[#333333] transition-colors shadow-md"
+              >
+                {isPlaying ? (
+                  /* 일시정지 아이콘 */
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="6" y="4" width="4" height="16" rx="1" />
+                    <rect x="14" y="4" width="4" height="16" rx="1" />
+                  </svg>
+                ) : (
+                  /* 재생 아이콘 */
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="ml-1">
+                    <path d="M5.5 3.5v17l14-8.5z" />
+                  </svg>
+                )}
+              </button>
 
-            {/* +10초 버튼 */}
-            <button 
-              onClick={() => skipTime(10)}
-              className="text-black hover:text-[#41C0A1] transition-colors flex items-center justify-center relative w-[44px] h-[44px]"
-            >
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21.5 2v6h-6M21.34 15.5c-1.1 3.2-4.1 5.5-7.6 5.5-4.5 0-8.2-3.7-8.2-8.2s3.7-8.2 8.2-8.2c2.3 0 4.4.9 5.9 2.4l1.9 1.9" />
+              {/* +10초 버튼 */}
+              <button 
+                onClick={() => skipTime(10)}
+                className="text-black hover:text-[#41C0A1] transition-colors flex items-center justify-center relative w-[44px] h-[44px]"
+              >
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21.5 2v6h-6M21.34 15.5c-1.1 3.2-4.1 5.5-7.6 5.5-4.5 0-8.2-3.7-8.2-8.2s3.7-8.2 8.2-8.2c2.3 0 4.4.9 5.9 2.4l1.9 1.9" />
+                </svg>
+                <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[9px] font-bold mt-[2px] ml-[2px]">10</span>
+              </button>
+            </div>
+          </div>
+
+          {/* 안내 문구 */}
+          <div className="flex flex-col items-center px-6 mt-6 gap-2">
+            <p className="text-[11px] text-[#555555] font-medium text-center leading-relaxed">
+              공유 멤버는 실제 클립으로, 비공유 멤버는 완료 카드로<br />AI가 자막을 더해 30초 하이라이트를 만들어요!
+            </p>
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#888888] font-medium mt-1">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0110 0v4" />
               </svg>
-              <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[9px] font-bold mt-[2px] ml-[2px]">10</span>
+              직접 공유한 클립만 친구에게 보여요
+            </div>
+          </div>
+
+          {/* 하단 액션 버튼 */}
+          <div className="flex flex-row w-full px-5 gap-[8px] mt-6">
+            <button 
+              onClick={() => {
+                if (videoRef.current) {
+                  videoRef.current.currentTime = 0;
+                  videoRef.current.play();
+                  setIsPlaying(true);
+                }
+              }}
+              className="flex-1 py-[12px] rounded-[14px] border-[1.5px] border-[#E0E0E0] text-[#333333] font-bold text-[15px] bg-white hover:bg-gray-50 transition-colors"
+            >
+              다시 보기
+            </button>
+            <button 
+              onClick={() => alert("하이라이트 링크가 복사되었습니다!")}
+              className="flex-1 py-[12px] rounded-[14px] text-white font-bold text-[15px] bg-[#41C0A1] hover:bg-[#38a88d] transition-colors shadow-sm"
+            >
+              공유하기
             </button>
           </div>
+          
         </div>
-
-        {/* 안내 문구 */}
-        <div className="flex flex-col items-center px-6 mt-6 gap-2">
-          <p className="text-[11px] text-[#555555] font-medium text-center leading-relaxed">
-            공유 멤버는 실제 클립으로, 비공유 멤버는 완료 카드로<br />AI가 자막을 더해 30초 하이라이트를 만들어요!
-          </p>
-          <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#888888] font-medium mt-1">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0110 0v4" />
-            </svg>
-            직접 공유한 클립만 친구에게 보여요
-          </div>
-        </div>
-
-        {/* 하단 액션 버튼 */}
-        <div className="flex flex-row w-full px-5 gap-[8px] mt-6">
-          <button 
-            onClick={() => {
-              if (videoRef.current) {
-                videoRef.current.currentTime = 0;
-                videoRef.current.play();
-                setIsPlaying(true);
-              }
-            }}
-            className="flex-1 py-[12px] rounded-[14px] border-[1.5px] border-[#E0E0E0] text-[#333333] font-bold text-[15px] bg-white hover:bg-gray-50 transition-colors"
-          >
-            다시 보기
-          </button>
-          <button 
-            onClick={() => alert("하이라이트 링크가 복사되었습니다!")}
-            className="flex-1 py-[12px] rounded-[14px] text-white font-bold text-[15px] bg-[#41C0A1] hover:bg-[#38a88d] transition-colors shadow-sm"
-          >
-            공유하기
-          </button>
-        </div>
-      </div>
 
       {/* 하단 탭 바 (4개 탭 구조 통일) */}
       <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 flex justify-between items-center px-5 pt-4 pb-5 z-50">
@@ -372,17 +376,7 @@ export default function HighlightPage() {
         <TabIcon icon="bar-chart" label="기록" isActive onClick={() => router.push('/fe-e/record/report')} />
       </div>
     </div>
-  );
-}
-
-function NumberStar({ num, color }: { num: number, color: string }) {
-  return (
-    <div className="relative w-[34px] h-[34px] flex items-center justify-center z-20">
-      <svg className="absolute inset-0 w-full h-full drop-shadow-sm" viewBox="0 0 24 24" fill={color}>
-        <path d="M12 2l2.6 5.8 6.4.5-4.8 4.3 1.5 6.2-5.7-3.2-5.7 3.2 1.5-6.2-4.8-4.3 6.4-.5L12 2z" />
-      </svg>
-      <span className="relative text-white text-[13px] font-extrabold pb-[1px] pr-[1px]">{num}</span>
-    </div>
+  </main>
   );
 }
 
