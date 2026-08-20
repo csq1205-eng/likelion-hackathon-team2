@@ -45,16 +45,15 @@ if (!res.missions || res.missions.length === 0) {
   console.log("생성된 미션이 없어 자동 생성을 요청합니다...");
 
   try {
-    const currentGroupId =
-      localStorage.getItem("myGroupId") || "1";
+    const currentGroupId = localStorage.getItem("myGroupId");
 
-    await apiRequest("/missions/today/generate", {
-      method: "POST",
-      accessToken,
-      body: {
-        groupId: Number(currentGroupId),
-      },
-    });
+await apiRequest("/missions/today/generate", {
+  method: "POST",
+  accessToken,
+  body: currentGroupId
+    ? { groupId: Number(currentGroupId) }
+    : {},
+});
 
     res = await getTodayMissions(accessToken);
   } catch (genErr) {
