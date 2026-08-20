@@ -9,7 +9,7 @@ import { apiRequest } from "@/lib/api/client";
 interface HighlightMemberItem {
   id: number;
   name: string;
-  type: 'clip' | 'card';
+  itemType: 'CLIP' | 'CARD';
   content: string;
   mediaUrl?: string;
   time: string;
@@ -17,30 +17,32 @@ interface HighlightMemberItem {
 
 interface HighlightPageResponse {
   groupId: number;
-  dateStr: string;
+  highlightId?: number;
+  highlightDate: string; // dateStr 대신 백엔드 명세 적용
   title: string;
+  summary?: string;      // 백엔드 명세 적용
   videoUrl: string; 
-  members: HighlightMemberItem[];
+  members?: HighlightMemberItem[];
 }
 
 const FALLBACK_HIGHLIGHT: HighlightPageResponse = {
   groupId: 10,
-  dateStr: "8월 12일 수요일",
+  highlightId: 1,
+  highlightDate: "8월 12일 수요일",
   title: "우리의 하루",
-  // 테스트용 샘플 비디오 링크
+  summary: "공유 멤버는 실제 클립으로, 비공유 멤버는 완료 카드로 AI가 자막을 더해 30초 하이라이트를 만들어요!",
   videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
   members: [
-    { id: 1, name: "효림", type: "clip", content: "아침 선크림 완료!", mediaUrl: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=300&auto=format&fit=crop", time: "오전 7:20" },
-    { id: 2, name: "민서", type: "card", content: "물 2L 마시기", time: "오전 7:34 완료" },
-    { id: 3, name: "지우", type: "clip", content: "20분 걷기 성공!", mediaUrl: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=300&auto=format&fit=crop", time: "오전 8:05" },
+    { id: 1, name: "효림", itemType: "CLIP", content: "아침 선크림 완료!", mediaUrl: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=300&auto=format&fit=crop", time: "오전 7:20" },
+    { id: 2, name: "민서", itemType: "CARD", content: "물 2L 마시기", time: "오전 7:34 완료" },
+    { id: 3, name: "지우", itemType: "CLIP", content: "20분 걷기 성공!", mediaUrl: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=300&auto=format&fit=crop", time: "오전 8:05" },
   ]
 };
 
 export default function HighlightPage() {
   const router = useRouter();
-
   const params = useParams();
-  const groupId = params.groupId || '1';
+  const groupId = params.groupId || (typeof window !== 'undefined' ? localStorage.getItem('myGroupId') : null) || '1';
 
   const { accessToken, isLoading: authLoading } = useAuth();
 
@@ -68,10 +70,9 @@ export default function HighlightPage() {
           accessToken 
         });
 
-        // 💡 비디오 URL이 없을 경우 폴백(더미) 주소로 채워줍니다.
         setHighlightData({
           ...data,
-          videoUrl: data.videoUrl || FALLBACK_HIGHLIGHT.videoUrl
+          videoUrl: data.videoUrl || FALLBACK_HIGHLIGHT.videoUrl,
         });
       } catch (error) {
         console.error("하이라이트 조회 실패! 임시 데이터를 렌더링합니다:", error);
@@ -133,6 +134,7 @@ export default function HighlightPage() {
   }
 
   const progressPercent = duration ? (currentTime / duration) * 100 : 0;
+  const membersList = highlightData.members || [];
 
   return (
     <div className="relative w-full h-[100dvh] bg-white flex flex-col overflow-hidden">
@@ -172,15 +174,15 @@ export default function HighlightPage() {
             </svg>
           </button>
           <h1 className="text-[17px] font-extrabold text-[#000000]">{highlightData.title}</h1>
-          <p className="text-[12px] text-[#666666] font-medium mt-0.5">{highlightData.dateStr}</p>
-        </div>
+<p className="text-[12px] text-[#666666] font-medium mt-0.5">{highlightData.highlightDate}</p>
+</div>
 
         {/* 중앙 3단 세로 카드 영역 */}
         <div className="flex flex-row justify-center gap-2.5 w-full px-5 mt-[30px] z-10">
-          {highlightData.members.map((member) => (
-            <div key={member.id} className="flex flex-col items-center w-1/3">
+  {membersList.map((member) => (
+    <div key={member.id} className="flex flex-col items-center w-1/3">
               
-              {member.type === 'clip' ? (
+              {member.itemType === 'CLIP' ? (
                 <div className="relative w-full aspect-[4/9] rounded-[16px] overflow-hidden shadow-sl bg-white transform transition-transform hover:-translate-y-1">
                   <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${member.mediaUrl}')` }}></div>
                   
@@ -230,7 +232,7 @@ export default function HighlightPage() {
         <div className="px-[16px] mt-[20px]">
           <div className="bg-white rounded-[24px] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.04)] w-full border border-gray-50 flex flex-col">
             <div className="flex gap-2 justify-between">
-              {highlightData.members.map((m, idx) => (
+              {membersList.map((m, idx) => (
                 <div key={m.id} className="relative w-1/3 aspect-[4/3] rounded-[12px] overflow-hidden shadow-sm bg-gray-100 flex items-center justify-center">
                   {m.mediaUrl ? (
                     <div className="absolute inset-0 bg-cover bg-center opacity-80" style={{ backgroundImage: `url('${m.mediaUrl}')` }}></div>
@@ -245,8 +247,8 @@ export default function HighlightPage() {
                     </div>
                   )}
                   <div className="absolute top-1 w-full flex justify-center">
-                    <span className={`${m.type === 'clip' ? 'bg-[#41C0A1]' : 'bg-[#B39DDB]'} text-white text-[7px] font-bold px-1.5 py-[2px] rounded-full`}>
-                      {m.type === 'clip' ? '클립' : '완료 카드'}
+                    <span className={`${m.itemType === 'CLIP' ? 'bg-[#41C0A1]' : 'bg-[#B39DDB]'} text-white text-[7px] font-bold px-1.5 py-[2px] rounded-full`}>
+                      {m.itemType === 'CLIP' ? '클립' : '완료 카드'}
                     </span>
                   </div>
                   <div className="absolute bottom-1.5 left-1.5 w-[18px] h-[18px] bg-black/60 rounded-full text-white text-[8px] flex items-center justify-center font-bold">
