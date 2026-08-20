@@ -61,7 +61,6 @@ export default function OnboardingPage() {
     );
   }
 
-  // 현재 단계의 필수 항목을 모두 선택/입력했는지 확인
   const isStepValid =
     step === 1
       ? mainConcern !== "" && causeCandidates.length > 0
@@ -118,11 +117,12 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="w-full h-[100dvh] bg-[#F7F8F8] px-4 py-6 flex items-center justify-center overflow-hidden">
-  <div className="mx-auto flex w-full max-w-sm h-[740px] flex-col rounded-3xl bg-white px-6 py-6 shadow-[0_8px_30px_rgba(31,42,37,0.06)] overflow-hidden">
-        {/* 진행 표시 */}
-        <div className="mb-7">
-          <p className="mb-2.5 text-sm text-[#8A9A92]">정보 입력</p>
+    <main className="w-full h-[100dvh] bg-[#F7F8F8] sm:px-4 sm:py-6 flex items-center justify-center sm:overflow-hidden">
+      <div className="mx-auto flex w-full h-full sm:h-[740px] max-w-none sm:max-w-sm flex-col bg-white sm:rounded-3xl px-6 py-6 sm:shadow-[0_8px_30px_rgba(31,42,37,0.06)] overflow-hidden justify-between">
+        
+        {/* 상단 진행 표시 (고정) */}
+        <div className="shrink-0 mb-4">
+          <p className="mb-2 text-xs text-[#8A9A92]">정보 입력</p>
 
           <div className="flex items-center gap-2">
             {[1, 2, 3].map((i) => (
@@ -135,238 +135,233 @@ export default function OnboardingPage() {
             ))}
           </div>
 
-          <p className="mt-2 text-right text-xs font-medium text-[#B4BFB9]">
+          <p className="mt-1.5 text-right text-xs font-medium text-[#B4BFB9]">
             {step}/3
           </p>
         </div>
 
-        {/* 1단계 */}
-        {step === 1 && (
-          <div>
-            <h1 className="mb-6 text-2xl font-bold text-[#1F2A25] text-balance">
-              당신에 대해 알려주세요!
-            </h1>
+        {/* 중간 스크롤 가능한 콘텐츠 영역 */}
+        <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex flex-col py-2 pr-1">
+          {/* 1단계 */}
+          {step === 1 && (
+            <div>
+              <h1 className="mb-4 text-xl font-bold text-[#1F2A25] text-balance">
+                당신에 대해 알려주세요!
+              </h1>
 
-            <p className="mb-3 text-sm text-[#8A9A92]">
-              요즘 제일 신경 쓰이는 건?
-            </p>
+              <p className="mb-2 text-xs text-[#8A9A92]">
+                요즘 제일 신경 쓰이는 건?
+              </p>
 
-            <div className="grid grid-cols-2 gap-2.5">
-              {CONCERNS.map((c) => {
-                const selected = mainConcern === c.code;
+              <div className="grid grid-cols-2 gap-2">
+                {CONCERNS.map((c) => {
+                  const selected = mainConcern === c.code;
 
-                return (
-                  <button
-                    key={c.code}
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() => setMainConcern(c.code)}
-                    className={`w-full rounded-[10px] px-4 py-3 text-center text-sm font-medium transition-colors ${
-                      selected
-                        ? "border border-[#A7FBE7] bg-[#A7FBE7] text-[#222222]"
-                        : "border border-transparent bg-[#F7F8F8] text-[#4B5851]"
-                    }`}
-                  >
-                    {c.label}
-                  </button>
-                );
-              })}
+                  return (
+                    <button
+                      key={c.code}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => setMainConcern(c.code)}
+                      className={`w-full rounded-[10px] px-3 py-2.5 text-center text-xs font-medium transition-colors ${
+                        selected
+                          ? "border border-[#A7FBE7] bg-[#A7FBE7] text-[#222222]"
+                          : "border border-transparent bg-[#F7F8F8] text-[#4B5851]"
+                      }`}
+                    >
+                      {c.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <p className="mt-4 mb-2 text-xs text-[#8A9A92]">
+                혹시 최근 이런 게 있었나요? (복수 선택 가능)
+              </p>
+
+              <div className="grid grid-cols-2 gap-2">
+                {CAUSES.map((c) => {
+                  const selected = causeCandidates.includes(c.code);
+
+                  return (
+                    <button
+                      key={c.code}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => toggleCause(c.code)}
+                      className={`w-full rounded-[10px] px-3 py-2.5 text-center text-xs font-medium transition-colors ${
+                        selected
+                          ? "border border-[#A7FBE7] bg-[#A7FBE7] text-[#222222]"
+                          : "border border-transparent bg-[#F7F8F8] text-[#4B5851]"
+                      }`}
+                    >
+                      {c.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
+          )}
 
-            <p className="mt-6 mb-3 text-sm text-[#8A9A92]">
-              혹시 최근 이런 게 있었나요? (복수 선택 가능)
-            </p>
+          {/* 2단계 */}
+          {step === 2 && (
+            <div>
+              <h1 className="mb-4 text-xl font-bold text-[#1F2A25] text-balance">
+                당신에 대해 알려주세요!
+              </h1>
 
-            <div className="grid grid-cols-2 gap-2.5">
-              {CAUSES.map((c) => {
-                const selected = causeCandidates.includes(c.code);
+              <div className="space-y-3">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-[#2B3A33]">
+                    평균 수면시간
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      placeholder="숫자 선택"
+                      value={sleepHours}
+                      onChange={(e) => setSleepHours(Number(e.target.value))}
+                      className="w-full rounded-[10px] border border-transparent bg-[#F7F8F8] px-3 py-2.5 pr-12 text-xs text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#A7FBE7] focus:bg-white"
+                    />
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#8A968F]">
+                      시간
+                    </span>
+                  </div>
+                </div>
 
-                return (
-                  <button
-                    key={c.code}
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() => toggleCause(c.code)}
-                    className={`w-full rounded-[10px] px-4 py-3 text-center text-sm font-medium transition-colors ${
-                      selected
-                        ? "border border-[#A7FBE7] bg-[#A7FBE7] text-[#222222]"
-                        : "border border-transparent bg-[#F7F8F8] text-[#4B5851]"
-                    }`}
-                  >
-                    {c.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-[#2B3A33]">
+                    물 섭취량
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      step="1"
+                      min="0"
+                      placeholder="입력"
+                      value={waterIntake}
+                      onChange={(e) => setWaterIntake(Number(e.target.value))}
+                      className="w-full rounded-[10px] border border-transparent bg-[#F7F8F8] px-3 py-2.5 pr-10 text-xs text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#A7FBE7] focus:bg-white"
+                    />
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#8A968F]">
+                      잔
+                    </span>
+                  </div>
+                </div>
 
-        {/* 2단계 */}
-        {step === 2 && (
-          <div>
-            <h1 className="mb-6 text-2xl font-bold text-[#1F2A25] text-balance">
-              당신에 대해 알려주세요!
-            </h1>
-
-            <div className="space-y-5">
-              {/* 평균 수면시간 */}
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-[#2B3A33]">
-                  평균 수면시간
-                </label>
-
-                <div className="relative">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-[#2B3A33]">
+                    기상 시간
+                  </label>
                   <input
-                    type="number"
-                    inputMode="numeric"
-                    placeholder="숫자 선택"
-                    value={sleepHours}
-                    onChange={(e) => setSleepHours(Number(e.target.value))}
-                    className="w-full rounded-[10px] border border-transparent bg-[#F7F8F8] px-4 py-3.5 pr-14 text-sm text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#A7FBE7] focus:bg-white"
+                    type="time"
+                    value={wakeUpTime}
+                    onChange={(e) => setWakeUpTime(e.target.value)}
+                    className="w-full rounded-[10px] border border-transparent bg-[#F7F8F8] px-3 py-2.5 text-xs text-[#2B3A33] outline-none transition-colors focus:border-[#A7FBE7] focus:bg-white"
                   />
+                </div>
 
-                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#8A968F]">
-                    시간
-                  </span>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-[#2B3A33]">
+                    취침 시간
+                  </label>
+                  <input
+                    type="time"
+                    value={sleepTime}
+                    onChange={(e) => setSleepTime(e.target.value)}
+                    className="w-full rounded-[10px] border border-transparent bg-[#F7F8F8] px-3 py-2.5 text-xs text-[#2B3A33] outline-none transition-colors focus:border-[#A7FBE7] focus:bg-white"
+                  />
                 </div>
               </div>
-
-              {/* 물 섭취량 */}
-<div>
-  <label className="mb-2 block text-sm font-semibold text-[#2B3A33]">
-    물 섭취량
-  </label>
-
-  <div className="relative">
-    <input
-      type="number"
-      inputMode="numeric"
-      step="1"
-      min="0"
-      placeholder="입력"
-      value={waterIntake}
-      onChange={(e) => setWaterIntake(Number(e.target.value))}
-      className="w-full rounded-[10px] border border-transparent bg-[#F7F8F8] px-4 py-3.5 pr-12 text-sm text-[#2B3A33] outline-none transition-colors placeholder:text-[#AAB4AE] focus:border-[#A7FBE7] focus:bg-white"
-    />
-
-    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#8A968F]">
-      잔
-    </span>
-  </div>
-</div>
-
-              {/* 기상 시간 */}
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-[#2B3A33]">
-                  기상 시간
-                </label>
-
-                <input
-                  type="time"
-                  value={wakeUpTime}
-                  onChange={(e) => setWakeUpTime(e.target.value)}
-                  className="w-full rounded-[10px] border border-transparent bg-[#F7F8F8] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors focus:border-[#A7FBE7] focus:bg-white"
-                />
-              </div>
-
-              {/* 취침 시간 */}
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-[#2B3A33]">
-                  취침 시간
-                </label>
-
-                <input
-                  type="time"
-                  value={sleepTime}
-                  onChange={(e) => setSleepTime(e.target.value)}
-                  className="w-full rounded-[10px] border border-transparent bg-[#F7F8F8] px-4 py-3.5 text-sm text-[#2B3A33] outline-none transition-colors focus:border-[#A7FBE7] focus:bg-white"
-                />
-              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* 3단계 */}
-        {step === 3 && (
-          <div>
-            <h1 className="mb-6 text-2xl font-bold text-[#1F2A25] text-balance">
-              지금 쓰고 있는 제품이 있나요?
-            </h1>
+          {/* 3단계 */}
+          {step === 3 && (
+            <div>
+              <h1 className="mb-4 text-xl font-bold text-[#1F2A25] text-balance">
+                지금 쓰고 있는 제품이 있나요?
+              </h1>
 
-            <div className="space-y-3">
-              {PRODUCT_CATEGORIES.map((cat) => {
-                const owned = ownedProducts[cat.code];
+              <div className="space-y-2.5">
+                {PRODUCT_CATEGORIES.map((cat) => {
+                  const owned = ownedProducts[cat.code];
 
-                return (
-                  <div
-                    key={cat.code}
-                    className="rounded-2xl bg-[#F7F8F8] px-4 py-4"
-                  >
-                    <p className="text-sm font-bold text-[#2B3A33]">
-                      {cat.label}
-                    </p>
+                  return (
+                    <div
+                      key={cat.code}
+                      className="rounded-2xl bg-[#F7F8F8] px-3.5 py-3"
+                    >
+                      <p className="text-xs font-bold text-[#2B3A33]">
+                        {cat.label}
+                      </p>
+                      <p className="mt-0.5 text-[10px] text-[#9AA8A1]">
+                        {cat.desc}
+                      </p>
 
-                    <p className="mt-0.5 text-xs text-[#9AA8A1]">
-                      {cat.desc}
-                    </p>
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          type="button"
+                          aria-pressed={owned === true}
+                          onClick={() =>
+                            setOwnedProducts((prev) => ({
+                              ...prev,
+                              [cat.code]: true,
+                            }))
+                          }
+                          className={`rounded-full px-5 py-1 text-xs font-medium transition-colors ${
+                            owned === true
+                              ? "bg-[#A7FBE7] text-[#222222]"
+                              : "border border-[#E6E9E8] bg-white text-[#8A968F]"
+                          }`}
+                        >
+                          있음
+                        </button>
 
-                    <div className="mt-3 flex gap-2">
-                      <button
-                        type="button"
-                        aria-pressed={owned === true}
-                        onClick={() =>
-                          setOwnedProducts((prev) => ({
-                            ...prev,
-                            [cat.code]: true,
-                          }))
-                        }
-                        className={`rounded-full px-6 py-1.5 text-sm font-medium transition-colors ${
-                          owned === true
-                            ? "bg-[#A7FBE7] text-[#222222]"
-                            : "border border-[#E6E9E8] bg-white text-[#8A968F]"
-                        }`}
-                      >
-                        있음
-                      </button>
-
-                      <button
-                        type="button"
-                        aria-pressed={owned === false}
-                        onClick={() =>
-                          setOwnedProducts((prev) => ({
-                            ...prev,
-                            [cat.code]: false,
-                          }))
-                        }
-                        className={`rounded-full px-6 py-1.5 text-sm font-medium transition-colors ${
-                          owned === false
-                            ? "bg-[#A7FBE7] text-[#222222]"
-                            : "border border-[#E6E9E8] bg-white text-[#8A968F]"
-                        }`}
-                      >
-                        없음
-                      </button>
+                        <button
+                          type="button"
+                          aria-pressed={owned === false}
+                          onClick={() =>
+                            setOwnedProducts((prev) => ({
+                              ...prev,
+                              [cat.code]: false,
+                            }))
+                          }
+                          className={`rounded-full px-5 py-1 text-xs font-medium transition-colors ${
+                            owned === false
+                              ? "bg-[#A7FBE7] text-[#222222]"
+                              : "border border-[#E6E9E8] bg-white text-[#8A968F]"
+                          }`}
+                        >
+                          없음
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* 다음 / 제출 버튼 */}
-        <button
-          type="button"
-          onClick={handleNext}
-          disabled={!isStepValid || submitting}
-          className={`w-full mt-auto shrink-0 pt-4 border-t border-transparent w-full py-[14px] rounded-[16px] font-semibold text-[16px] text-black transition-colors ${
-            isStepValid && !submitting
-              ? "bg-[#A7FBE7] text-[#222222]"
-              : "bg-[#F7F8F8] text-[#AAB5AF]"
-          }`}
-        >
-          {step === 3 && submitting ? "저장 중..." : "다음"}
-        </button>
+        {/* 하단 다음 / 제출 버튼 (고정) */}
+        <div className="shrink-0 pt-3">
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={!isStepValid || submitting}
+            className={`w-full py-[14px] rounded-[12px] font-semibold text-[15px] transition-colors ${
+              isStepValid && !submitting
+                ? "bg-[#A7FBE7] text-[#222222]"
+                : "bg-[#F7F8F8] text-[#AAB5AF]"
+            }`}
+          >
+            {step === 3 && submitting ? "저장 중..." : "다음"}
+          </button>
+        </div>
+
       </div>
     </main>
   );
