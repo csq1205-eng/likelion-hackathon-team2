@@ -13,7 +13,7 @@ export function DemoAccountSwitcher() {
     if (userId === 2) {
       localStorage.removeItem("myGroupId");
       alert("B계정(참여자)으로 전환되었습니다. 초대 코드 입력 페이지로 이동합니다!");
-      window.location.href = "/fe-e/group/invite/1"; // 초대 확인 및 코드 입력 페이지로 이동
+      window.location.href = "/fe-e/group/join"; // 초대 확인 및 코드 입력 페이지로 이동
     } else {
       alert("A계정(방장)으로 전환되었습니다!");
       window.location.href = "/fe-e/group"; 

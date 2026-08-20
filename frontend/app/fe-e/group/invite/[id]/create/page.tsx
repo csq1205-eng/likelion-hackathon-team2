@@ -165,7 +165,7 @@ export default function GroupInviteCreate() {
           <div className="flex flex-col items-center justify-center my-auto w-full">
             
             {/* QR 코드 박스 */}
-            <div className="w-[140px] h-[140px] bg-[#F7F7F7] rounded-[20px] flex items-center justify-center mb-[20px] shrink-0 shadow-2xs">
+            <div className="w-[140px] h-[140px] bg-[#F7F7F7] rounded-t-[20px] flex items-center justify-center shrink-0 shadow-2xs">
               <div className="bg-white p-2 rounded-[14px] shadow-sm w-[124px] h-[124px] flex items-center justify-center">
                 <Image 
                   src={inviteInfo.qrImage || "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://wedit.app"} 
@@ -177,6 +177,28 @@ export default function GroupInviteCreate() {
                 />
               </div>
             </div>
+
+            {(() => {
+            const codeMatch = inviteInfo.link.match(/\/join\/([^/]+)$/);
+            const inviteCode = codeMatch ? codeMatch[1] : (localStorage.getItem('lastInviteCode') || '839201');
+
+            const handleCodeCopy = () => {
+              navigator.clipboard.writeText(inviteCode);
+              alert(`초대 코드 [${inviteCode}]가 복사되었습니다!`);
+            };
+
+            return (
+              <div 
+                onClick={handleCodeCopy}
+                className="w-[140px] bg-[#F7F7F7] hover:bg-[#EFEFEF] active:scale-[0.98] transition-all cursor-pointer rounded-b-[14px] pt-[3px] pb-[10px] px-[12px] flex items-center justify-between mb-[20px] select-all"
+                title="클릭하여 복사"
+              >
+                <div className="flex flex-col items-center justify-center w-full">
+                  <span className="text-[16px] text-[#000000] text-center font-bold tracking-wider">{inviteCode}</span>
+                </div>
+              </div>
+            );
+          })()}
 
             <span className="block w-full text-left text-[13px] text-[#000000] font-semibold mb-[8px]">
               또는 링크로 공유하기
