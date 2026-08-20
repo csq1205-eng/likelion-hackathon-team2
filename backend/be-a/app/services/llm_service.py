@@ -30,7 +30,16 @@ class LLMConfigurationError(RuntimeError):
 class LLMService:
     def __init__(self, client=None, model: Optional[str] = None):
         api_key = os.getenv("OPENAI_API_KEY", "").strip()
-        self.client = client or (OpenAI(api_key=api_key) if api_key else None)
+        timeout_seconds = float(os.getenv("OPENAI_TIMEOUT_SECONDS", "15"))
+        self.client = client or (
+            OpenAI(
+                api_key=api_key,
+                timeout=timeout_seconds,
+                max_retries=0,
+            )
+            if api_key
+            else None
+        )
         self.model = model or os.getenv("OPENAI_MODEL", "gpt-5.6-sol")
 
     @property

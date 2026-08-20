@@ -1,4 +1,5 @@
 from app.schemas.mission import Mission, MissionGenerateRequest
+from app.services.llm_service import LLMService
 from app.services.mission_service import MissionService
 
 
@@ -64,3 +65,45 @@ def test_unsafe_ai_result_uses_fallback():
 
     assert result.generation_mode == "fallback"
     assert all(m.mission_type != "OUTDOOR_ACTIVITY" for m in result.missions)
+
+
+class TimeoutFakeLLMService:
+    available = True
+
+    def generate_missions(self, request, safety_constraints):
+        raise TimeoutError("OpenAI request timed out")
+
+
+def test_ai_timeout_uses_fallback():
+    service = MissionService(llm_service=TimeoutFakeLLMService())
+    request = MissionGenerateRequest(
+        user_id="user-timeout",
+        goal="건강한 생활 습관 만들기",
+        profile={"skin_type": "normal"},
+    )
+
+    result = service.generate(request)
+
+    assert result.generation_mode == "fallback"
+    assert result.missions
+
+
+def test_openai_client_uses_configured_timeout_without_retries(monkeypatch):
+    captured = {}
+
+    def fake_openai(**kwargs):
+        captured.update(kwargs)
+        return object()
+
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    monkeypatch.setenv("OPENAI_TIMEOUT_SECONDS", "12.5")
+    monkeypatch.setattr("app.services.llm_service.OpenAI", fake_openai)
+
+    service = LLMService()
+
+    assert service.available is True
+    assert captured == {
+        "api_key": "test-key",
+        "timeout": 12.5,
+        "max_retries": 0,
+    }
