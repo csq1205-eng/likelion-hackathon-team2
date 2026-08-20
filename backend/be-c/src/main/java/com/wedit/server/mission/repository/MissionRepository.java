@@ -1,6 +1,7 @@
 package com.wedit.server.mission.repository;
 
 import com.wedit.server.mission.domain.Mission;
+import com.wedit.server.group.domain.Group;
 import com.wedit.server.report.dto.WeeklyMissionResultRow;
 import com.wedit.server.user.domain.User;
 import java.time.LocalDate;
@@ -12,6 +13,8 @@ import org.springframework.data.repository.query.Param;
 public interface MissionRepository extends JpaRepository<Mission, Long> {
 
     List<Mission> findAllByUserAndMissionDateOrderByIdAsc(User user, LocalDate missionDate);
+
+    List<Mission> findAllByGroupAndMissionDateOrderByIdAsc(Group group, LocalDate missionDate);
 
     List<Mission> findAllByUserAndMissionDateBetweenOrderByMissionDateAscIdAsc(
             User user,
