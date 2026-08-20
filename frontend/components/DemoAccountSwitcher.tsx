@@ -2,7 +2,6 @@
 
 export function DemoAccountSwitcher() {
   const switchAccount = (userId: number) => {
-    // 기존 인증 정보 날리고 선택한 유저로 강제 세팅
     const mockData = {
       accessToken: `temporary-token-${userId}`,
       userId: userId,
@@ -11,9 +10,14 @@ export function DemoAccountSwitcher() {
     };
     
     localStorage.setItem("wedit_auth", JSON.stringify(mockData));
-    alert(`${userId}번 유저로 전환되었습니다!`);
-    
-    window.location.href = "/fe-e/group"; 
+    if (userId === 2) {
+      localStorage.removeItem("myGroupId");
+      alert("B계정(참여자)으로 전환되었습니다. 초대 코드 입력 페이지로 이동합니다!");
+      window.location.href = "/fe-e/group/invite/1"; // 초대 확인 및 코드 입력 페이지로 이동
+    } else {
+      alert("A계정(방장)으로 전환되었습니다!");
+      window.location.href = "/fe-e/group"; 
+    }
   };
 
   return (
@@ -25,13 +29,13 @@ export function DemoAccountSwitcher() {
         onClick={() => switchAccount(1)}
         className="bg-[#41C0A1] text-white text-xs font-bold py-2 px-3 rounded-md shadow-lg hover:bg-[#38a88d] transition-colors"
       >
-        계정 : A
+        계정 : A (방장)
       </button>
       <button
         onClick={() => switchAccount(2)}
         className="bg-[#B39DDB] text-white text-xs font-bold py-2 px-3 rounded-md shadow-lg hover:bg-[#9e86c8] transition-colors"
       >
-        계정 : B (그룹 참여용)
+        계정 : B (참여자)
       </button>
     </div>
   );
