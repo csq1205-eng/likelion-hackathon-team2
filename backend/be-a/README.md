@@ -39,7 +39,11 @@ uvicorn app.main:app --reload --port 8001
 ```bash
 export OPENAI_API_KEY="발급받은 키"
 export OPENAI_MODEL="gpt-5.6-sol"
+export OPENAI_TIMEOUT_SECONDS="15"
 ```
+
+OpenAI 호출은 기본 15초 후 중단되며 SDK 자동 재시도는 비활성화됩니다. 제한 시간을 초과하거나
+AI 호출에 실패하면 요청을 실패시키지 않고 규칙 기반 미션으로 즉시 대체합니다.
 
 로컬에서 하이라이트 생성 후 BE C 저장과 BE B 완료 콜백까지 확인하려면 두 연동 기능을
 명시적으로 활성화해야 합니다.
