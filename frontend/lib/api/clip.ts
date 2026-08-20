@@ -34,7 +34,7 @@ export async function uploadClip(
   formData.append("criteria", criteria);
   formData.append("clip", clip, "clip.mp4");
 
-  const response = await fetch(`${API_B_URL}/clips/upload`, {
+  const response = await fetch(`/api/clips/upload`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
