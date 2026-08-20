@@ -17,10 +17,10 @@ import { StampGrid } from "@/components/garden/StampGrid";
 
 const NAV_ITEMS = [
   { emoji: "🏠", label: "홈", href: "/" },
-  { emoji: "✅", label: "미션", href: "/mission" },
+  { emoji: "✅", label: "미션", href: "/fe-d/mission" },
   { emoji: "🌱", label: "W 정원", href: "" },
-  { emoji: "👥", label: "그룹", href: "/group" },
-  { emoji: "📖", label: "기록", href: "/mypage" },
+  { emoji: "👥", label: "그룹", href: "/fe-e/group" },
+  { emoji: "📖", label: "기록", href: "/fe-d/mypage" },
 ];
 
 export default function GardenPage() {
@@ -300,7 +300,7 @@ export default function GardenPage() {
             <Link
               key={item.label}
               href={
-                item.href || `/group/${id}/garden`
+                item.href || `/fe-d/${id}/garden`
               }
               className={`flex flex-col items-center gap-0.5 text-xs ${
                 item.label === "W 정원"
