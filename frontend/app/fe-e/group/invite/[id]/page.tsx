@@ -33,6 +33,7 @@ export default function JoinCheck() {
       });
 
       alert('그룹에 성공적으로 참여했습니다!');
+      localStorage.setItem('myGroupId', String(groupId));
       router.push(`/fe-e/group/${groupId}`);
 
     } catch (error) {

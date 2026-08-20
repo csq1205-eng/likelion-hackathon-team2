@@ -109,7 +109,10 @@ export default function GroupListJoin() {
                 return (
                   <div
                     key={group.groupId}
-                    onClick={() => router.push(`/fe-e/group/${group.groupId}`)}
+                    onClick={() => {
+                      localStorage.setItem('myGroupId', String(group.groupId));
+                      router.push(`/fe-e/group/${group.groupId}`);
+                    }}
                     className="bg-[#F7F8F8] p-4 rounded-[20px] flex items-center cursor-pointer hover:bg-gray-50 transition-colors"
                   >
                     <div
