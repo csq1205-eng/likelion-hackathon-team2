@@ -2,6 +2,7 @@ package com.wedit.server.mission.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.wedit.server.common.ServiceTime;
 import com.wedit.server.group.domain.Group;
 import com.wedit.server.group.domain.GroupMember;
 import com.wedit.server.group.repository.GroupMemberRepository;
@@ -58,7 +59,7 @@ class MissionServiceTest {
         Mission mission = missionRepository.save(Mission.create(
                 user,
                 null,
-                LocalDate.now(),
+                ServiceTime.today(),
                 "MORNING",
                 "아침 물 한 잔 마시기",
                 "기상 후 물을 마시고 인증 클립을 제출해 주세요.",
@@ -69,7 +70,7 @@ class MissionServiceTest {
 
         TodayMissionResponse response = missionService.getTodayMissions(user.getId());
 
-        assertThat(response.date()).isEqualTo(LocalDate.now());
+        assertThat(response.date()).isEqualTo(ServiceTime.today());
         assertThat(response.missions()).hasSize(1);
         assertThat(response.missions().get(0).missionId()).isEqualTo(mission.getId());
         assertThat(response.missions().get(0).slot()).isEqualTo("MORNING");
@@ -92,7 +93,7 @@ class MissionServiceTest {
         ));
         Group group = groupRepository.save(Group.create(user, "아침 루틴 챌린지", "21일 W 정원 완성", 21));
         groupMemberRepository.save(GroupMember.createOwner(group, user));
-        LocalDate today = LocalDate.now();
+        LocalDate today = ServiceTime.today();
         saveMission(user, null, today, "개인 미션 1");
         saveMission(user, null, today, "개인 미션 2");
         saveMission(user, null, today, "개인 미션 3");
@@ -122,7 +123,7 @@ class MissionServiceTest {
         Mission mission = missionRepository.save(Mission.create(
                 user,
                 null,
-                LocalDate.now(),
+                ServiceTime.today(),
                 "MORNING",
                 "아침 물 한 잔 마시기",
                 "기상 후 물을 마시고 인증 클립을 제출해 주세요.",
@@ -157,7 +158,7 @@ class MissionServiceTest {
         Mission mission = missionRepository.save(Mission.create(
                 user,
                 null,
-                LocalDate.now(),
+                ServiceTime.today(),
                 "MORNING",
                 "아침 물 한 잔 마시기",
                 "기상 후 물을 마시고 인증 클립을 제출해 주세요.",

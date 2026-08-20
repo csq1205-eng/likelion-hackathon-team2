@@ -2,6 +2,7 @@ package com.wedit.server.highlight.service;
 
 import com.wedit.server.common.CustomException;
 import com.wedit.server.common.ErrorCode;
+import com.wedit.server.common.ServiceTime;
 import com.wedit.server.group.domain.Group;
 import com.wedit.server.group.domain.GroupMember;
 import com.wedit.server.group.domain.GroupMemberStatus;
@@ -75,7 +76,7 @@ public class HighlightService {
             throw new CustomException(ErrorCode.GROUP_ACCESS_DENIED);
         }
 
-        LocalDate targetDate = highlightDate == null ? LocalDate.now() : highlightDate;
+        LocalDate targetDate = highlightDate == null ? ServiceTime.today() : highlightDate;
         Highlight highlight = highlightRepository.findFirstByGroupAndHighlightDateOrderByIdDesc(group, targetDate)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "하이라이트를 찾을 수 없습니다."));
 

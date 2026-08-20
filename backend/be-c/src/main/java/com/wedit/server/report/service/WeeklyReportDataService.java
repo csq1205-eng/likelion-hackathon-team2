@@ -2,6 +2,7 @@ package com.wedit.server.report.service;
 
 import com.wedit.server.common.CustomException;
 import com.wedit.server.common.ErrorCode;
+import com.wedit.server.common.ServiceTime;
 import com.wedit.server.mission.domain.MissionResultType;
 import com.wedit.server.mission.repository.MissionRepository;
 import com.wedit.server.report.dto.WeeklyDailyReportDataResponse;
@@ -78,7 +79,7 @@ public class WeeklyReportDataService {
             return weekStartDate;
         }
 
-        return LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        return ServiceTime.today().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
     }
 
     private List<MissionReportItem> findMissionReportItems(User user, LocalDate startDate, LocalDate endDate) {

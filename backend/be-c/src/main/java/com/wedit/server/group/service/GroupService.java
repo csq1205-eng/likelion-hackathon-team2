@@ -2,6 +2,7 @@ package com.wedit.server.group.service;
 
 import com.wedit.server.common.CustomException;
 import com.wedit.server.common.ErrorCode;
+import com.wedit.server.common.ServiceTime;
 import com.wedit.server.group.domain.Group;
 import com.wedit.server.group.domain.GroupInvite;
 import com.wedit.server.group.domain.GroupMember;
@@ -191,7 +192,7 @@ public class GroupService {
         Group group = findGroup(groupId);
         validateActiveMember(group, user);
 
-        LocalDate responseDate = date == null ? LocalDate.now() : date;
+        LocalDate responseDate = date == null ? ServiceTime.today() : date;
         List<GroupMember> activeMembers = groupMemberRepository.findAllByGroupAndStatus(
                 group,
                 GroupMemberStatus.ACTIVE
@@ -223,7 +224,7 @@ public class GroupService {
         Group group = findGroup(groupId);
         validateActiveMember(group, user);
 
-        LocalDate stampDate = date == null ? LocalDate.now() : date;
+        LocalDate stampDate = date == null ? ServiceTime.today() : date;
         List<GroupMember> activeMembers = groupMemberRepository.findAllByGroupAndStatus(
                 group,
                 GroupMemberStatus.ACTIVE

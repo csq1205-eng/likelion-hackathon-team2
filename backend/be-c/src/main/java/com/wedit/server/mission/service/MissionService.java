@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wedit.server.common.CustomException;
 import com.wedit.server.common.ErrorCode;
+import com.wedit.server.common.ServiceTime;
 import com.wedit.server.group.domain.Group;
 import com.wedit.server.group.domain.GroupMember;
 import com.wedit.server.group.domain.GroupMemberStatus;
@@ -91,7 +92,7 @@ public class MissionService {
     @Transactional(readOnly = true)
     public TodayMissionResponse getTodayMissions(Long userId) {
         User user = findUser(userId);
-        LocalDate today = LocalDate.now();
+        LocalDate today = ServiceTime.today();
         Group missionGroup = findDefaultMissionGroup(user);
         Long missionGroupId = missionGroup == null ? null : missionGroup.getId();
         List<TodayMissionItemResponse> missions = missionRepository.findAllByUserAndMissionDateAndGroupIdOrderByIdAsc(
@@ -110,7 +111,7 @@ public class MissionService {
     @Transactional
     public List<MissionGenerationResponse> generateTodayMissions(Long userId, Long groupId) {
         User user = findUser(userId);
-        LocalDate today = LocalDate.now();
+        LocalDate today = ServiceTime.today();
         List<Group> targetGroups = findTargetGroups(user, groupId);
 
         return targetGroups.stream()
@@ -133,7 +134,7 @@ public class MissionService {
         Mission mission = missionRepository.findById(request.missionId())
                 .orElseThrow(() -> new CustomException(ErrorCode.MISSION_NOT_FOUND));
         MissionResultType result = toMissionResultType(request.result());
-        LocalDateTime judgedAt = request.judgedAt() == null ? LocalDateTime.now() : request.judgedAt();
+        LocalDateTime judgedAt = request.judgedAt() == null ? ServiceTime.now() : request.judgedAt();
         String promptVersion = request.promptVersion() == null ? "mission-judge-prompt-v1" : request.promptVersion();
         String modelVersion = request.modelVersion() == null ? "wedit-judge-v1" : request.modelVersion();
 
