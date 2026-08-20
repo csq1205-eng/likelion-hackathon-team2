@@ -30,6 +30,8 @@ function CameraPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const missionId = Number(searchParams.get("missionId"));
+const missionTitle = searchParams.get("title") ?? "";
+const criteria = searchParams.get("criteria") ?? "";
   const { accessToken } = useAuth();
 
   const { videoRef, stream, status, requestCamera } = useCamera();
@@ -89,20 +91,11 @@ function CameraPageInner() {
     setUploadError(null);
 
     try {
-      const res = await uploadClip(
-        missionId,
-        recordedBlob,
-        false,
-        accessToken,
-        mission.title,
-        mission.verificationCriteria
-      );
+      const res = await uploadClip(missionId, recordedBlob, false, accessToken, missionTitle, criteria);
 
-      router.push(
-        `/fe-e/mission/result?clipId=${res.clipId}&retryCount=${
-          res.remainingRetryCount ?? 0
-        }`
-      );
+     router.push(
+  `/fe-e/mission/result?clipId=${res.clipId}&retryCount=${res.remainingRetryCount ?? 0}`
+);
     } catch (err: any) {
       console.error("클립 업로드 상세 에러:", err);
 
