@@ -37,7 +37,7 @@ export default function GroupJoinPage() {
   useEffect(() => {
     const fetchGroupPreview = async () => {
       try {
-        const data = await apiRequest<any>(`/groups/invite/preview?inviteCode=${groupId}`, {
+        const data = await apiRequest<any>(`/groups/invite`, {
           method: 'GET',
         });
 

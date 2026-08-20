@@ -72,18 +72,20 @@ export default function JoinCheck() {
   return (
     <div className="flex flex-col w-full h-full relative bg-white px-5 py-6 overflow-y-auto">
       <button 
-        onClick={() => router.back()} 
-        className="text-[14px] font-bold text-[#555555] self-start mb-2"
-      >
-        ←
-      </button>
+          onClick={() => router.back()} 
+          className="mb-2 text-[#A0A0A0] w-fit hover:opacity-70 transition-opacity"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
       <h1 className="text-[15px] text-[#000000] font-semibold mt-4 mb-4">
         함께할 그룹을 정해주세요
       </h1>
 
       <div className="flex flex-row items-center w-full gap-[10px] mb-10">
         <button
-          onClick={() => router.push(`/fe-e/group/invite/${groupId}/create`)}
+          onClick={() => router.push(`/fe-e/group/create`)}
           className="flex flex-col items-center justify-center bg-[#F7F8F8] text-[#000000] px-[10px] py-[20px] w-[120px] h-[96px] rounded-[10px] text-[15px] font-semibold"
         >
           <Image 
@@ -96,7 +98,7 @@ export default function JoinCheck() {
           <span className="text-[14px] font-semibold">그룹 만들기</span>
         </button>
         <button
-          onClick={() => router.push(`/fe-e/group/join/${groupId}`)}
+          onClick={() => router.push(`/fe-e/group/join`)}
           className="flex flex-col items-center justify-center bg-[#F7F8F8] text-[#000000] px-[10px] py-[20px] w-[120px] h-[96px] rounded-[10px] text-[15px] font-semibold"
         >
           <Image 

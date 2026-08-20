@@ -23,8 +23,7 @@ export default function GroupCodeJoinPage() {
       return;
     }
 
-    // 입력한 초대 코드를 들고 기존의 그룹 참여 확인/미리보기 페이지로 이동!
-    router.push(`/fe-e/group/join/${inviteCode.trim()}`);
+    router.push(`/fe-e/group/invite`);
   };
 
   return (

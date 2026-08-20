@@ -1,4 +1,5 @@
 // src/app/fe-e/group/invite/[id]/create/page.tsx
+
 'use client';
 
 import Image from 'next/image';
@@ -12,11 +13,13 @@ interface InviteResponseDTO {
   qrImageUrl: string;
 }
 
+
 declare global {
   interface Window {
     Kakao: any;
   }
 }
+
 
 export default function GroupInviteCreate() {
   const params = useParams();
@@ -25,14 +28,13 @@ export default function GroupInviteCreate() {
 
   const { accessToken } = useAuth();
 
-  // API에서 받아올 링크와 QR 데이터를 저장할 상태
   const [inviteInfo, setInviteInfo] = useState({ link: '', qrImage: '' });
   const [isLoading, setIsLoading] = useState(true);
 
   // 카카오 SDK 스크립트 동적 로드 및 초기화
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
+   
     const script = document.createElement('script');
     script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.8.1/kakao.min.js';
     script.integrity = 'sha384-OL+ylM/iuPLtW5U3XcvLSGhE8JzReKDank5InqlHGWPhb4140/yrBw0bg0y7+C9J';
@@ -55,28 +57,34 @@ export default function GroupInviteCreate() {
     };
   }, []);
 
-  useEffect(() => {
+ useEffect(() => {
     const generateInvite = async () => {
       if (!accessToken) return;
       try {
-        const data = await apiRequest<InviteResponseDTO>(`/groups/${groupId}/invite`, { 
+        const data = await apiRequest<InviteResponseDTO>(`/groups/${groupId}/invite`, {
           method: 'GET',
-          accessToken, 
+          accessToken,
         });
 
-        setInviteInfo({ 
-          link: data.inviteLink, 
-          qrImage: data.qrImageUrl 
+        const savedCode = localStorage.getItem('lastInviteCode') || '839201';
+        
+        const link = data?.inviteLink || `https://wedit.app/join/${savedCode}`;
+        const qrImage = data?.qrImageUrl || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${link}`;
+
+        setInviteInfo({
+          link: link,
+          qrImage: qrImage
         });
-      
+
       } catch (error) {
         console.error('초대 정보 생성 실패:', error);
+
+        const savedCode = localStorage.getItem('lastInviteCode') || '839201';
         
         setInviteInfo({
-          link: 'https://wedit.app/join/A1B2C3D4',
-          qrImage: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://wedit.app/join/A1B2C3D4'
+          link: `https://wedit.app/join/${savedCode}`,
+          qrImage: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://wedit.app/join/${savedCode}`
         });
-        
       } finally {
         setIsLoading(false);
       }
@@ -129,13 +137,13 @@ export default function GroupInviteCreate() {
 
   return (
     <div className="relative w-full h-[100dvh] bg-white flex flex-col overflow-hidden">
-      
+     
       <div className="w-full h-full px-5 py-5 flex flex-col justify-between">
-        
+       
         {/* 상단 타이틀 영역 */}
         <div className="flex flex-col shrink-0">
-          <button 
-            onClick={() => router.back()} 
+          <button
+            onClick={() => router.back()}
             className="mb-2 text-[#A0A0A0] w-fit hover:opacity-70 transition-opacity"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -163,13 +171,13 @@ export default function GroupInviteCreate() {
         ) : (
           // 결과 화면
           <div className="flex flex-col items-center justify-center my-auto w-full">
-            
+           
             {/* QR 코드 박스 */}
             <div className="w-[140px] h-[140px] bg-[#F7F7F7] rounded-t-[20px] flex items-center justify-center shrink-0 shadow-2xs">
               <div className="bg-white p-2 rounded-[14px] shadow-sm w-[124px] h-[124px] flex items-center justify-center">
-                <Image 
-                  src={inviteInfo.qrImage || "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://wedit.app"} 
-                  alt="그룹 초대 QR 코드" 
+                <Image
+                  src={inviteInfo.qrImage || "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://wedit.app"}
+                  alt="그룹 초대 QR 코드"
                   width={124}
                   height={124}
                   className="w-full h-full object-contain"
@@ -179,8 +187,11 @@ export default function GroupInviteCreate() {
             </div>
 
             {(() => {
-            const codeMatch = inviteInfo.link.match(/\/join\/([^/]+)$/);
-            const inviteCode = codeMatch ? codeMatch[1] : (localStorage.getItem('lastInviteCode') || '839201');
+            const link = inviteInfo?.link ?? '';
+            const codeMatch = link.match(/\/join\/([^/]+)$/);
+            const inviteCode = codeMatch
+              ? codeMatch[1]
+              : '839201';
 
             const handleCodeCopy = () => {
               navigator.clipboard.writeText(inviteCode);
@@ -188,7 +199,7 @@ export default function GroupInviteCreate() {
             };
 
             return (
-              <div 
+              <div
                 onClick={handleCodeCopy}
                 className="w-[140px] bg-[#F7F7F7] hover:bg-[#EFEFEF] active:scale-[0.98] transition-all cursor-pointer rounded-b-[14px] pt-[3px] pb-[10px] px-[12px] flex items-center justify-between mb-[20px] select-all"
                 title="클릭하여 복사"
@@ -203,7 +214,7 @@ export default function GroupInviteCreate() {
             <span className="block w-full text-left text-[13px] text-[#000000] font-semibold mb-[8px]">
               또는 링크로 공유하기
             </span>
-            
+           
             {/* 링크 복사 영역 */}
             <div className="flex flex-row items-center w-full gap-2 h-[46px] mb-[10px]">
               <div className="flex-1 h-full bg-[#F7F7F7] px-[16px] rounded-[14px] flex items-center overflow-hidden">
@@ -211,7 +222,7 @@ export default function GroupInviteCreate() {
                   {inviteInfo.link}
                 </span>
               </div>
-              <button 
+              <button
                   onClick={handleCopy}
                   className="bg-[#E7F9F3] text-[#41C0A1] h-[46px] px-3.5 rounded-[14px] text-[13px] font-bold shrink-0 hover:bg-[#92edd8] transition-colors"
               >
