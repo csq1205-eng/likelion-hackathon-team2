@@ -31,7 +31,7 @@ export function DemoAccountSwitcher() {
         onClick={() => switchAccount(2)}
         className="bg-[#B39DDB] text-white text-xs font-bold py-2 px-3 rounded-md shadow-lg hover:bg-[#9e86c8] transition-colors"
       >
-        계정 : B
+        계정 : B (그룹 참여용)
       </button>
     </div>
   );
