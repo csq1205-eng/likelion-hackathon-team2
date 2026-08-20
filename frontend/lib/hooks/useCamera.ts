@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 export function useCamera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
   const [status, setStatus] = useState<"idle" | "granted" | "denied" | "error">("idle");
 
   useEffect(() => {
@@ -13,12 +14,18 @@ export function useCamera() {
 
   async function requestCamera() {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const newStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" },
         audio: false,
       });
-      streamRef.current = stream;
-      if (videoRef.current) videoRef.current.srcObject = stream;
+
+      streamRef.current = newStream;
+      setStream(newStream);
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = newStream;
+      }
+
       setStatus("granted");
     } catch (err) {
       if (err instanceof DOMException && err.name === "NotAllowedError") {
@@ -31,7 +38,9 @@ export function useCamera() {
 
   function stopCamera() {
     streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    setStream(null);
   }
 
-  return { videoRef, streamRef, status, requestCamera };
+  return { videoRef, stream, status, requestCamera };
 }
