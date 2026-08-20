@@ -10,6 +10,22 @@ import { uploadClip } from "@/lib/api/clip";
 import { getTodayMissions, type Mission } from "@/lib/api/mission";
 import { Button } from "@/components/ui/Button";
 
+function formatVerificationCriteria(criteria: string): string[] {
+  try {
+    const parsed = JSON.parse(criteria);
+
+    if (Array.isArray(parsed)) {
+      return parsed
+        .map((item) => item.description)
+        .filter(Boolean);
+    }
+
+    return [criteria];
+  } catch {
+    return [criteria];
+  }
+}
+
 function CameraPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -33,31 +49,31 @@ function CameraPageInner() {
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
-  if (!accessToken || !missionId) return;
+    if (!accessToken || !missionId) return;
 
-  const token = accessToken;
+    const token = accessToken;
 
-  async function fetchMission() {
-    try {
-      const res = await getTodayMissions(token);
+    async function fetchMission() {
+      try {
+        const res = await getTodayMissions(token);
 
-      const foundMission = res.missions.find(
-        (m) => m.missionId === missionId
-      );
+        const foundMission = res.missions.find(
+          (m) => m.missionId === missionId
+        );
 
-      if (!foundMission) {
-        throw new Error("미션을 찾을 수 없어요.");
+        if (!foundMission) {
+          throw new Error("미션을 찾을 수 없어요.");
+        }
+
+        setMission(foundMission);
+      } catch (err) {
+        console.error("미션 조회 실패:", err);
+        setUploadError("미션 정보를 불러오지 못했어요.");
       }
-
-      setMission(foundMission);
-    } catch (err) {
-      console.error("미션 조회 실패:", err);
-      setUploadError("미션 정보를 불러오지 못했어요.");
     }
-  }
 
-  fetchMission();
-}, [accessToken, missionId]);
+    fetchMission();
+  }, [accessToken, missionId]);
 
   async function handleSubmit() {
     if (
@@ -104,6 +120,10 @@ function CameraPageInner() {
     );
   }
 
+  const verificationCriteria = mission
+    ? formatVerificationCriteria(mission.verificationCriteria)
+    : [];
+
   return (
     <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center p-6">
       <div className="w-full max-w-sm">
@@ -112,14 +132,30 @@ function CameraPageInner() {
         )}
 
         <div className="bg-white rounded-[28px] p-6 shadow-sm">
-          <p className="text-sm text-[#999] mb-4">5초 클립 촬영</p>
+          <p className="text-sm text-[#999] mb-4">
+            5초 클립 촬영
+          </p>
 
           {mission && (
             <div className="mb-4">
               <p className="font-bold">{mission.title}</p>
-              <p className="text-xs text-[#999] mt-1">
-                {mission.verificationCriteria}
-              </p>
+
+              <div className="mt-2">
+                <p className="text-xs font-bold text-[#666] mb-1">
+                  판정 기준
+                </p>
+
+                <ul className="space-y-1">
+                  {verificationCriteria.map((criterion, index) => (
+                    <li
+                      key={index}
+                      className="text-xs text-[#999] pl-2"
+                    >
+                      • {criterion}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           )}
 
@@ -128,6 +164,7 @@ function CameraPageInner() {
               <p className="text-sm text-[#666] text-center">
                 카메라 권한이 필요해요. 설정에서 허용해주세요.
               </p>
+
               <button
                 onClick={requestCamera}
                 className="px-4 py-2 rounded-full bg-[#6FCDB3] text-white text-xs font-bold"
