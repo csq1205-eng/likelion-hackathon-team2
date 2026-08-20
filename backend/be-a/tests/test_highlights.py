@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 import httpx
 import pytest
@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from app.schemas.highlight import HighlightCompleteRequest, HighlightGenerateRequest
 from app.services.highlight_service import HighlightService
+from app.services.highlight_storage_service import HighlightStorageError
 
 
 class FakeCallbackService:
@@ -122,17 +123,34 @@ class OrderedPartialCallbackService(PartiallyFailingCallbackService):
         return await super().notify_highlight_complete(clip_id, highlight_id)
 
 
+class FakeStorageService:
+    def __init__(self, events):
+        self.events = events
+        self.calls = []
+
+    async def save_highlight(self, **payload):
+        self.events.append("metadata_saved")
+        self.calls.append(payload)
+        return {"highlightId": 9001}
+
+
 def test_generate_saves_video_before_reporting_partial_callbacks():
     events = []
     callback = OrderedPartialCallbackService(events)
+    storage = FakeStorageService(events)
     service = HighlightService(
         callback_service=callback,
         generator=FakeGenerator(events),
         callback_enabled=True,
+        storage_service=storage,
+        storage_enabled=True,
     )
     request = HighlightGenerateRequest(
         highlight_id=505,
+        user_id=7,
         group_id=10,
+        highlight_date=date(2026, 8, 19),
+        summary="함께 완료한 미션",
         clips=[
             {"clip_id": "clip-ok", "shared": False, "caption": "완료"},
             {"clip_id": "clip-fail", "shared": False, "caption": "완료"},
@@ -141,11 +159,58 @@ def test_generate_saves_video_before_reporting_partial_callbacks():
 
     result = asyncio.run(service.generate(request))
 
-    assert events == ["video_saved", "callback:clip-ok", "callback:clip-fail"]
+    assert events == [
+        "video_saved",
+        "metadata_saved",
+        "callback:clip-ok",
+        "callback:clip-fail",
+    ]
     assert result.status == "COMPLETED"
+    assert result.storage_status == "COMPLETED"
+    assert result.stored_highlight_id == 9001
     assert result.callback_status == "PARTIAL"
     assert result.notified_clip_ids == ["clip-ok"]
     assert result.failed_clip_ids == ["clip-fail"]
+    assert storage.calls == [
+        {
+            "user_id": 7,
+            "group_id": 10,
+            "highlight_date": date(2026, 8, 19),
+            "title": "오늘의 W 하이라이트",
+            "summary": "함께 완료한 미션",
+            "video_url": "http://be-a/highlight-505.mp4",
+        }
+    ]
+
+
+class FailingStorageService:
+    async def save_highlight(self, **payload):
+        raise HighlightStorageError("BE C unavailable")
+
+
+def test_generate_does_not_notify_be_b_when_be_c_storage_fails():
+    events = []
+    callback = OrderedPartialCallbackService(events)
+    service = HighlightService(
+        callback_service=callback,
+        generator=FakeGenerator(events),
+        callback_enabled=True,
+        storage_service=FailingStorageService(),
+        storage_enabled=True,
+    )
+    request = HighlightGenerateRequest(
+        highlight_id=507,
+        user_id=7,
+        group_id=10,
+        highlight_date=date(2026, 8, 19),
+        clips=[{"clip_id": "clip-ok", "shared": False, "caption": "완료"}],
+    )
+
+    with pytest.raises(HighlightStorageError):
+        asyncio.run(service.generate(request))
+
+    assert events == ["video_saved"]
+    assert callback.calls == []
 
 
 def test_generate_rejects_duplicate_clip_ids():

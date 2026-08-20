@@ -10,6 +10,7 @@ from app.schemas.highlight import (
 )
 from app.services.highlight_generator import HighlightGenerationError, HighlightSourceError
 from app.services.highlight_service import HighlightService
+from app.services.highlight_storage_service import HighlightStorageError
 
 
 router = APIRouter(
@@ -28,6 +29,8 @@ async def generate_highlight(request: HighlightGenerateRequest) -> ApiResponse[H
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
     except HighlightGenerationError as exc:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))
+    except HighlightStorageError as exc:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc))
 
 
 @router.post("/complete", response_model=ApiResponse[HighlightCompleteResponse])

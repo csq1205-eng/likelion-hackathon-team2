@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import List, Literal, Optional
 
 from pydantic import Field, model_validator
@@ -40,8 +40,11 @@ class HighlightClip(ApiModel):
 
 class HighlightGenerateRequest(ApiModel):
     highlight_id: int = Field(gt=0)
+    user_id: Optional[int] = Field(default=None, gt=0)
     group_id: int = Field(gt=0)
+    highlight_date: date = Field(default_factory=date.today)
     title: str = Field(default="오늘의 W 하이라이트", min_length=1, max_length=100)
+    summary: Optional[str] = Field(default=None, max_length=500)
     clips: List[HighlightClip] = Field(min_length=1, max_length=6)
     max_duration_seconds: int = Field(default=30, ge=5, le=30)
 
@@ -62,3 +65,5 @@ class HighlightGenerateResponse(ApiModel):
     notified_clip_ids: List[ExternalId]
     failed_clip_ids: List[ExternalId] = Field(default_factory=list)
     callback_status: Literal["COMPLETED", "PARTIAL", "FAILED", "SKIPPED"]
+    storage_status: Literal["COMPLETED", "SKIPPED"]
+    stored_highlight_id: Optional[int] = None
