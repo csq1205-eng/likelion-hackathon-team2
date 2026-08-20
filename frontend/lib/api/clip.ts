@@ -42,10 +42,17 @@ export async function uploadClip(
     body: formData,
   });
 
-  const json = await response.json();
+  let json: any = {};
+  try {
+    json = await response.json();
+  } catch (e) {
+    console.error("서버 응답이 JSON이 아닙니다:", e);
+  }
 
   if (!response.ok) {
-    throw new Error(json?.message ?? "클립 업로드에 실패했어요.");
+    const errorMessage = json?.message || json?.error || `업로드 실패 (Status: ${response.status})`;
+    const errorCode = json?.code ? ` [코드: ${json.code}]` : "";
+    throw new Error(`${errorMessage}${errorCode}`);
   }
 
   return json.data as ClipUploadResponse;
