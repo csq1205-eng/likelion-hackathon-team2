@@ -2,6 +2,7 @@ package com.wedit.server.user.service;
 
 import com.wedit.server.common.CustomException;
 import com.wedit.server.common.ErrorCode;
+import com.wedit.server.common.ServiceTime;
 import com.wedit.server.mission.domain.Mission;
 import com.wedit.server.mission.domain.MissionResultType;
 import com.wedit.server.mission.repository.MissionRepository;
@@ -91,7 +92,7 @@ public class UserRecordService {
     }
 
     private int calculateCurrentStreakDays(Set<LocalDate> completedDates) {
-        LocalDate cursor = LocalDate.now();
+        LocalDate cursor = ServiceTime.today();
         if (!completedDates.contains(cursor)) {
             cursor = cursor.minusDays(1);
         }
