@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { getTodayMissions, type Mission } from "@/lib/api/mission";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { apiRequest } from "@/lib/api/client";
+
 
 const SLOT_LABEL: Record<string, string> = {
   MORNING: "아침",
@@ -22,16 +24,35 @@ export default function MissionPage() {
 
   useEffect(() => {
   if (authLoading || !accessToken) return;
-  fetchMissions();
+  fetchMissionsAndAutoGenerate();
   fetchStreak();
 }, [authLoading, accessToken]);
 
-  async function fetchMissions() {
+  async function fetchMissionsAndAutoGenerate() {
     if (!accessToken) return;
     setLoading(true);
     try {
-      const res = await getTodayMissions(accessToken);
-      setMissions(res.missions);
+      let res = await getTodayMissions(accessToken);
+      
+
+      if (!res.missions || res.missions.length === 0) {
+        console.log("생성된 미션이 없어 자동 생성을 요청합니다...");
+        try {
+          const currentGroupId = localStorage.getItem('myGroupId') || '1';
+
+          await apiRequest('/missions/today/generate', {
+            method: 'POST',
+            accessToken,
+            body: {},
+          });
+
+          res = await getTodayMissions(accessToken);
+        } catch (genErr) {
+          console.error("미션 자동 생성 실패:", genErr);
+        }
+      }
+
+      setMissions(res.missions || []);
       setError(null);
     } catch (err) {
       console.error(err);
@@ -48,7 +69,6 @@ export default function MissionPage() {
     setStreak(res);
   } catch (err) {
     console.error("스트릭 조회 실패:", err);
-    // 스트릭은 실패해도 화면 전체를 막을 필요 없어서 조용히 무시
   }
 }
 
@@ -60,7 +80,7 @@ export default function MissionPage() {
     return (
       <div className="min-h-screen bg-[#F5F5F5] flex flex-col items-center justify-center gap-3">
         <p className="text-sm text-[#999]">{error}</p>
-        <button onClick={fetchMissions} className="text-sm text-[#1F6F5C] underline">
+        <button onClick={fetchMissionsAndAutoGenerate} className="text-sm text-[#1F6F5C] underline">
           다시 시도
         </button>
       </div>
