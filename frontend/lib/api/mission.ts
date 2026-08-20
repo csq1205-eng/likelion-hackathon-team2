@@ -8,6 +8,7 @@ export interface Mission {
   missionType: string;
   status: "PENDING" | "SUBMITTED" | "PASSED" | "FAILED" | "SKIPPED";
   reason: string;
+  verificationCriteria: string;
 }
 
 export interface TodayMissionsResponse {
