@@ -43,6 +43,7 @@ export async function uploadClip(
   });
 
   let json: any = {};
+
   try {
     json = await response.json();
   } catch (e) {
@@ -50,8 +51,22 @@ export async function uploadClip(
   }
 
   if (!response.ok) {
-    const errorMessage = json?.message || json?.error || `업로드 실패 (Status: ${response.status})`;
-    const errorCode = json?.code ? ` [코드: ${json.code}]` : "";
+    console.error("클립 업로드 API 에러:", {
+      status: response.status,
+      code: json?.code,
+      message: json?.message,
+      response: json,
+    });
+
+    const errorMessage =
+      json?.message ||
+      json?.error ||
+      `업로드 실패 (Status: ${response.status})`;
+
+    const errorCode = json?.code
+      ? ` [코드: ${json.code}]`
+      : "";
+
     throw new Error(`${errorMessage}${errorCode}`);
   }
 
