@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { apiRequest } from '@/lib/api/client';
+import { getTodayMissions, type Mission } from '@/lib/api/mission';
 
 interface GroupDetailResponse {
   groupId: number;
@@ -35,6 +36,7 @@ export default function GroupMainFeedPage() {
   const { accessToken, isLoading: authLoading } = useAuth();
   
   const [groupDetail, setGroupDetail] = useState<GroupDetailResponse | null>(null);
+  const [todayMissionObj, setTodayMissionObj] = useState<Mission | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -46,21 +48,30 @@ export default function GroupMainFeedPage() {
       return;
     }
 
-    const fetchGroupDetail = async () => {
+    const fetchData = async () => {
       if (!accessToken) return;
 
       try {
-        const data = await apiRequest<GroupDetailResponse>(`/groups/${groupId}/highlight`, {
+        // 그룹 하이라이트/상세 정보 조회
+        const groupData = await apiRequest<GroupDetailResponse>(`/groups/${groupId}/highlight`, {
           accessToken, 
         });
 
         setGroupDetail(prev => ({
           ...FALLBACK_GROUP_DETAIL,
-          ...data
+          ...groupData
         }));
 
+        // 오늘의 미션 목록을 조회하여 실제 missionId가 포함된 미션 객체 획득
+        const missionRes = await getTodayMissions(accessToken);
+        if (missionRes && missionRes.missions && missionRes.missions.length > 0) {
+          // 첫 번째 미션을 오늘의 미션으로 매칭하거나 타이틀이 일치하는 미션 탐색
+          const matchedMission = missionRes.missions[0];
+          setTodayMissionObj(matchedMission);
+        }
+
       } catch (error) {
-        console.error("그룹 피드 조회 실패! 임시 데이터를 렌더링합니다:", error);
+        console.error("그룹 피드 및 미션 조회 실패! 임시 데이터를 렌더링합니다:", error);
         setGroupDetail(FALLBACK_GROUP_DETAIL); 
       } finally {
         setIsLoading(false);
@@ -68,10 +79,19 @@ export default function GroupMainFeedPage() {
     };
 
     if (groupId) {
-      fetchGroupDetail();
+      fetchData();
     }
 
   }, [groupId, authLoading, accessToken]);
+
+  const handleMissionAuth = () => {
+    if (todayMissionObj && todayMissionObj.missionId) {
+      router.push(`/fe-d/mission/camera?missionId=${todayMissionObj.missionId}`);
+    } else {
+      // 미션 정보가 없을 경우 미션 목록 화면으로 유도
+      router.push(`/fe-d/mission`);
+    }
+  };
 
   if (isLoading || !groupDetail) {
     return (
@@ -92,7 +112,7 @@ export default function GroupMainFeedPage() {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6"/>
             </svg>
-          </button>
+        </button>
         <h1 className="text-[18px] font-bold text-[#000000] ml-[32px] mt-[4px]">
           {groupDetail.name || "그룹 피드"}
         </h1>
@@ -110,10 +130,10 @@ export default function GroupMainFeedPage() {
         <div className="bg-white rounded-[20px] p-5 shadow-sm">
           <h2 className="text-[13px] text-[#41C0A1] font-bold mb-1">오늘의 미션</h2>
           <p className="text-[18px] font-bold text-[#222222] mb-5">
-            {groupDetail.todayMission || "오늘의 미션이 등록되지 않았습니다."}
+            {todayMissionObj?.title || groupDetail.todayMission || "오늘의 미션이 등록되지 않았습니다."}
           </p>
           <button 
-            onClick={() => router.push('/fe-d/mission/camera')}
+            onClick={handleMissionAuth}
             className="w-full py-3 bg-[#222222] text-white font-bold rounded-[12px] text-[15px] hover:bg-black transition-colors"
           >
             미션 인증하기

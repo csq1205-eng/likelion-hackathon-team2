@@ -48,7 +48,6 @@ function MissionResultInner() {
         // 판정 완료 또는 실패 상태 도달 : 폴링 중지
         clearInterval(pollingInterval);
 
-        // 💡 피드백 기준 분기 처리
         if (res.status === 'COMPLETED') {
           if (res.result === 'PASS') {
             setScreenMode('SUCCESS');

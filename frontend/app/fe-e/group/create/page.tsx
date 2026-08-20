@@ -31,7 +31,6 @@ export default function GroupCreatePage() {
     setIsSubmitting(true);
 
     try {
-      // 💡 여기가 바로 팀 피드백에서 언급된 POST /groups API 연동입니다!
       const response = await apiRequest<any>('/groups', {
         method: 'POST',
         accessToken,
