@@ -135,6 +135,14 @@ function MissionResultInner() {
               미션과 관련된 장면이 확인되지 않았어요<br />
               (재시도 {retryCount}회 남음)
             </p>
+
+            {failReason && (
+              <div className="w-[250px] bg-[#FFF5F5] border border-[#FFE3E3] rounded-xl p-3 text-center mt-[16px]">
+                <p className="text-[13px] text-[#FF5C5C] font-medium">
+                  {failReason}
+                </p>
+              </div>
+            )}
           </>
         )}
       </div>
