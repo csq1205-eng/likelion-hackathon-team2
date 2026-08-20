@@ -9,6 +9,7 @@ import com.wedit.server.group.domain.GroupMember;
 import com.wedit.server.group.domain.GroupMemberStatus;
 import com.wedit.server.group.repository.GroupMemberRepository;
 import com.wedit.server.group.repository.GroupRepository;
+import com.wedit.server.highlight.service.HighlightGenerationTriggerService;
 import com.wedit.server.mission.domain.Mission;
 import com.wedit.server.mission.domain.MissionResult;
 import com.wedit.server.mission.domain.MissionResultType;
@@ -57,6 +58,7 @@ public class MissionService {
     private final MissionRepository missionRepository;
     private final MissionResultRepository missionResultRepository;
     private final MissionGenerationClient missionGenerationClient;
+    private final HighlightGenerationTriggerService highlightGenerationTriggerService;
     private final PointService pointService;
     private final ObjectMapper objectMapper;
 
@@ -69,6 +71,7 @@ public class MissionService {
             MissionRepository missionRepository,
             MissionResultRepository missionResultRepository,
             MissionGenerationClient missionGenerationClient,
+            HighlightGenerationTriggerService highlightGenerationTriggerService,
             PointService pointService,
             ObjectMapper objectMapper
     ) {
@@ -80,6 +83,7 @@ public class MissionService {
         this.missionRepository = missionRepository;
         this.missionResultRepository = missionResultRepository;
         this.missionGenerationClient = missionGenerationClient;
+        this.highlightGenerationTriggerService = highlightGenerationTriggerService;
         this.pointService = pointService;
         this.objectMapper = objectMapper;
     }
@@ -143,6 +147,7 @@ public class MissionService {
         mission.applyResult(result);
         if (result == MissionResultType.PASS) {
             pointService.earnMissionPassPoint(mission.getUser(), mission.getId());
+            highlightGenerationTriggerService.generateIfGroupMissionCompleted(mission);
         }
 
         return new MissionResultCreateResponse(
